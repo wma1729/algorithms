@@ -14,16 +14,6 @@ private:
 		cout << "{" << current_subset << "}" << endl;
 	}
 
-public:
-	subset(const string &s)
-		: str(s)
-	{
-		choices[0] = false;
-		choices[1] = true;
-	}
-
-	~subset() {}
-
 	void generate(string &current_subset, size_t idx, size_t max)
 	{
 		if (idx == max) {
@@ -37,6 +27,16 @@ public:
 			if (choices[i]) current_subset.pop_back();
 		}
 	}
+
+public:
+	subset(const string &s)
+		: str(s)
+	{
+		choices[0] = false;
+		choices[1] = true;
+	}
+
+	~subset() {}
 
 	void generate()
 	{
