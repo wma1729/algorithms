@@ -1,11 +1,20 @@
-all: nqueen subset permutations graph
 
 DBG    = -O
 CFLAGS = -c
+
 OBJS   = nqueen.o \
          subset.o \
          permutations.o \
-         graph.o
+         graph.o \
+         bst.o
+
+EXES   = nqueen \
+         subset \
+         permutations \
+         graph \
+         bst
+
+all: ${EXES}
 
 nqueen: nqueen.o
 	g++ ${DBG} $^ -o $@
@@ -19,8 +28,11 @@ permutations: permutations.o
 graph: graph.o
 	g++ ${DBG} $^ -o $@
 
+bst: bst.o
+	g++ ${DBG} $^ -o $@
+
 %.o: %.cpp
 	g++ ${CFLAGS} ${DBG} $^ -o $@
 
 clean:
-	/bin/rm -rf ${OBJS} nqueen subset permutations graph
+	/bin/rm -rf ${OBJS} ${EXES}
