@@ -6,13 +6,15 @@ OBJS   = nqueen.o \
          subset.o \
          permutations.o \
          graph.o \
-         bst.o
+         bst.o \
+         linkedlist.o
 
 EXES   = nqueen \
          subset \
          permutations \
          graph \
-         bst
+         bst \
+         linkedlist
 
 all: ${EXES}
 
@@ -29,6 +31,9 @@ graph: graph.o
 	g++ ${DBG} $^ -o $@
 
 bst: bst.o
+	g++ ${DBG} $^ -o $@
+
+linkedlist: linkedlist.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
