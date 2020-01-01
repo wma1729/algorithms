@@ -79,18 +79,19 @@ private:
 
 	void get_paths(vector<T> paths, const vertex &from, T to)
 	{
-		typename vector<T>::const_iterator it;
+		typename vector<T>::const_iterator it = find(from.adjacent.begin(), from.adjacent.end(), to);
+		if (it != from.adjacent.end()) {
+			cout << "path: ";
+			for (auto v : paths)
+				cout << v << " ";
+			cout << to << endl;
+			return;
+		}
+
 		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
-			if (*it == to) {
-				cout << "path: ";
-				for (auto v : paths)
-					cout << v << " ";
-				cout << to << endl;
-			} else {
-				paths.push_back(*it);
-				get_paths(paths, get_vertex(*it), to);
-				paths.pop_back();
-			}
+			paths.push_back(*it);
+			get_paths(paths, get_vertex(*it), to);
+			paths.pop_back();
 		}
 	}
 
