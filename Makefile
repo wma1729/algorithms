@@ -5,6 +5,7 @@ CFLAGS = -c
 OBJS   = nqueen.o \
          subset.o \
          permutations.o \
+         towersofhanoi.o \
          graph.o \
          bst.o \
          linkedlist.o
@@ -12,6 +13,7 @@ OBJS   = nqueen.o \
 EXES   = nqueen \
          subset \
          permutations \
+         towersofhanoi \
          graph \
          bst \
          linkedlist
@@ -25,6 +27,9 @@ subset: subset.o
 	g++ ${DBG} $^ -o $@
 
 permutations: permutations.o
+	g++ ${DBG} $^ -o $@
+
+towersofhanoi: towersofhanoi.o
 	g++ ${DBG} $^ -o $@
 
 graph: graph.o
