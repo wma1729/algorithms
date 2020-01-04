@@ -1,4 +1,3 @@
-
 DBG    = -O
 CFLAGS = -c
 
@@ -8,7 +7,8 @@ OBJS   = nqueen.o \
          towersofhanoi.o \
          graph.o \
          bst.o \
-         linkedlist.o
+         linkedlist.o \
+         wordbreak.o
 
 EXES   = nqueen \
          subset \
@@ -16,7 +16,8 @@ EXES   = nqueen \
          towersofhanoi \
          graph \
          bst \
-         linkedlist
+         linkedlist \
+         wordbreak
 
 all: ${EXES}
 
@@ -39,6 +40,9 @@ bst: bst.o
 	g++ ${DBG} $^ -o $@
 
 linkedlist: linkedlist.o
+	g++ ${DBG} $^ -o $@
+
+wordbreak: wordbreak.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
