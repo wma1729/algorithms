@@ -1,5 +1,6 @@
-DBG    = -O
-CFLAGS = -c
+DBG     = -O
+CFLAGS  = -c
+DEFINES =
 
 OBJS   = nqueen.o \
          subset.o \
@@ -46,7 +47,7 @@ wordbreak: wordbreak.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
-	g++ ${CFLAGS} ${DBG} $^ -o $@
+	g++ ${CFLAGS} ${DBG} ${DEFINES} $^ -o $@
 
 clean:
 	/bin/rm -rf ${OBJS} ${EXES}
