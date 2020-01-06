@@ -9,7 +9,8 @@ OBJS   = nqueen.o \
          graph.o \
          bst.o \
          linkedlist.o \
-         wordbreak.o
+         wordbreak.o \
+         knapsack.o
 
 EXES   = nqueen \
          subset \
@@ -18,7 +19,8 @@ EXES   = nqueen \
          graph \
          bst \
          linkedlist \
-         wordbreak
+         wordbreak \
+         knapsack
 
 all: ${EXES}
 
@@ -46,8 +48,11 @@ linkedlist: linkedlist.o
 wordbreak: wordbreak.o
 	g++ ${DBG} $^ -o $@
 
+knapsack: knapsack.o
+	g++ ${DBG} $^ -o $@
+
 %.o: %.cpp
 	g++ ${CFLAGS} ${DBG} ${DEFINES} $^ -o $@
 
 clean:
-	/bin/rm -rf ${OBJS} ${EXES}
+	/bin/rm -rf ${OBJS} ${EXES} core.*
