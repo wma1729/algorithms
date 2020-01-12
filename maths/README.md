@@ -73,3 +73,21 @@ It is commonly known by the following names:
 * Highest Common Divisor (HCD)
 * Greatest Common Factor (GCF)
 * Greatest Common Divisor (GCD)
+
+## How to find HCF of two numbers, m and n
+### Method 1
+```C++
+    // Find the smaller of the two numbers
+    long i = (m < n) ? m : n;
+
+    for (; i > 1; --i) {
+        /*
+         * We are done as soon as we find a number that can
+         * divide both m and n with no remainder.
+         */
+        if (((m % i) == 0) && ((n % i) == 0))
+            break;
+    }
+
+    return i;
+```
