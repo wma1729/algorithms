@@ -91,3 +91,24 @@ It is commonly known by the following names:
 
     return i;
 ```
+### Method 2
+```C++
+    // Get all factors for m and n.
+    std::vector<long> f_m = std::move(factors(m));
+    std::vector<long> f_n = std::move(factors(n));
+
+    std::vector<long>::reverse_iterator m_it = f_m.rbegin();
+    std::vector<long>::reverse_iterator n_it = f_n.rbegin();
+
+    // Find the highest common factors
+    while ((m_it != f_m.rend()) && (n_it != f_n.rend())) {
+        if (*m_it > *n_it)
+            m_it++;
+        else if (*m_it < *n_it)
+            n_it++;
+        else /* if (*m_it == *n_it) */
+            break;
+    }
+
+    return (m_it != f_m.rend()) ? *m_it : 1;
+```
