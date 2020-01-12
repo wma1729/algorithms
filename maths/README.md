@@ -75,7 +75,7 @@ It is commonly known by the following names:
 * Greatest Common Divisor (GCD)
 
 ## How to find HCF of two numbers, m and n
-### Method 1
+### Method 1 (using simple division)
 ```C++
     // Find the smaller of the two numbers
     long i = (m < n) ? m : n;
@@ -91,7 +91,7 @@ It is commonly known by the following names:
 
     return i;
 ```
-### Method 2
+### Method 2 (using factors)
 ```C++
     // Get all factors for m and n.
     std::vector<long> f_m = std::move(factors(m));
