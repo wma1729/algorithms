@@ -112,7 +112,7 @@ It is commonly known by the following names:
 
     return (m_it != f_m.rend()) ? *m_it : 1;
 ```
-### Method 2 (using prime factors)
+### Method 3 (using prime factors)
 ```C++
     // Get all prime factors for m and n.
     std::vector<long> f_m = std::move(prime_factors(m));
@@ -137,4 +137,32 @@ It is commonly known by the following names:
     }
 
     return result;
+```
+### Method 4
+Euclid noticed that if a number k that divides both m and n, then it divides their difference. What this means is:
+> HCF(m, n) == HCF(m - n, n) for m > n.
+```C++
+    while (m != n) {
+        if (m > n)
+            m = (m - n);
+        else
+            n = (n - m);
+    }
+
+    return m;
+```
+### Method 5 (Optimized Euclid's algorithm)
+Assume the two numbers, m and n, are 10000 and 24. We will be subtracting 24 from 10000 for a long time. The following algorithm replaces subtraction with division.
+```C++
+    long lo = std::min(m, n);
+    long hi = std::max(m, n);
+    long r = 1;
+
+    while (r > 0) {
+        r = hi % lo;
+        hi = lo;
+        lo = r;
+    }
+
+    return hi;
 ```
