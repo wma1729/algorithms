@@ -2,6 +2,36 @@
 #include "maths.h"
 
 /*
+ * Find all factors of a number.
+ */
+std::vector<long>
+factors(long number)
+{
+	std::vector<long> factors;
+
+	if (number <= 0) {
+		return factors;
+	} else if (number == 1) {
+		return factors;
+	} else {
+		factors.push_back(1);
+		factors.push_back(number);
+
+		long fsqrt = floor_sqrt(number);
+
+		for (long i = 2; i <= fsqrt; ++i) {
+			if ((number % i) == 0) {
+				factors.push_back(i);
+				factors.push_back(number / i);
+			}
+		}
+	}
+
+	std::sort(factors.begin(), factors.end());
+	return factors;
+}
+
+/*
  * Finds all prime factors of a number.
  */
 std::vector<long>
@@ -35,35 +65,5 @@ prime_factors(long number)
 			factors.push_back(number);
 	}
 
-	return factors;
-}
-
-/*
- * Find all common factors of a number.
- */
-std::vector<long>
-common_factors(long number)
-{
-	std::vector<long> factors;
-
-	if (number <= 0) {
-		return factors;
-	} else if (number == 1) {
-		return factors;
-	} else {
-		factors.push_back(1);
-		factors.push_back(number);
-
-		long fsqrt = floor_sqrt(number);
-
-		for (long i = 2; i <= fsqrt; ++i) {
-			if ((number % i) == 0) {
-				factors.push_back(i);
-				factors.push_back(number / i);
-			}
-		}
-	}
-
-	std::sort(factors.begin(), factors.end());
 	return factors;
 }
