@@ -11,7 +11,8 @@ usage(const char *progname)
 		<< "    [-prime <number>]            Is the number prime?" << std::endl
 		<< "    [-prime_ge <number>]         Prime number greater than/equal to a number." << std::endl
 		<< "    [-factors <number>]          Factors of a number." << std::endl
-		<< "    [-prime_factors <number>]    Prime factors of a number." << std::endl;
+		<< "    [-prime_factors <number>]    Prime factors of a number." << std::endl
+		<< "    [-gcd <n1> <n2>]             GCD of two numbers." << std::endl;
 	return 1;
 }
 
@@ -30,7 +31,8 @@ print(const std::vector<long> &numbers)
 int
 main(int argc, const char **argv)
 {
-	long number = -1;
+	long n1 = -1;
+	long n2 = -1;
 
 	if (argc < 2) {
 		return usage(argv[0]);
@@ -40,12 +42,12 @@ main(int argc, const char **argv)
 		if (strcmp(argv[i], "-sqrt") == 0) {
 			++i;
 			if (argv[i]) {
-				number = atol(argv[i]);
-				if (number < 0) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
 					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
 					return 1;
 				} else {
-					std::cout << floor_sqrt(number) << std::endl;
+					std::cout << floor_sqrt(n1) << std::endl;
 				}
 			} else {
 				std::cerr << "missing argument for " << argv[i] << std::endl;
@@ -54,12 +56,12 @@ main(int argc, const char **argv)
 		} else if (strcmp(argv[i], "-prime") == 0) {
 			++i;
 			if (argv[i]) {
-				number = atol(argv[i]);
-				if (number < 0) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
 					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
 					return 1;
 				} else {
-					std::cout << std::boolalpha << is_prime(number) << std::endl;
+					std::cout << std::boolalpha << is_prime(n1) << std::endl;
 				}
 			} else {
 				std::cerr << "missing argument for " << argv[i] << std::endl;
@@ -68,12 +70,12 @@ main(int argc, const char **argv)
 		} else if (strcmp(argv[i], "-prime_ge") == 0) {
 			++i;
 			if (argv[i]) {
-				number = atol(argv[i]);
-				if (number < 0) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
 					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
 					return 1;
 				} else {
-					std::cout << prime_ge(number) << std::endl;
+					std::cout << prime_ge(n1) << std::endl;
 				}
 			} else {
 				std::cerr << "missing argument for " << argv[i] << std::endl;
@@ -82,12 +84,12 @@ main(int argc, const char **argv)
 		} else if (strcmp(argv[i], "-factors") == 0) {
 			++i;
 			if (argv[i]) {
-				number = atol(argv[i]);
-				if (number < 0) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
 					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
 					return 1;
 				} else {
-					std::vector<long> f = std::move(factors(number));
+					std::vector<long> f = std::move(factors(n1));
 					print(f);
 				}
 			} else {
@@ -97,18 +99,43 @@ main(int argc, const char **argv)
 		} else if (strcmp(argv[i], "-prime_factors") == 0) {
 			++i;
 			if (argv[i]) {
-				number = atol(argv[i]);
-				if (number < 0) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
 					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
 					return 1;
 				} else {
-					std::vector<long> f = std::move(prime_factors(number));
+					std::vector<long> f = std::move(prime_factors(n1));
 					print(f);
 				}
 			} else {
 				std::cerr << "missing argument for " << argv[i] << std::endl;
 				return 1;
 			}
+		} else if (strcmp(argv[i], "-gcd") == 0) {
+			++i;
+			if (argv[i]) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+			++i;
+			if (argv[i]) {
+				n2 = atol(argv[i]);
+				if (n2 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+
+			std::cout << gcd(n1, n2) << std::endl;
 		} else {
 			return usage(argv[0]);
 		}

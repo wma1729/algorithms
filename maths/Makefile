@@ -5,6 +5,7 @@ DEFINES = -DDEBUG
 OBJS   = fsqrt.o \
          prime.o \
          factors.o \
+         gcd.o \
          driver.o
 
 EXES   = maths
