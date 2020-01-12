@@ -103,12 +103,38 @@ It is commonly known by the following names:
     // Find the highest common factors
     while ((m_it != f_m.rend()) && (n_it != f_n.rend())) {
         if (*m_it > *n_it)
-            m_it++;
+            ++m_it;
         else if (*m_it < *n_it)
-            n_it++;
+            ++n_it;
         else /* if (*m_it == *n_it) */
             break;
     }
 
     return (m_it != f_m.rend()) ? *m_it : 1;
+```
+### Method 2 (using prime factors)
+```C++
+    // Get all prime factors for m and n.
+    std::vector<long> f_m = std::move(prime_factors(m));
+    std::vector<long> f_n = std::move(prime_factors(n));
+
+    long result = 1;
+
+    std::vector<long>::iterator m_it = f_m.begin();
+    std::vector<long>::iterator n_it = f_n.begin();
+
+    // We need the product of all common prime factors.
+    while ((m_it != f_m.end()) && (n_it != f_n.end())) {
+        if (*m_it < *n_it) {
+            ++m_it;
+        } else if (*m_it > *n_it) {
+            ++n_it;
+        } else /* if (*m_it == *n_it) */ {
+            result *= *m_it;
+            ++m_it;
+            ++n_it;
+        }
+    }
+
+    return result;
 ```
