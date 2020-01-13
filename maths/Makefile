@@ -6,6 +6,7 @@ OBJS   = fsqrt.o \
          prime.o \
          factors.o \
          gcd.o \
+         lcm.o \
          driver.o
 
 EXES   = maths

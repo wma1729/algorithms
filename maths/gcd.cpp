@@ -50,8 +50,8 @@ gcd_v3(long m, long n)
 
 	long result = 1;
 
-	std::vector<long>::iterator m_it = f_m.begin();
-	std::vector<long>::iterator n_it = f_n.begin();
+	std::vector<long>::const_iterator m_it = f_m.begin();
+	std::vector<long>::const_iterator n_it = f_n.begin();
 
 	// We need the product of all common prime factors.
 	while ((m_it != f_m.end()) && (n_it != f_n.end())) {

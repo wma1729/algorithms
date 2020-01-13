@@ -23,4 +23,10 @@ long gcd_v5(long, long);
 
 inline long gcd(long m, long n) { return gcd_v5(m, n); }
 
+long lcm_v1(long, long);
+long lcm_v2(long, long);
+long lcm_v3(long, long);
+
+inline long lcm(long m, long n) { return lcm_v3(m, n); }
+
 #endif // _MATHS_H_

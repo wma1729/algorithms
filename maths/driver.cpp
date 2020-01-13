@@ -12,7 +12,8 @@ usage(const char *progname)
 		<< "    [-prime_ge <number>]         Prime number greater than/equal to a number." << std::endl
 		<< "    [-factors <number>]          Factors of a number." << std::endl
 		<< "    [-prime_factors <number>]    Prime factors of a number." << std::endl
-		<< "    [-gcd <n1> <n2>]             GCD of two numbers." << std::endl;
+		<< "    [-gcd <n1> <n2>]             GCD of two numbers." << std::endl
+		<< "    [-lcm <n1> <n2>]             LCM of two numbers." << std::endl;
 	return 1;
 }
 
@@ -136,6 +137,31 @@ main(int argc, const char **argv)
 			}
 
 			std::cout << gcd(n1, n2) << std::endl;
+		} else if (strcmp(argv[i], "-lcm") == 0) {
+			++i;
+			if (argv[i]) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+			++i;
+			if (argv[i]) {
+				n2 = atol(argv[i]);
+				if (n2 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+
+			std::cout << lcm(n1, n2) << std::endl;
 		} else {
 			return usage(argv[0]);
 		}
