@@ -203,10 +203,11 @@ Examples:
 > PF(9): 3, 3 [3 has 2 occurrences]<br>
 > PF(21): 3, 7 [3 has 1 and 7 has 1 occurrence each]<br>
 > LCM(9, 21): 3 x 3 x 7 = 63<br>
-<br>
+> <br>
 > PF(36): 2, 2, 3, 3 [2 has 2 and 3 has 2 occurences]<br>
 > PF(48): 2, 2, 2, 2, 3 [2 has 4 occurrences and 3 has 1 occurence]<br>
 > LCM(36, 48): 2 x 2 x 2 x 2 x 3 x 3 = 144<br>
+
 ```C++
 // Get all prime factors for m and n.
 std::vector<long> f_m = std::move(prime_factors(m));
@@ -242,6 +243,7 @@ return result;
 ### Method 3 (using GCD)
 > m x n = LCM(m, n) x GCD(m, n)<br>
 > LCM(m, n) = (m x n) / GCD(m, n)<br>
+
 We can calculate GCD really fast using optimized Euclid's algorithm.
 ```C++
 return (m * n) / gcd(m, n);
