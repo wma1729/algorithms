@@ -88,7 +88,7 @@ long gcd_v1(long m, long)
          * divide both m and n with no remainder.
          */
         if (((m % i) == 0) && ((n % i) == 0))
-        break;
+            break;
     }
 
     return i;
@@ -108,11 +108,11 @@ long gcd_v2(long m, long)
     // Find the highest common factors
     while ((m_it != f_m.rend()) && (n_it != f_n.rend())) {
         if (*m_it > *n_it)
-        ++m_it;
+            ++m_it;
         else if (*m_it < *n_it)
-        ++n_it;
+            ++n_it;
         else /* if (*m_it == *n_it) */
-        break;
+            break;
     }
 
     return (m_it != f_m.rend()) ? *m_it : 1;
