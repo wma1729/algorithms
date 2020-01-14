@@ -272,3 +272,29 @@ long lcm_v3(long m, long n)
     return (m * n) / gcd(m, n);
 }
 ```
+
+# Properties of power (exponents)
+Expression | Equivalent | Comments
+-----------|------------|---------
+b<sup>0</sup>               | 1                             |
+b<sup>1</sup>               | b                             |
+(a * b)<sup>x</sup>         | a<sup>x</sup> * b<sup>x</sup> |
+b<sup>x + y</sup>           | b<sup>x</sup> * b<sup>y</sup> |
+b<sup>x - y</sup>           | b<sup>x</sup> / b<sup>y</sup> |
+(b<sup>x</sup>)<sup>y</sup> | b<sup>x * y</sup>             |
+b<sup>-x</sup>              | 1 / b<sup>x</sup>             | b<sup>-x</sup> = b<sup>0 - x</sup> = b<sup>0</sup> / b<sub>x</sup>
+b<sup>1/x</sup>             | <sup>x</sup>&#8730;b          | (b<sup>1/x</sup>)<sup>x</sup> = (<sup>x</sup>&#8730;b)<sup>x</sup><br>b<sup>x/x</sup> = b<br>b<sup>1</sup> = b
+b<sup>x/y</sup>             | (<sup>y</sup>&#8730;b)<sup>x</sup> |
+
+# Logarithms
+x = b<sup>y</sup> is same as log<sub>b</sub>(x) = y where b is the base, y is the exponent or power.
+> log<sub>b</sub>(x) = y means the power to which b must be raised to get x.
+
+## Properties of logarithms
+
+1. log<sub>b</sub>(1) = 0 for any b.
+2. log<sub>b</sub>(b) = 1 for any b.
+3. log<sub>b</sub>(b<sup>x</sup>) = x
+4. log<sub>b</sub>(m * n) = log<sub>b</sub>(m) + log<sub>b</sub>(n)
+5. log<sub>b</sub>(m / n) = log<sub>b</sub>(m) - log<sub>b</sub>(n)
+6. log<sub>b</sub>(m<sup>n</sup>) = n * log<sub>b</sub>(m)
