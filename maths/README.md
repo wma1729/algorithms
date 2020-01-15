@@ -307,11 +307,12 @@ power_v1(int n, int k)
 
 ### Method 2 (Using one of the properties of power).
 We know that n<sup>k</sup> = (n<sup>k / 2</sup>)<sup>2</sup> when k is even. Using this, we can keep reducing the value of k until k is 1 or 0. Let's see an example. We want to compute 2<sup>32</sup>. We can break it as following:
-> 2<sup>32</sup> = 2<sup>16</sup> * 2<sup>16</sup>
-> 2<sup>16</sup> = 2<sup>8</sup> * 2<sup>8</sup>
-> 2<sup>8</sup> = 2<sup>4</sup> * 2<sup>4</sup>
-> 2<sup>4</sup> = 2<sup>2</sup> * 2<sup>2</sup>
-> 2<sup>2</sup> = 2<sup>1</sup> * 2<sup>1</sup>
+> 2<sup>32</sup> = 2<sup>16</sup> x 2<sup>16</sup><br>
+> 2<sup>16</sup> = 2<sup>8</sup> x 2<sup>8</sup><br>
+> 2<sup>8</sup> = 2<sup>4</sup> x 2<sup>4</sup><br>
+> 2<sup>4</sup> = 2<sup>2</sup> x 2<sup>2</sup><br>
+> 2<sup>2</sup> = 2<sup>1</sup> x 2<sup>1</sup><br>
+
 How do we have cases when k is odd? Simple. n<sup>k</sup> = n x (n<sup>(k - 1) / 2</sup>)<sup>2</sup>. With this approach, the number of multiplications are at most 2 x log<sub>2</sub>k.
 ```C++
 long
