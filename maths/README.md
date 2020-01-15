@@ -286,6 +286,55 @@ b<sup>-x</sup>              | 1 / b<sup>x</sup>             | b<sup>-x</sup> = b
 b<sup>1/x</sup>             | <sup>x</sup>&#8730;b          | (b<sup>1/x</sup>)<sup>x</sup> = (<sup>x</sup>&#8730;b)<sup>x</sup><br>b<sup>x/x</sup> = b<br>b<sup>1</sup> = b
 b<sup>x/y</sup>             | (<sup>y</sup>&#8730;b)<sup>x</sup> |
 
+## How to determine n<sup>k</sup> for two positive numbers?
+### Method 1 (Using simple multiplication)
+We know that n<sup>k</sup> = n x n<sup>k - 1</sup>. This method involves k - 1 multiplication operations. This can be too expensive for larger values of k.
+```C++
+long
+power_v1(int n, int k)
+{
+    if (k == 0)
+        return 1;
+
+    long result = n;
+
+    for (int i = 1; i < k; ++i)
+        result *= n;
+
+    return result;
+}
+```
+
+### Method 2 (Using one of the properties of power).
+We know that n<sup>k</sup> = (n<sup>k / 2</sup>)<sup>2</sup> when k is even. Using this, we can keep reducing the value of k until k is 1 or 0. Let's see an example. We want to compute 2<sup>32</sup>. We can break it as following:
+> 2<sup>32</sup> = 2<sup>16</sup> * 2<sup>16</sup>
+> 2<sup>16</sup> = 2<sup>8</sup> * 2<sup>8</sup>
+> 2<sup>8</sup> = 2<sup>4</sup> * 2<sup>4</sup>
+> 2<sup>4</sup> = 2<sup>2</sup> * 2<sup>2</sup>
+> 2<sup>2</sup> = 2<sup>1</sup> * 2<sup>1</sup>
+How do we have cases when k is odd? Simple. n<sup>k</sup> = n x (n<sup>(k - 1) / 2</sup>)<sup>2</sup>. With this approach, the number of multiplications are at most 2 x log<sub>2</sub>k.
+```C++
+long
+power_v2(int n, int k)
+{
+    if (k == 0)
+        return 1;
+
+    if (k == 1)
+        return n;
+
+    long r = power_v2(n, k / 2);
+
+    if ((k % 2) == 0) {
+        // even
+        return r * r;
+    } else {
+        // odd
+        return n * r * r;
+    }
+}
+```
+
 # Logarithms
 x = b<sup>y</sup> is same as log<sub>b</sub>(x) = y where b is the base, y is the exponent or power.
 > log<sub>b</sub>(x) = y means the power to which b must be raised to get x.

@@ -7,6 +7,7 @@ OBJS   = fsqrt.o \
          factors.o \
          gcd.o \
          lcm.o \
+         power.o \
          driver.o
 
 EXES   = maths

@@ -13,7 +13,8 @@ usage(const char *progname)
 		<< "    [-factors <number>]          Factors of a number." << std::endl
 		<< "    [-prime_factors <number>]    Prime factors of a number." << std::endl
 		<< "    [-gcd <n1> <n2>]             GCD of two numbers." << std::endl
-		<< "    [-lcm <n1> <n2>]             LCM of two numbers." << std::endl;
+		<< "    [-lcm <n1> <n2>]             LCM of two numbers." << std::endl
+		<< "    [-power <n1> <n2>]           n1 raised to the power of n2." << std::endl;
 	return 1;
 }
 
@@ -162,6 +163,31 @@ main(int argc, const char **argv)
 			}
 
 			std::cout << lcm(n1, n2) << std::endl;
+		} else if (strcmp(argv[i], "-power") == 0) {
+			++i;
+			if (argv[i]) {
+				n1 = atol(argv[i]);
+				if (n1 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+			++i;
+			if (argv[i]) {
+				n2 = atol(argv[i]);
+				if (n2 < 0) {
+					std::cerr << "invalid number " << argv[i] << " specified" << std::endl;
+					return 1;
+				}
+			} else {
+				std::cerr << "missing argument for " << argv[i] << std::endl;
+				return 1;
+			}
+
+			std::cout << power(static_cast<int>(n1), static_cast<int>(n2)) << std::endl;
 		} else {
 			return usage(argv[0]);
 		}

@@ -29,4 +29,9 @@ long lcm_v3(long, long);
 
 inline long lcm(long m, long n) { return lcm_v3(m, n); }
 
+long power_v1(int, int);
+long power_v2(int, int);
+
+inline long power(int n, int k) { return power_v2(n, k); }
+
 #endif // _MATHS_H_
