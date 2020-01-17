@@ -23,26 +23,26 @@ Following this rule, we need not check all the numbers in [2, √N) range.
 We can only check [2, 3, c1, c2, …, √N) where candidates c1, c2, … are obtained following 6k ± 1 rule. 
 
 # Factors of a number, N
-The factors of a number are numbers, m and n, such that m x n = N. There can be many factors of a number.
+The factors of a number are numbers, m and n, such that m * n = N. There can be many factors of a number.
 For example, the factors of 12 are:
 
-> F(12):  1, 2, 3, 4, 6, 12 as 1 x 12 = 12, 2 x 6 = 12, 3 x 4 = 12
+> F(12):  1, 2, 3, 4, 6, 12 as 1 * 12 = 12, 2 * 6 = 12, 3 * 4 = 12
 
 
 ## How to find all factors of a number, N?
-* 1 and N are alway factors as 1 x n1 = N for n1 = N.
-* Try 2 to see if 2 x n2 = N. If n2 exists, 2 and n2 are factors.
-* Try 3 to see if 3 x n3 = N. If n3 exists, 3 and n3 are factors,
+* 1 and N are alway factors as 1 * n1 = N for n1 = N.
+* Try 2 to see if 2 * n2 = N. If n2 exists, 2 and n2 are factors.
+* Try 3 to see if 3 * n3 = N. If n3 exists, 3 and n3 are factors,
 * Continue this upto √N. Why √N? Think!
 
-All the m x n pairs generated whose product is N gives us the factors of N.
+All the m * n pairs generated whose product is N gives us the factors of N.
 
 # Prime Factors of a number, N
 The prime factors of a number are factors only including prime numbers. For example:
 
-> PF(12): 1, 2, 2, 3 or 1 x 2<sup>2</sup> x 3<br>
-> PF(39): 1, 3, 13 or 1 x 3 x 13<br>
-> PF(98): 1, 2, 7, 7 or 1 x 2 x 7<sup>2</sup><br>
+> PF(12): 1, 2, 2, 3 or 1 * 2<sup>2</sup> * 3<br>
+> PF(39): 1, 3, 13 or 1 * 3 * 13<br>
+> PF(98): 1, 2, 7, 7 or 1 * 2 * 7<sup>2</sup><br>
 
 ## How to find prime factors of a number, N?
 * 1 is always include (or excluded if you do not consider 1 as a prime number).
@@ -220,11 +220,11 @@ long lcm_v1(long m, long n)
 Examples:
 > PF(9): 3, 3 [3 has 2 occurrences]<br>
 > PF(21): 3, 7 [3 has 1 and 7 has 1 occurrence each]<br>
-> LCM(9, 21): 3 x 3 x 7 = 63<br>
+> LCM(9, 21): 3 * 3 * 7 = 63<br>
 > <br>
 > PF(36): 2, 2, 3, 3 [2 has 2 and 3 has 2 occurences]<br>
 > PF(48): 2, 2, 2, 2, 3 [2 has 4 occurrences and 3 has 1 occurence]<br>
-> LCM(36, 48): 2 x 2 x 2 x 2 x 3 x 3 = 144<br>
+> LCM(36, 48): 2 * 2 * 2 * 2 * 3 * 3 = 144<br>
 
 ```C++
 long lcm_v2(long m, long n)
@@ -262,8 +262,8 @@ long lcm_v2(long m, long n)
 }
 ```
 ### Method 3 (using GCD)
-> m x n = LCM(m, n) x GCD(m, n)<br>
-> LCM(m, n) = (m x n) / GCD(m, n)<br>
+> m * n = LCM(m, n) * GCD(m, n)<br>
+> LCM(m, n) = (m * n) / GCD(m, n)<br>
 
 We can calculate GCD really fast using optimized Euclid's algorithm.
 ```C++
@@ -288,7 +288,7 @@ b<sup>x/y</sup>             | (<sup>y</sup>&#8730;b)<sup>x</sup> |
 
 ## How to determine n<sup>k</sup> for two positive numbers?
 ### Method 1 (Using simple multiplication)
-We know that n<sup>k</sup> = n x n<sup>k - 1</sup>. This method involves k - 1 multiplication operations. This can be too expensive for larger values of k.
+We know that n<sup>k</sup> = n * n<sup>k - 1</sup>. This method involves k - 1 multiplication operations. This can be too expensive for larger values of k.
 ```C++
 long
 power_v1(int n, int k)
@@ -307,13 +307,13 @@ power_v1(int n, int k)
 
 ### Method 2 (Using one of the properties of power).
 We know that n<sup>k</sup> = (n<sup>k / 2</sup>)<sup>2</sup> when k is even. Using this, we can keep reducing the value of k until k is 1 or 0. Let's see an example. We want to compute 2<sup>32</sup>. We can break it as following:
-> 2<sup>32</sup> = 2<sup>16</sup> x 2<sup>16</sup><br>
-> 2<sup>16</sup> = 2<sup>8</sup> x 2<sup>8</sup><br>
-> 2<sup>8</sup> = 2<sup>4</sup> x 2<sup>4</sup><br>
-> 2<sup>4</sup> = 2<sup>2</sup> x 2<sup>2</sup><br>
-> 2<sup>2</sup> = 2<sup>1</sup> x 2<sup>1</sup><br>
+> 2<sup>32</sup> = 2<sup>16</sup> * 2<sup>16</sup><br>
+> 2<sup>16</sup> = 2<sup>8</sup> * 2<sup>8</sup><br>
+> 2<sup>8</sup> = 2<sup>4</sup> * 2<sup>4</sup><br>
+> 2<sup>4</sup> = 2<sup>2</sup> * 2<sup>2</sup><br>
+> 2<sup>2</sup> = 2<sup>1</sup> * 2<sup>1</sup><br>
 
-How do we have cases when k is odd? Simple. n<sup>k</sup> = n x (n<sup>(k - 1) / 2</sup>)<sup>2</sup>. With this approach, the number of multiplications are at most 2 x log<sub>2</sub>k.
+How do we have cases when k is odd? Simple. n<sup>k</sup> = n * (n<sup>(k - 1) / 2</sup>)<sup>2</sup>. With this approach, the number of multiplications are at most 2 * log<sub>2</sub>k.
 ```C++
 long
 power_v2(int n, int k)
