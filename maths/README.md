@@ -359,3 +359,16 @@ Function | Description
 Constant function | A polynomial function when x = 0 or f(0) = c. Represents a point in a x-y axis graph.
 Linear function   | A polynomial function of degree 1 (n = 1).<br>f(x) = ax + c<br> The graph of a linear function is a straight line. a is the coefficient of the variable x (also called the slope/gradient). It is the rate of change of the dependent variable.
 Quadratic function | A polynomial function of degree 2 (n = 2).<br>f(x) = ax<sup>2</sup> + bx + c<br>The graph of a quadratic equation is a curve where y increases rapidly in proportion to x. The coefficient of x dilates (stretches or compresses) the graph along the y-axis.
+Cubic function | A polynomial of degree 3 (n = 3).<br>ax<sup>3</sup> + bx<sup>2</sup> + cx + d
+Exponential function | y = a * b<sup>x</sup><br>b is the base. y grows exponentially as x increases. If 0 < b < 1, y decreases with increase in x. The graph is a curve.
+Logarithmic function | y = log<sub>b</sub>(x)<br> The graph is a slope but y increase very slowly with increase of x.
+Factorial | y = x! = x * (x -1) * (x - 2) * ... * 3 * 2 * 1<br> The graph is a curve. Very rapid growth.
+
+x | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+--|---|---|---|---|---|---|---|---|---|----
+x<sup>2</sup> | 1 | 4 | 9 | 16 | 25 | 36 | 49 | 64 | 81 | 100
+x<sup>3</sup> | 1 | 8 | 27 | 64 | 125 | 216 | 343 | 512 | 729 | 1000
+2<sup>x</sup> | 2 | 4 | 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024
+x! | 1 | 2 | 6 | 24 | 120 | 720 | 5040 | 40320 | 36288 | 362880
+ log<sub>2</sub>(x) | 0 | 1 | 1.585 | 2 | 2.32 | 2.585 | 2.8 | 3 | 3.169 | 3.322
+
