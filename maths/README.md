@@ -348,3 +348,14 @@ x = b<sup>y</sup> is same as log<sub>b</sub>(x) = y where b is the base, y is th
 4. log<sub>b</sub>(m * n) = log<sub>b</sub>(m) + log<sub>b</sub>(n)
 5. log<sub>b</sub>(m / n) = log<sub>b</sub>(m) - log<sub>b</sub>(n)
 6. log<sub>b</sub>(m<sup>n</sup>) = n * log<sub>b</sub>(m)
+
+# Polynomial Functions
+> y = f(x) = a<sub>n</sub>x<sup>n</sup> + a<sub>n - 1</sub>x<sup>n - 1</sup> + ... + a<sub>2</sub>x<sup>2</sup> + a<sub>1</sub>x + a<sub>0</sub><br>
+
+The above is a polynomial function of n-degrees. x is an indendent variable and y, being dependent on a, is the dependent variable. a<sub>0</sub> is the constant (often denoted as c and called y-intercept).
+
+Function | Description
+---------|------------
+Constant function | A polynomial function when x = 0 or f(0) = c. Represents a point in a x-y axis graph.
+Linear function   | A polynomial function of degree 1 (n = 1).<br>f(x) = ax + c<br> The graph of a linear function is a straight line. a is the coefficient of the variable x (also called the slope/gradient). It is the rate of change of the dependent variable.
+Quadratic function | A polynomial function of degree 2 (n = 2).<br>f(x) = ax<sup>2</sup> + bx + c<br>The graph of a quadratic equation is a curve where y increases rapidly in proportion to x. The coefficient of x dilates (stretches or compresses) the graph along the y-axis.
