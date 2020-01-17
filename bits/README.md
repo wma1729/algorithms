@@ -3,7 +3,7 @@
 Operator | What? | Comments
 ---------|-------|---------
 <<       | Left shift. Shifts bit(s) to the left. | The vacated bits are zero filled. N << n = N * 2<sup>n<sup>.
->>       | Right shift. Shifts bit(s) to the right. | For unsigned numbers, the vacated bits are zero filled. The behavior is dependent of the hardware platform in use for signed numbers. N >> n = N / 2<sup>n</sup>.
+\>>       | Right shift. Shifts bit(s) to the right. | For unsigned numbers, the vacated bits are zero filled. The behavior is dependent of the hardware platform in use for signed numbers. N >> n = N / 2<sup>n</sup>.
 &        | And | 0 & 0 = 0<br>0 & 1 = 0<br>1 & 0 = 0<br>1 & 1 = 1
 |        | Or | 0 | 0 = 0<br>0 | 1 = 1<br>1 | 0 = 1<br>1 | 1 = 1
 ~        | One's complement | Flips every bit. 1 becomes 0 and vice-versa.
