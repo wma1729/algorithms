@@ -8,8 +8,8 @@ The queen in a chess-board has three possible moves:
 * vertical
 * diagnal
 
-*Problem:* Put N queens in a N * N chessboard such that they are not a threat to each other.
-*Solution:* Let the chess be represented by a 2-dimensional boolean array, board. We will iterator row-by-row placing a queen in a row such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the i<sup>th</sup> row and j<sup>th></sup> column is a safe place for the queen.
+*Problem:* Put N queens in a N * N chessboard such that they are not a threat to each other.<br>
+*Solution:* Let the chess be represented by a 2-dimensional boolean array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the i<sup>th</sup> row and j<sup>th></sup> column is a safe place for the queen.
 ```C++
 /*
  * Solves the n-queen problem.
