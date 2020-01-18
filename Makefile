@@ -1,37 +1,20 @@
 DBG     = -O
 CFLAGS  = -c
-DEFINES =
+DEFINES = -DDEBUG
 
-OBJS   = nqueen.o \
-         subset.o \
-         permutations.o \
-         towersofhanoi.o \
+OBJS   = towersofhanoi.o \
          graph.o \
          bst.o \
          linkedlist.o \
-         wordbreak.o \
          knapsack.o
 
-EXES   = nqueen \
-         subset \
-         permutations \
-         towersofhanoi \
+EXES   = towersofhanoi \
          graph \
          bst \
          linkedlist \
-         wordbreak \
          knapsack
 
 all: ${EXES}
-
-nqueen: nqueen.o
-	g++ ${DBG} $^ -o $@
-
-subset: subset.o
-	g++ ${DBG} $^ -o $@
-
-permutations: permutations.o
-	g++ ${DBG} $^ -o $@
 
 towersofhanoi: towersofhanoi.o
 	g++ ${DBG} $^ -o $@
@@ -43,9 +26,6 @@ bst: bst.o
 	g++ ${DBG} $^ -o $@
 
 linkedlist: linkedlist.o
-	g++ ${DBG} $^ -o $@
-
-wordbreak: wordbreak.o
 	g++ ${DBG} $^ -o $@
 
 knapsack: knapsack.o

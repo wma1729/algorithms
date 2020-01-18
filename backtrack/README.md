@@ -28,10 +28,12 @@ void solve(int i, bool all)
 				// Found the correct column in the ith row.
 				board[i][j] = true;
 
+				// Go solve for the next row
 				solve(i + 1, all);
 				if (sol && !all)
 					return;
 
+				// Backtrack
 				board[i][j] = false;
 			} else {
 				// Try the next column. board[i][j] is not safe.
@@ -97,9 +99,13 @@ void permutate(const string &remaining, string &perm)
 	}
 
 	for (size_t i = 0; i < remaining.length(); ++i) {
-		// Consume the first character from remaining and permutate the rest.
+		// Consume the first character.
 		perm.push_back(remaining[i]);
+
+		// Permutate the remaining string.
 		permutate(remaining.substr(0, i) + remaining.substr(i + 1), perm);
+
+		// Backtrack.
 		perm.pop_back();
 	}
 
@@ -117,4 +123,128 @@ void permutate(const string &str)
 	permutate(str, p);
 }
 
+```
+*abcd* has the following permutations possible:
+```
+# permutations abcd
+abcd
+abdc
+acbd
+acdb
+adbc
+adcb
+bacd
+badc
+bcad
+bcda
+bdac
+bdca
+cabd
+cadb
+cbad
+cbda
+cdab
+cdba
+dabc
+dacb
+dbac
+dbca
+dcab
+dcba
+```
+
+## Subset of a string
+*Problem:* Find all subsets of a given string.<br>
+*Solution:* For each charater, we have two choices: leave it or take it in the subset. We try both possibilities for each character in the given string. First create a 2-element boolean array and initialize the elements to false (leave it) and true (take it). The array is then iterated over for each element of the given string giving us the following algorithm:
+```C++
+bool choices[2];
+choices[0] = false; // leave it
+choices[1] = true;  // take it
+
+/*
+ * Generate subsets of the given string.
+ *
+ * @param current_subset current subset so far.
+ * @param str            input string.
+ * @param idx            current string index.
+ * @param max            input string length.
+ */
+void generate(string &current_subset, const string &str, size_t idx, size_t len)
+{
+	if (idx == len) {
+		// No character left in the string. Print this subset.
+		cout << "{" << current_subset << "}" << endl;
+		return;
+	}
+
+	for (size_t i = 0; i < sizeof(choices) / sizeof(bool); ++i) {
+		// Either leave or take the ith character.
+		if (choices[i]) current_subset.push_back(str[idx]);
+
+		// Generate subset for the remaining string.
+		generate(current_subset, str, idx + 1, len);
+
+		// Backtrack
+		if (choices[i]) current_subset.pop_back();
+	}
+}
+
+/*
+ * Generate subsets of the given string.
+ */
+void generate(const string &str)
+{
+	string current_subset;
+	generate(current_subset, str, 0, str.length());
+}
+```
+*abc* has the following subsets:
+```
+# subset abc
+{}
+{c}
+{b}
+{bc}
+{a}
+{ac}
+{ab}
+{abc}
+```
+
+# Word break
+*Problem:* We are given a dictionary. The dictionary provides a method *contains()* which tells us if the dictionary contains a given word. Find if a given string can be broken down into valid words from the dictionary. Let's assume that the dictionary contains: *cats, sand, and, dog, cat*. If the input string is *catsandog*, it cannot be broken. However, if the input string is *catsanddog*, it can be.<br>
+*Solution:* Again we will try the brute force. First try to find words of length 1, then length 2, and so on upto words of length n where n is the length of the given string. Every time we find a word, we do the same for the rest of the string. Using this approach gives us the following algorithm:
+```C++
+/*
+ * Determines if the given string could be broken into
+ * words from a given dictionary.
+ *
+ * @param to_break input string.
+ * @param dict     reference to a dictionary.
+ *
+ * @return true if the string can be broken or false if the
+ * word cannot be broken into words from a dictionary.
+ */
+bool
+word_break(const string &to_break, const dictionary &dict)
+{
+	if (to_break.empty()) {
+		// No more characters left. Return success
+		return true;
+	}
+
+	for (size_t len = 1; len <= to_break.size(); ++len) {
+		// Break the string in two: left (length = len) and right (rest if the string)
+		string left = to_break.substr(0, len);
+		string right = to_break.substr(len);
+
+		if (dict.contains(left)) {
+			// If found left, try to do the same for right.
+			if (word_break(right, dict))
+				return true;
+		}
+	}
+
+	return false;
+}
 ```
