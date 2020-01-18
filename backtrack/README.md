@@ -70,3 +70,51 @@ Q - - -
 
 4-queen problem has 2 solutions.
 ```
+
+## Permutations of a string
+*Problem:* Find all possible permutations of a given string.<br>
+*Solution:* The solution involves trying all possible solution. Let's assume the given string is *abc*.<br>
+* Take *a* and permutate *bc*. Do the same for the remaining string *bc*.
+* Take *b* and permutate *ac*. Do the same for the remaining string *ac*.
+* Take *c* and permutate *ab*. Do the same for the remaining string *ab*.
+
+And this gives us the following simple algorithm.
+```C++
+/*
+ * Find all permutations of the given string.
+ *
+ * @param remaining remaining string excluding characters that are arranged.
+ * @param perm      characters already permutated.
+ *
+ * Invariant: length(remaining) + length(perm) = length(original string).
+ */
+void permutate(const string &remaining, string &perm)
+{
+	if (remaining.empty()) {
+		// No character left in the string. Print this permutation.
+		cout << perm << endl;
+		return;
+	}
+
+	for (size_t i = 0; i < remaining.length(); ++i) {
+		// Consume the first character from remaining and permutate the rest.
+		perm.push_back(remaining[i]);
+		permutate(remaining.substr(0, i) + remaining.substr(i + 1), perm);
+		perm.pop_back();
+	}
+
+	return;
+}
+
+/*
+* Find all permutations of the given string.
+*
+* @param str input string.
+*/
+void permutate(const string &str)
+{
+	string p;
+	permutate(str, p);
+}
+
+```
