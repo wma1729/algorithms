@@ -5,14 +5,12 @@ DEFINES = -DDEBUG
 OBJS   = towersofhanoi.o \
          graph.o \
          bst.o \
-         linkedlist.o \
-         knapsack.o
+         linkedlist.o
 
 EXES   = towersofhanoi \
          graph \
          bst \
-         linkedlist \
-         knapsack
+         linkedlist
 
 all: ${EXES}
 
@@ -26,9 +24,6 @@ bst: bst.o
 	g++ ${DBG} $^ -o $@
 
 linkedlist: linkedlist.o
-	g++ ${DBG} $^ -o $@
-
-knapsack: knapsack.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
