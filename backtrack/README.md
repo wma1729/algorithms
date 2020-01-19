@@ -2,6 +2,25 @@
 
 Some problems involve iterating over the entire search space. Backtracking is a technique used to find a solution efficiently for such combinatorial problems. The efficiency comes from not visiting the same state more than once. The best way to understand **backtracking** is through examples.
 
+Most of the backtracking problems involves recursion and uses the following coding pattern:
+```
+backtrack()
+{
+	if (we have tried all possible combinations) {
+		dump/print the solution;
+		return;
+	}
+	
+	for (all available candidates/choices avaliable) {
+		make a move;
+		backtrack(); // solve the sub-problem
+		unmake the move;
+	}
+	
+	return;
+}
+```
+
 ## N-queen problem
 The queen in a chess-board has three possible moves:
 * horizontal
