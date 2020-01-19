@@ -9,7 +9,7 @@ The queen in a chess-board has three possible moves:
 * diagnal
 
 *Problem:* Put N queens in a N * N chessboard such that they are not a threat to each other.<br>
-*Solution:* Let the chess be represented by a 2-dimensional boolean array, *board*. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the i<sup>th</sup> row and j<sup>th></sup> column is a safe place for the queen.
+*Solution:* Let the chess be represented by a 2-dimensional boolean array, *board*. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the *i<sup>th</sup>* row and *j<sup>th</sup>* column is a safe place for the queen.
 ```C++
 /*
  * Solves the n-queen problem.
@@ -82,7 +82,7 @@ Sudoku is a N * N board with N rows and N columns that needs to be filled with n
 This is quite similar to the N-queen problem. Instead of the placement of queue, we are talking about placement of numbers.
 
 *Problem:* Solve N * N sudoku board.<br>
-*Solution:* Let the sudoku board be represented by a 2-dimensional integer array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *is_valid(r, c, val)* determines if it is okay to put val in the r<sup>th</sup> row and r<sup>th></sup> column. The empty numbers are set to 0 to indicate that we need to fill them.
+*Solution:* Let the sudoku board be represented by a 2-dimensional integer array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *is_valid(r, c, val)* determines if it is okay to put *val* in the *r<sup>th</sup>* row and *c<sup>th</sup>* column. The empty numbers are set to *0* to indicate that we need to fill them.
 ```C++
 /*
  * Solve the sudoku problem.
