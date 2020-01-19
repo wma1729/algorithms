@@ -39,10 +39,11 @@ private:
 
 	bool is_valid_in_box(int r, int c, int val)
 	{
-		int br_start = (r / 3) * 3;
-		int br_end = br_start + 3;
-		int bc_start = (c / 3) * 3;
-		int bc_end = bc_start + 3;
+		int boxsize = static_cast<int>(sqrt(rows));
+		int br_start = (r / boxsize) * boxsize;
+		int br_end = br_start + boxsize;
+		int bc_start = (c / boxsize) * boxsize;
+		int bc_end = bc_start + boxsize;
 
 		for (int i = br_start; i < br_end; ++i) {
 			for (int j = bc_start; j < bc_end; ++j) {
