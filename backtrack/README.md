@@ -9,7 +9,7 @@ The queen in a chess-board has three possible moves:
 * diagnal
 
 *Problem:* Put N queens in a N * N chessboard such that they are not a threat to each other.<br>
-*Solution:* Let the chess be represented by a 2-dimensional boolean array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the i<sup>th</sup> row and j<sup>th></sup> column is a safe place for the queen.
+*Solution:* Let the chess be represented by a 2-dimensional boolean array, *board*. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *valid_position(i, j)* determines if the i<sup>th</sup> row and j<sup>th></sup> column is a safe place for the queen.
 ```C++
 /*
  * Solves the n-queen problem.
@@ -71,6 +71,104 @@ Q - - -
 - Q - - 
 
 4-queen problem has 2 solutions.
+```
+
+## Sudoku
+Sudoku is a N * N board with N rows and N columns that needs to be filled with numbers from [1 - N]. Some numbers are pre-filled. The remaining numbers are to be deduced. The placement of a number must meet the following constraints:
+* The number is unique in the row.
+* The number is unique in the column.
+* The number is unique in the box (a sub board √N * √N).
+
+This is quite similar to the N-queen problem. Instead of the placement of queue, we are talking about placement of numbers.
+
+*Problem:* Solve N * N sudoku board.<br>
+*Solution:* Let the sudoku board be represented by a 2-dimensional integer array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *is_valid(r, c, val)* determines if it is okay to put val in the r<sup>th</sup> row and r<sup>th></sup> column. The empty numbers are set to 0 to indicate that we need to fill them.
+```C++
+/*
+ * Solve the sudoku problem.
+ *
+ * @param board the sudoku board.
+ * @param r     the current row we are solving.
+ * @param r     total number of rows (equal to n).
+ * @param r     the current column we are solving.
+ * @param r     total number of columns (equal to n).
+ *
+ * @return true if we found a solutions, false otherwise.
+ */
+bool solve(int **board, int r, int rows, int c, int cols)
+{
+	if (c == cols) {
+		// Done with column; move on to the next row.
+		c = 0;
+		r++;
+
+		if (r == rows) {
+			// We are done with all rows; Print the solution.
+			dump();
+			return true;
+		}
+	}
+
+	// If the number is pre-filled, move on to the next column.
+	if (board[r][c] != 0) 
+		return solve(board, r, rows, c + 1, cols);
+
+	// Iterate over all values.
+	for (int v = 1; v <= rows; ++v) {
+		if (is_valid(r, c, v)) {
+			// Place the number.
+			board[r][c] = v;
+
+			// Solve for remaining numbers.
+			if (solve(board, r, rows, c + 1, cols))
+				return true;
+
+			// Backtrack
+			board[r][c] = 0;
+		}
+	}
+
+	return false;
+}
+
+/*
+ * Solve the sudoku problem.
+ *
+ * @param board the sudoku board.
+ * @param n     size of the sudoku board.
+ *
+ * @return true if we found a solutions, false otherwise.
+ */
+bool solve(int **board, int n)
+{
+	return solve(board, 0, n, 0, n);
+}
+```
+
+Here is a solution for a given sudoku. The program first display the problem (number 0 indicates empty slots) and then the solution.
+```
+# sudoku
+0 6 0 4 0 7 0 1 0
+2 4 0 9 0 5 6 0 0
+7 0 0 6 8 0 2 0 4
+0 3 7 0 0 8 0 0 2
+0 0 6 1 3 0 4 0 0
+9 1 0 0 0 0 5 3 0
+0 0 0 0 0 0 0 9 1
+0 0 0 0 0 0 0 0 0
+0 5 0 0 4 0 0 0 0
+
+8 6 5 4 2 7 9 1 3
+2 4 3 9 1 5 6 8 7
+7 9 1 6 8 3 2 5 4
+4 3 7 5 9 8 1 6 2
+5 8 6 1 3 2 4 7 9
+9 1 2 7 6 4 5 3 8
+3 7 4 2 5 6 8 9 1
+6 2 9 8 7 1 3 4 5
+1 5 8 3 4 9 7 2 6
+
+Found a solution!
 ```
 
 ## Permutations of a string

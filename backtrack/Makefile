@@ -3,11 +3,13 @@ CFLAGS  = -c
 DEFINES = -DDEBUG
 
 OBJS   = nqueen.o \
+         sudoku.o \
          subset.o \
          permutations.o \
          wordbreak.o
 
 EXES   = nqueen \
+         sudoku \
          subset \
          permutations \
          wordbreak
@@ -15,6 +17,9 @@ EXES   = nqueen \
 all: ${EXES}
 
 nqueen: nqueen.o
+	g++ ${DBG} $^ -o $@
+
+sudoku: sudoku.o
 	g++ ${DBG} $^ -o $@
 
 subset: subset.o
