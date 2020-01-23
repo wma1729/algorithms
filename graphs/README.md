@@ -38,3 +38,105 @@ A graph could be:
 10 -> 9
 11 -> 9
 ```
+Adjancency list is the most common representation used for graph. Here is an example:
+```C++
+/*
+ * Graph implementation.
+ */
+template<typename T>
+class graph
+{
+private:
+	struct vertex
+	{
+		T           vrtx;       // vertex
+		vector<T>   adjacent;   // adjacent vertices
+
+		explicit vertex(T v) : vrtx(v) {}
+		bool operator==(T v) const { return (this->vrtx == v); }
+	};
+
+	bool            directed;       // directed or undirected?
+	int             count;          // number of vertices
+	vector<vertex>  vertices;       // vertices in the graph
+
+	/*
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	vertex & get_vertex(T v)
+	{
+		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
+
+	/*
+	 * Add an edge (from, to).
+	 */
+	void add_edge(vertex &from, vertex &to)
+	{
+		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
+			from.adjacent.push_back(to.vrtx);
+	}
+
+public:
+	graph(bool dir = true) : directed(dir), count(0) {}
+
+	/*
+	 * Add a vertex, v.
+	 */
+	void add_vertex(T v)
+	{
+		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			vertices.emplace_back(v);
+			++count;
+		}
+	}
+
+	/*
+	 * Add an edge, (from, to). If the graph is undirected, edge (to, from)
+	 * is added as well.
+	 */
+	void add_edge(T from, T to)
+	{
+		add_vertex(from);
+		add_vertex(to);
+
+		vertex &v1 = get_vertex(from);
+		vertex &v2 = get_vertex(to);
+
+		add_edge(v1, v2);
+		if (!directed)
+			add_edge(v2, v1);
+	}
+
+	int num_vertices() const { return count; }
+
+	/*
+	 * Prints the graph on the screen.
+	 */
+	void dump()
+	{
+		cout << "Number of vertices: " << count << endl;
+
+		for (auto v : vertices) {
+			cout << v.vrtx;
+
+			if (!v.adjacent.empty())
+				cout << " -> ";
+
+			for (auto adj : v.adjacent) 
+				cout << adj << " ";
+
+			cout << endl;
+		}
+	}
+};
+```

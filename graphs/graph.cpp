@@ -19,31 +19,27 @@ void visitor(T v)
 }
 
 /*
- * Graph implementation.
+ * A graph representation.
  */
-template<typename T>
 class graph
 {
-private:
 	struct vertex
 	{
-		T           vrtx;
-		vector<T>   adjacent;
+		T           vrtx;       // vertex
+		vector<T>   adjacent;   // adjacent vertices
 
 		explicit vertex(T v) : vrtx(v) {}
 		bool operator==(T v) const { return (this->vrtx == v); }
 	};
 
-	bool            directed;
-	int             count;
-	vector<vertex>  vertices;
+	bool            directed;       // directed or undirected?
+	int             count;          // number of vertices
+	vector<vertex>  vertices;       // vertices in the graph
 
-	void add_edge(vertex &from, vertex &to)
-	{
-		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
-			from.adjacent.push_back(to.vrtx);
-	}
-
+	/*
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
 	vertex & get_vertex(T v)
 	{
 		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
@@ -54,6 +50,15 @@ private:
 		} else {
 			return *it;
 		}
+	}
+
+	/*
+	 * Add an edge (from, to).
+	 */
+	void add_edge(vertex &from, vertex &to)
+	{
+		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
+			from.adjacent.push_back(to.vrtx);
 	}
 
 	bool path_exists(set<T> &visited, const vertex &from, T to)
@@ -157,6 +162,9 @@ public:
 
 	graph(bool dir = true) : directed(dir), count(0) {}
 
+	/*
+	 * Add a vertex, v.
+	 */
 	void add_vertex(T v)
 	{
 		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
@@ -166,6 +174,10 @@ public:
 		}
 	}
 
+	/*
+	 * Add an edge, (from, to). If the graph is undirected, edge (to, from)
+	 * is added as well.
+	 */
 	void add_edge(T from, T to)
 	{
 		add_vertex(from);
@@ -203,6 +215,9 @@ public:
 			breadth_first_traversal(visited, visitor);
 	}
 
+	/*
+	 * Prints the graph on the screen.
+	 */
 	void dump()
 	{
 		cout << "Number of vertices: " << count << endl;
