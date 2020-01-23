@@ -19,8 +19,9 @@ void visitor(T v)
 }
 
 /*
- * A graph representation.
+ * Graph implementation.
  */
+template<typename T>
 class graph
 {
 	struct vertex
@@ -33,9 +34,24 @@ class graph
 	};
 
 	bool            directed;       // directed or undirected?
-	int             count;          // number of vertices
+	size_t          count;          // number of vertices
 	vector<vertex>  vertices;       // vertices in the graph
 
+	/*
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	const vertex & get_vertex(T v) const
+	{
+		typename vector<vertex>::const_iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
 	/*
 	 * Get a vertex, v.
 	 * Throws out_of_range exception if the vertex is not found.
@@ -55,7 +71,7 @@ class graph
 	/*
 	 * Add an edge (from, to).
 	 */
-	void add_edge(vertex &from, vertex &to)
+	void add_edge(vertex &from, const vertex &to)
 	{
 		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
 			from.adjacent.push_back(to.vrtx);
@@ -175,7 +191,7 @@ public:
 	}
 
 	/*
-	 * Add an edge, (from, to). If the graph is undirected, edge (to, from)
+	 * Add an edge (from, to). If the graph is undirected, edge (to, from)
 	 * is added as well.
 	 */
 	void add_edge(T from, T to)
@@ -191,7 +207,15 @@ public:
 			add_edge(v2, v1);
 	}
 
-	int num_vertices() const { return count; }
+	size_t num_vertices() const { return count; }
+
+	/*
+	 * Find the degree of an vertex, v.
+	 */
+	size_t degree(T v) const
+	{
+		return get_vertex(v).adjacent.size();
+	}
 
 	bool path_exists(T from, T to)
 	{
@@ -251,8 +275,12 @@ main()
 	g.add_edge(5, 7);
 	g.add_edge(6, 8);
 	g.add_edge(7, 8);
+	g.add_edge(9, 10);
+	g.add_edge(9, 11);
 
 	g.dump();
+
+	cout << "degree of " << 4 << " is " << g.degree(4) << endl;
 
 	if (g.path_exists(1, 8))
 		cout << "path from 1 to 8 exists" << endl;

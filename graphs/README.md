@@ -57,8 +57,24 @@ private:
 	};
 
 	bool            directed;       // directed or undirected?
-	int             count;          // number of vertices
+	size_t          count;          // number of vertices
 	vector<vertex>  vertices;       // vertices in the graph
+
+	/*
+	 * Get a vertex, v. The const version.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	const vertex & get_vertex(T v) const
+	{
+		typename vector<vertex>::const_iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
 
 	/*
 	 * Get a vertex, v.
@@ -79,7 +95,7 @@ private:
 	/*
 	 * Add an edge (from, to).
 	 */
-	void add_edge(vertex &from, vertex &to)
+	void add_edge(vertex &from, const vertex &to)
 	{
 		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
 			from.adjacent.push_back(to.vrtx);
@@ -117,7 +133,7 @@ public:
 			add_edge(v2, v1);
 	}
 
-	int num_vertices() const { return count; }
+	size_t num_vertices() const { return count; }
 
 	/*
 	 * Prints the graph on the screen.
@@ -139,4 +155,16 @@ public:
 		}
 	}
 };
+```
+## Degree of a vertex
+The number of edges coming out of a vertex is the degree of that edge.
+```C++
+	/*
+	 * Find the degree of an vertex, v.
+	 */
+	size_t degree(T v) const
+	{
+		return get_vertex(v).adjacent.size();
+	}
+
 ```
