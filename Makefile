@@ -3,21 +3,16 @@ CFLAGS  = -c
 DEFINES = -DDEBUG
 
 OBJS   = towersofhanoi.o \
-         graph.o \
          bst.o \
          linkedlist.o
 
 EXES   = towersofhanoi \
-         graph \
          bst \
          linkedlist
 
 all: ${EXES}
 
 towersofhanoi: towersofhanoi.o
-	g++ ${DBG} $^ -o $@
-
-graph: graph.o
 	g++ ${DBG} $^ -o $@
 
 bst: bst.o
