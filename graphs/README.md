@@ -156,9 +156,12 @@ public:
 	}
 };
 ```
+
 ## Degree of a vertex
 The number of edges coming out of a vertex is the degree of that edge.
 ```C++
+	// Part of graph class
+
 	/*
 	 * Find the degree of an vertex, v.
 	 */
@@ -166,5 +169,140 @@ The number of edges coming out of a vertex is the degree of that edge.
 	{
 		return get_vertex(v).adjacent.size();
 	}
+```
 
+## Graph Traversal
+There are two main graph traversal methods based on the order in which the vertices are visited:
+* **Depth First Search (DFS)** A very popular approach suitable to recursion. An arbitrary vertex is chosen. The action needed on the vertex is performed and the vertex is marked as *visited*. Then an adjacent, unvisited, vertex is picked up arbitrarily. The action needed is performed and that vertex is marked as *visited* as well. The process continues, as we go deeper into the graph, until all the connected vertices are marked as *visited*. The data structure used to save the *unexplored* vertices is stack and that makes it apt for recursion.
+* *Breadth First Search (BFS)** An organized approach were vertices are visited level by level. An arbitrary vertex is chosen. The action needed on the vertex is performed and the vertex is marked as *visited*. Next all adjacent, unvisited, vertices are *visited*. The process continues until all the vertices at all levels are traversed and marked as *visited*. The data structure used to save the *unexplored* vertices is queue. BFS gives the *shortest path* between any two vertices of the graph.
+```C++
+/*
+ * Sample visitor function type.
+ */
+template<typename T>
+using visitor_t = void(*)(T);
+
+/*
+ * Sample visitor function definition.
+ * The visitor simply prints the vertex.
+ */
+template<typename T>
+void visitor(T v)
+{
+	cout << v << endl;
+}
+
+	// Part of graph class
+
+	/*
+	 * Depth first traversal starting from vertex *from*.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param visitor performs processing at the each vertex.
+	 * @param from    starting vertex.
+	 */
+	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor, const vertex &from)
+	{
+		if (visited.end() == visited.find(from.vrtx)) {
+			/*
+			 * Not visited yet.
+			 * Process and mark as visited.
+			 */
+			(*visitor)(from.vrtx);
+			visited.insert(from.vrtx);
+		} else {
+			return;
+		}
+
+		/*
+		 * Dive deeper.
+		 */
+		typename vector<T>::const_iterator it;
+		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
+			depth_first_traversal(visited, visitor, get_vertex(*it));
+	}
+
+	/*
+	 * Depth first traversal for the whole graph.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param visitor performs processing at the each vertex.
+	 */
+	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor)
+	{
+		/*
+		 * Do DFS for each vertex.
+		 */
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it)
+			depth_first_traversal(visited, visitor, *it);
+	}
+
+	/*
+	 * Breadth first traversal starting from vertex *from*.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param visitor performs processing at the each vertex.
+	 * @param from    starting vertex.
+	 */
+	void breadth_first_traversal(set<T> &visited, visitor_t<T> visitor, T from)
+	{
+		queue<T> q;
+
+		q.push(from);
+
+		while (!q.empty()) {
+			from = q.front();
+			q.pop();
+
+			if (visited.end() == visited.find(from)) {
+				/*
+				 * Not visited yet.
+				 * Process and mark as visited.
+				 */
+				(*visitor)(from);
+				visited.insert(from);
+
+				vertex &v = get_vertex(from);
+
+				/*
+				 * Now add all the adjacent ones to the queue.
+				 */
+				typename vector<T>::const_iterator it;
+				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it)
+					q.push(*it);
+			}
+		}
+	}
+
+	/*
+	 * Breadth first traversal for the whole graph.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param visitor performs processing at the each vertex.
+	 */
+	void breadth_first_traversal(set<T> &visited, visitor_t<T> visitor)
+	{
+		/*
+		 * Do BFS for each vertex.
+		 */
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it)
+			breadth_first_traversal(visited, visitor, it->vrtx);
+	}
+
+	enum class traversal_order
+	{
+		depth_first,
+		breadth_first
+	};
+
+	/*
+	 * Traverse the graph based on the traveral order requested
+	 * and applying visitor at each vertex.
+	 */
+	void traverse(traversal_order order, visitor_t<T> visitor)
+	{
+		set<T> visited;
+		if (order == traversal_order::depth_first)
+			depth_first_traversal(visited, visitor);
+		else if (order == traversal_order::breadth_first)
+			breadth_first_traversal(visited, visitor);
+	}
 ```
