@@ -352,7 +352,7 @@ x = b<sup>y</sup> is same as log<sub>b</sub>(x) = y where b is the base, y is th
 # Polynomial Functions
 > y = f(x) = a<sub>n</sub>x<sup>n</sup> + a<sub>n - 1</sub>x<sup>n - 1</sup> + ... + a<sub>2</sub>x<sup>2</sup> + a<sub>1</sub>x + a<sub>0</sub><br>
 
-The above is a polynomial function of n-degrees. x is an indendent variable and y, being dependent on a, is the dependent variable. a<sub>0</sub> is the constant (often denoted as c and called y-intercept).
+The above is a polynomial function of n-degrees. x is an indendent variable and y, being dependent on x, is the dependent variable. a<sub>0</sub> is the constant (often denoted as c and called y-intercept).
 
 Function | Description
 ---------|------------
