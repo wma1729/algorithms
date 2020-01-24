@@ -1,10 +1,10 @@
 # Graphs
 
 A graph, **G = (V, E)**, is a data structure that consists of **V** vertices and **E** edges.
-An edge connects two vertices and is represented by a pair of the two vertices it connects, (*v1*, *v2*).
+An edge connects two vertices and is represented by a pair of the two vertices it connects, (*v<sub>1</sub>*, *v<sub>2</sub>*).
 A graph could be:
-* **directed**, with a sense of direction, where an edge is an ordered pair (*v1*, *v2*),
-* **undirected** where an edge is an unordered pair (*v1*, *v2*) and (*v2*, *v1*).
+* **directed**, with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
+* **undirected** where an edge is an unordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*) and (*v<sub>2</sub>*, *v<sub>1</sub>*).
 
 ![A simple graph](graph.jpg)
 
