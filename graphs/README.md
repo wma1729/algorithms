@@ -306,3 +306,66 @@ void visitor(T v)
 			breadth_first_traversal(visited, visitor);
 	}
 ```
+## Traversal Problem
+*Problem:* Given a graph with vertices v<sub>1</sub<, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>?
+*Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. If we encounter v<sub>target</sub>, then a path exists. If the DFS traversal completes without finding v<sub>target</sub>, then no path exists between them.
+```C++
+	// Part of graph class
+
+	/*
+	 * Determine if a path exists between two vertices.
+	 * We are essentially doing depth first search starting from source
+	 * until we find target.
+	 *
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param source  source vertex.
+	 * @param target  target vertex.
+	 * @return true if a path exists, false otherwise.
+	 */
+	bool path_exists(set<T> &visited, const vertex &source, T target)
+	{
+		if (visited.end() == visited.find(source.vrtx)) {
+			/*
+			 * Not visited yet. Mark as visited.
+			 */
+			visited.insert(source.vrtx);
+		} else {
+			return false;
+		}
+
+		/*
+		 * Short-cut: See if we have reached the target vertex.
+		 * This check could well be in the loop below as well.
+		 * See the commented code in the loop below.
+		 */
+		typename vector<T>::const_iterator it = find(source.adjacent.begin(), source.adjacent.end(), target);
+		if (it != source.adjacent.end())
+			return true;
+
+		/*
+		 * Dive deeper looking for target.
+		 */
+		for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+			/*
+			 * if (it->vrtx == target)
+			 *     return true;
+			 */
+			if (path_exists(visited, get_vertex(*it), target))
+				return true;
+		}
+
+		return false;
+	}
+
+	/*
+	 * Determine if a path exists between two vertices.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 * @return true if a path exists, false otherwise.
+	 */
+	bool path_exists(T source, T target)
+	{
+		set<T> visited;
+		return path_exists(visited, get_vertex(source), target);
+	}
+```

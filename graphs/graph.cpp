@@ -83,21 +83,45 @@ class graph
 			from.adjacent.push_back(to.vrtx);
 	}
 
-	bool path_exists(set<T> &visited, const vertex &from, T to)
+	/*
+	 * Determine if a path exists between two vertices.
+	 * We are essentially doing depth first search starting from source
+	 * until we find target.
+	 *
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param source  source vertex.
+	 * @param target  target vertex.
+	 * @return true if a path exists, false otherwise.
+	 */
+	bool path_exists(set<T> &visited, const vertex &source, T target)
 	{
-		if (visited.end() == visited.find(from.vrtx)) {
-			// not visited yet; mark as visited
-			visited.insert(from.vrtx);
+		if (visited.end() == visited.find(source.vrtx)) {
+			/*
+			 * Not visited yet. Mark as visited.
+			 */
+			visited.insert(source.vrtx);
 		} else {
 			return false;
 		}
 
-		typename vector<T>::const_iterator it = find(from.adjacent.begin(), from.adjacent.end(), to);
-		if (it != from.adjacent.end())
+		/*
+		 * Short-cut: See if we have reached the target vertex.
+		 * This check could well be in the loop below as well.
+		 * See the commented code in the loop below.
+		 */
+		typename vector<T>::const_iterator it = find(source.adjacent.begin(), source.adjacent.end(), target);
+		if (it != source.adjacent.end())
 			return true;
 
-		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
-			if (path_exists(visited, get_vertex(*it), to))
+		/*
+		 * Dive deeper looking for target.
+		 */
+		for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+			/*
+			 * if (it->vrtx == target)
+			 *     return true;
+			 */
+			if (path_exists(visited, get_vertex(*it), target))
 				return true;
 		}
 
@@ -263,10 +287,16 @@ public:
 		return get_vertex(v).adjacent.size();
 	}
 
-	bool path_exists(T from, T to)
+	/*
+	 * Determine if a path exists between two vertices.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 * @return true if a path exists, false otherwise.
+	 */
+	bool path_exists(T source, T target)
 	{
 		set<T> visited;
-		return path_exists(visited, get_vertex(from), to);
+		return path_exists(visited, get_vertex(source), target);
 	}
 
 	void get_paths(T from, T to)
@@ -338,12 +368,17 @@ main()
 	cout << "breadth-first traversal" << endl;
 	g.traverse(graph<int>::traversal_order::breadth_first, visitor);
 
-#if 0
 	if (g.path_exists(1, 8))
 		cout << "path from 1 to 8 exists" << endl;
 	else
 		cout << "no path from 1 to 8" << endl;
 
+	if (g.path_exists(6, 9))
+		cout << "path from 6 to 9 exists" << endl;
+	else
+		cout << "no path from 6 to 9" << endl;
+
+#if 0
 	cout << "all paths from 4 to 8" << endl;
 	g.get_paths(4, 8);
 #endif
