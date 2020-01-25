@@ -306,7 +306,7 @@ void visitor(T v)
 			breadth_first_traversal(visited, visitor);
 	}
 ```
-## Traversal Problem
+## Traversal Problem 1
 *Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>?<br>
 *Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. If we encounter v<sub>target</sub>, then a path exists. If the DFS traversal completes without finding v<sub>target</sub>, then no path exists between them.
 ```C++
@@ -324,14 +324,13 @@ void visitor(T v)
 	 */
 	bool path_exists(set<T> &visited, const vertex &source, T target)
 	{
-		if (visited.end() == visited.find(source.vrtx)) {
-			/*
-			 * Not visited yet. Mark as visited.
-			 */
-			visited.insert(source.vrtx);
-		} else {
+		if (visited.end() != visited.find(source.vrtx))
 			return false;
-		}
+
+		/*
+		 * Not visited yet. Mark as visited.
+		 */
+		visited.insert(source.vrtx);
 
 		/*
 		 * Short-cut: See if we have reached the target vertex.
@@ -369,3 +368,65 @@ void visitor(T v)
 		return path_exists(visited, get_vertex(source), target);
 	}
 ```
+## Traversal Problem 2
+*Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, find all paths between vertex v<sub>source</sub> and v<sub>target</sub>?<br>
+*Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. Keep recording the paths until we reach the vertex v<sub>target</sub>. We must also mark the vertex as visited as we proceed. This is to avoid cycles, especially for undirected graphs. This is yet another example of **backtracking** problem.
+```C++
+	// Part of graph class
+
+	/*
+	 * Get all paths between two vertices.
+	 * @param paths  maintains paths already visited.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 */
+	void get_paths(vector<T> &paths, set<T> &visited, const vertex &from, T to)
+	{
+		/*
+		 * Mark the path as visited.
+		 * Add the vertex to the set of path list.
+		 */
+		visited.insert(from.vrtx);
+		paths.push_back(from.vrtx);
+
+		typename vector<T>::const_iterator it = find(from.adjacent.begin(), from.adjacent.end(), to);
+		if (it != from.adjacent.end()) {
+			/*
+			 * We have reached the target vertex, print the paths.
+			 */
+			cout << "path: ";
+			for (auto v : paths)
+				cout << v << " ";
+			cout << to << endl;
+		} else {
+			/*
+			 * Dive deeper.
+			 */
+			for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
+				if (visited.end() == visited.find(*it)) {
+					get_paths(paths, visited, get_vertex(*it), to);
+				}
+			}
+		}
+
+		/*
+		 * Remove the vertex from path list.
+		 * Unmark the path as visited.
+		 */
+		paths.pop_back();
+		visited.erase(from.vrtx);
+	}
+
+	/*
+	 * Get all paths between two vertices.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 */
+	void get_paths(T source, T target)
+	{
+		vector<T> paths;
+		set<T> visited;
+		get_paths(paths, visited, get_vertex(source), target);
+	}
+``` 

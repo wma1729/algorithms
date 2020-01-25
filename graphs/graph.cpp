@@ -95,14 +95,13 @@ class graph
 	 */
 	bool path_exists(set<T> &visited, const vertex &source, T target)
 	{
-		if (visited.end() == visited.find(source.vrtx)) {
-			/*
-			 * Not visited yet. Mark as visited.
-			 */
-			visited.insert(source.vrtx);
-		} else {
+		if (visited.end() != visited.find(source.vrtx))
 			return false;
-		}
+
+		/*
+		 * Not visited yet. Mark as visited.
+		 */
+		visited.insert(source.vrtx);
 
 		/*
 		 * Short-cut: See if we have reached the target vertex.
@@ -128,22 +127,48 @@ class graph
 		return false;
 	}
 
-	void get_paths(vector<T> paths, const vertex &from, T to)
+	/*
+	 * Get all paths between two vertices.
+	 * @param paths  maintains paths already visited.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 */
+	void get_paths(vector<T> &paths, set<T> &visited, const vertex &from, T to)
 	{
+		/*
+		 * Mark the path as visited.
+		 * Add the vertex to the set of path list.
+		 */
+		visited.insert(from.vrtx);
+		paths.push_back(from.vrtx);
+
 		typename vector<T>::const_iterator it = find(from.adjacent.begin(), from.adjacent.end(), to);
 		if (it != from.adjacent.end()) {
+			/*
+			 * We have reached the target vertex, print the paths.
+			 */
 			cout << "path: ";
 			for (auto v : paths)
 				cout << v << " ";
 			cout << to << endl;
-			return;
+		} else {
+			/*
+			 * Dive deeper.
+			 */
+			for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
+				if (visited.end() == visited.find(*it)) {
+					get_paths(paths, visited, get_vertex(*it), to);
+				}
+			}
 		}
 
-		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
-			paths.push_back(*it);
-			get_paths(paths, get_vertex(*it), to);
-			paths.pop_back();
-		}
+		/*
+		 * Remove the vertex from path list.
+		 * Unmark the path as visited.
+		 */
+		paths.pop_back();
+		visited.erase(from.vrtx);
 	}
 
 	/*
@@ -299,11 +324,16 @@ public:
 		return path_exists(visited, get_vertex(source), target);
 	}
 
-	void get_paths(T from, T to)
+	/*
+	 * Get all paths between two vertices.
+	 * @param source source vertex.
+	 * @param target target vertex.
+	 */
+	void get_paths(T source, T target)
 	{
 		vector<T> paths;
-		paths.push_back(from);
-		get_paths(paths, get_vertex(from), to);
+		set<T> visited;
+		get_paths(paths, visited, get_vertex(source), target);
 	}
 
 	/*
@@ -344,13 +374,13 @@ public:
 int
 main()
 {
-	graph<int> g(true);
+	graph<int> g(false);
 
 	g.add_edge(1, 2);
 	g.add_edge(1, 4);
 	g.add_edge(2, 3);
 	g.add_edge(4, 5);
-	g.add_edge(4, 6);
+	g.add_edge(4, 7);
 	g.add_edge(5, 6);
 	g.add_edge(5, 7);
 	g.add_edge(6, 8);
@@ -378,10 +408,8 @@ main()
 	else
 		cout << "no path from 6 to 9" << endl;
 
-#if 0
 	cout << "all paths from 4 to 8" << endl;
 	g.get_paths(4, 8);
-#endif
 
 	return 0;
 }
