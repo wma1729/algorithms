@@ -3,7 +3,7 @@
 A graph, **G = (V, E)**, is a data structure that consists of **V** vertices and **E** edges.
 An edge connects two vertices and is represented by a pair of the two vertices it connects, (*v<sub>1</sub>*, *v<sub>2</sub>*).
 A graph could be:
-* **directed**, with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
+* **directed**, also called **digraph** with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
 * **undirected** where an edge is an unordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*) and (*v<sub>2</sub>*, *v<sub>1</sub>*).
 
 ![A simple graph](graph.jpg)
@@ -202,16 +202,15 @@ void visitor(T v)
 	 */
 	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor, const vertex &from)
 	{
-		if (visited.end() == visited.find(from.vrtx)) {
-			/*
-			 * Not visited yet.
-			 * Process and mark as visited.
-			 */
-			(*visitor)(from.vrtx);
-			visited.insert(from.vrtx);
-		} else {
+		if (visited.end() != visited.find(from.vrtx))
 			return;
-		}
+
+		/*
+		 * Not visited yet.
+		 * Process and mark as visited.
+		 */
+		(*visitor)(from.vrtx);
+		visited.insert(from.vrtx);
 
 		/*
 		 * Dive deeper.
@@ -430,3 +429,103 @@ void visitor(T v)
 		get_paths(paths, visited, get_vertex(source), target);
 	}
 ``` 
+## Traversal Problem 3
+*Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, find if there is a cycle in the graph.<br>
+*Solution:* Perform DFS traversal. Along with keeping track of vertices that have already been visited, maintain a hierarchy table. The table has two columns:
+* current vertex
+* vertex from where current vertex is visited or simply the parent vertex.
+Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the **backedge** in case of **undirected** graph. We do not want to count (*v<sub>1</sub>, v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
+```C++
+	// Part of graph class.
+
+	/*
+	 * Is there a cycle in the graph?
+	 *
+	 * @param hierarchy maintains a (vertex -> parent vertex) map.
+	 * @param visited   maintains a set of vertices that are already visited.
+	 * @param v         vertex being visited.
+	 * @param parent    parent vertex. -1 if there is no parent.
+	 *
+	 * @return true if there is a cycle and false otherwise.
+	 * If there is a loop, the vertices in the loop are printed as well.
+	 */
+	bool is_cyclic(map<T, T> &hierarchy, set<T> &visited, T v, T parent)
+	{
+		if (hierarchy.end() == hierarchy.find(v)) {
+			/*
+			 * Not in hierarchy at all; add the relationship.
+			 */
+			hierarchy[v] = parent;
+		} else {
+			/*
+			 * Already in hierarchy. Check if it is a back-edge.
+			 * Hierarchy table for graph 1 <--> 2
+			 * vertex | parent
+			 *   1    |  -1
+			 *   2    |   1
+			 * This function is called with v = 1, parent = 2.
+			 */
+			typename map<T, T>::const_iterator it = hierarchy.find(parent);
+			if (it != hierarchy.end()) {
+				if (it->second == v) {
+					/*
+					 * It is a back-edge. Ignore it.
+					 */
+					return false;
+				} else {
+					/*
+					 * Print the cycle and return true.
+					 */
+					cout << v << " " << parent << " ";
+					while (it != hierarchy.end()) {
+						cout << it->second << " ";
+						it = hierarchy.find(it->second);
+						if (it->first == v)
+							break;
+					}
+					cout << endl;
+					return true;
+				}
+			}
+		}
+
+		if (visited.end() == visited.find(v)) {
+			/*
+			 * Not visited yet; mark as visited.
+			 */
+			visited.insert(v);
+
+			/*
+			 * Dive deeper.
+			 */
+			const vertex &V = get_vertex(v);
+			typename vector<T>::const_iterator it;
+			for (it = V.adjacent.begin(); it != V.adjacent.end(); ++it) {
+				if (is_cyclic(hierarchy, visited, *it, v))
+					return true;
+			}
+		}
+
+		/* Backtrack */
+		hierarchy.erase(v);
+		return false;
+	}
+
+	/*
+	 * Is there a cycle in the graph?
+	 * @param parent parent vertex if the first vertex usually -1 for T = int.
+	 */
+	bool is_cyclic(T parent)
+	{
+		map<T, T> hierarchy;
+		set<T> visited;
+
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it) {
+			if (is_cyclic(hierarchy, visited, it->vrtx, parent))
+				return true;
+		}
+
+		return false;
+	}
+```

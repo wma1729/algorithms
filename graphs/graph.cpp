@@ -1,8 +1,12 @@
 #include <iostream>
 #include <ostream>
 #include <sstream>
+#include <fstream>
+#include <cstring>
+#include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <queue>
 #include <algorithm>
 
@@ -164,6 +168,7 @@ class graph
 		}
 
 		/*
+		 * Backtrack.
 		 * Remove the vertex from path list.
 		 * Unmark the path as visited.
 		 */
@@ -179,16 +184,15 @@ class graph
 	 */
 	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor, const vertex &from)
 	{
-		if (visited.end() == visited.find(from.vrtx)) {
-			/*
-			 * Not visited yet.
-			 * Process and mark as visited.
-			 */
-			(*visitor)(from.vrtx);
-			visited.insert(from.vrtx);
-		} else {
+		if (visited.end() != visited.find(from.vrtx))
 			return;
-		}
+
+		/*
+		 * Not visited yet.
+		 * Process and mark as visited.
+		 */
+		(*visitor)(from.vrtx);
+		visited.insert(from.vrtx);
 
 		/*
 		 * Dive deeper.
@@ -264,6 +268,113 @@ class graph
 			breadth_first_traversal(visited, visitor, it->vrtx);
 	}
 
+	/*
+	 * Serialize the graph using BFS.
+	 */
+	void serialize(ostream &os, set<T> &visited, T from)
+	{
+		queue<T> q;
+
+		q.push(from);
+
+		while (!q.empty()) {
+			from = q.front();
+			q.pop();
+
+			if (visited.end() == visited.find(from)) {
+				/*
+				 * Not visited yet.
+				 * Process and mark as visited.
+				 */
+				visited.insert(from);
+
+				vertex &v = get_vertex(from);
+
+				/*
+				 * Now add all the adjacent ones to the queue.
+				 */
+				typename vector<T>::const_iterator it;
+				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it) {
+					os << from << " " << *it << endl;
+					q.push(*it);
+				}
+			}
+		}
+	}
+
+	/*
+	 * Is there a cycle in the graph?
+	 *
+	 * @param hierarchy maintains a (vertex -> parent vertex) map.
+	 * @param visited   maintains a set of vertices that are already visited.
+	 * @param v         vertex being visited.
+	 * @param parent    parent vertex. -1 if there is no parent.
+	 *
+	 * @return true if there is a cycle and false otherwise.
+	 * If there is a loop, the vertices in the loop are printed as well.
+	 */
+	bool is_cyclic(map<T, T> &hierarchy, set<T> &visited, T v, T parent)
+	{
+		if (hierarchy.end() == hierarchy.find(v)) {
+			/*
+			 * Not in hierarchy at all; add the relationship.
+			 */
+			hierarchy[v] = parent;
+		} else {
+			/*
+			 * Already in hierarchy. Check if it is a back-edge.
+			 * Hierarchy table for graph 1 <--> 2
+			 * vertex | parent
+			 *   1    |  -1
+			 *   2    |   1
+			 * This function is called with v = 1, parent = 2.
+			 */
+			typename map<T, T>::const_iterator it = hierarchy.find(parent);
+			if (it != hierarchy.end()) {
+				if (it->second == v) {
+					/*
+					 * It is a back-edge. Ignore it.
+					 */
+					return false;
+				} else {
+					/*
+					 * Print the cycle and return true.
+					 */
+					cout << v << " " << parent << " ";
+					while (it != hierarchy.end()) {
+						cout << it->second << " ";
+						it = hierarchy.find(it->second);
+						if (it->first == v)
+							break;
+					}
+					cout << endl;
+					return true;
+				}
+			}
+		}
+
+		if (visited.end() == visited.find(v)) {
+			/*
+			 * Not visited yet; mark as visited.
+			 */
+			visited.insert(v);
+
+			/*
+			 * Dive deeper.
+			 */
+			const vertex &V = get_vertex(v);
+			typename vector<T>::const_iterator it;
+			for (it = V.adjacent.begin(); it != V.adjacent.end(); ++it) {
+				if (is_cyclic(hierarchy, visited, *it, v))
+					return true;
+			}
+		}
+
+		/* Backtrack */
+		hierarchy.erase(v);
+		return false;
+	}
+
 public:
 	enum class traversal_order
 	{
@@ -272,6 +383,20 @@ public:
 	};
 
 	graph(bool dir = true) : directed(dir), count(0) {}
+
+	graph(istream &is)
+	{
+		int dir;
+		int v1, v2;
+
+		is >> dir;
+		directed = (dir == 1);
+
+		while (is) {
+			is >> v1 >> v2;
+			add_edge(v1, v2);
+		}
+	}
 
 	/*
 	 * Add a vertex, v.
@@ -350,6 +475,48 @@ public:
 	}
 
 	/*
+	 * Is there a cycle in the graph?
+	 * @param parent parent vertex if the first vertex usually -1 for T = int.
+	 */
+	bool is_cyclic(T parent)
+	{
+		map<T, T> hierarchy;
+		set<T> visited;
+
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it) {
+			if (is_cyclic(hierarchy, visited, it->vrtx, parent))
+				return true;
+		}
+
+		return false;
+	}
+
+	/*
+	 * Is the graph a directed acyclic graph?
+	 */
+	bool is_dag(T parent)
+	{
+		if (!directed)
+			return false;
+		return !is_cyclic(parent);
+	}
+
+	/*
+	 * Serialize a graph.
+	 */
+	void serialize(ostream &os)
+	{
+		set<T> visited;
+
+		cout << (directed ? "1" : "0") << endl;
+		
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it)
+			serialize(os, visited, it->vrtx);
+	}
+
+	/*
 	 * Prints the graph on the screen.
 	 */
 	void dump()
@@ -370,46 +537,140 @@ public:
 	}
 };
 
+static int
+usage(const char *progname)
+{
+	cerr << progname << " -in <file> " << endl
+		<< "    [-dump]                                 Dump the graph read from file." << endl
+		<< "    [-degree -v <vertex>]                   Degree of the vertex." << endl
+		<< "    [-path_exists -v <vertex1, vertex2>]    Path exists between vertex1 and vertex2." << endl
+		<< "    [-get_paths -v <vertex1, vertex2>]      Path between vertex1 and vertex2." << endl
+		<< "    [-serialize]                            Serialize the graph." << endl
+		<< "    [-dfs]                                  Depth first search traversal." << endl
+		<< "    [-bfs]                                  Breadth first search traversal." << endl
+		<< "    [-is_cyclic]                            Is there a cycle in the graph?" << endl
+		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl;
+	return 1;
+}
+
+enum operation
+{
+	NONE,
+	DUMP,
+	DEGREE,
+	PATH_EXISTS,
+	GET_PATHS,
+	SERIALIZE,
+	DFS,
+	BFS,
+	IS_CYCLIC,
+	IS_DAG
+};
+
 // Driver code
 int
-main()
+main(int argc, const char **argv)
 {
-	graph<int> g(false);
+	string file;
+	operation op = NONE;
+	int v1 = -1, v2 = -1;
 
-	g.add_edge(1, 2);
-	g.add_edge(1, 4);
-	g.add_edge(2, 3);
-	g.add_edge(4, 5);
-	g.add_edge(4, 7);
-	g.add_edge(5, 6);
-	g.add_edge(5, 7);
-	g.add_edge(6, 8);
-	g.add_edge(7, 8);
-	g.add_edge(9, 10);
-	g.add_edge(9, 11);
+	for (int i = 1; i < argc; ++i) {
+		if (strcmp(argv[i], "-in") == 0) {
+			++i;
+			if (argv[i]) {
+				file = argv[i];
+			} else {
+				cerr << "missing argument for " << argv[i] << endl;
+				return 1;
+			}
+		} else if (strcmp(argv[i], "-v") == 0) {
+			++i;
+			if (argv[i]) {
+				stringstream ss(argv[i]);
+				while (ss.good()) {
+					string strvrtx;
+					getline(ss, strvrtx, ',');
+					if (v1 == -1)
+						v1 = atoi(strvrtx.c_str());
+					else
+						v2 = atoi(strvrtx.c_str());	
+				}
+			} else {
+				cerr << "missing argument for " << argv[i] << endl;
+				return 1;
+			}
+		} else if (strcmp(argv[i], "-dump") == 0) {
+			op = DUMP;
+		} else if (strcmp(argv[i], "-degree") == 0) {
+			op = DEGREE;
+		} else if (strcmp(argv[i], "-path_exists") == 0) {
+			op = PATH_EXISTS;
+		} else if (strcmp(argv[i], "-get_paths") == 0) {
+			op = GET_PATHS;
+		} else if (strcmp(argv[i], "-serialize") == 0) {
+			op = SERIALIZE;
+		} else if (strcmp(argv[i], "-dfs") == 0) {
+			op = DFS;
+		} else if (strcmp(argv[i], "-bfs") == 0) {
+			op = BFS;
+		} else if (strcmp(argv[i], "-is_cyclic") == 0) {
+			op = IS_CYCLIC;
+		} else if (strcmp(argv[i], "-is_dag") == 0) {
+			op = IS_DAG;
+		} else {
+			return usage(argv[0]);
+		}
+	}
 
-	g.dump();
+	if (file.empty()) {
+		cerr << "graph file is not specified using -in." << endl;
+		return usage(argv[0]);
+	}
 
-	cout << "degree of " << 4 << " is " << g.degree(4) << endl;
+	fstream fin(file, ios_base::in);
+	graph<int> g(fin);
 
-	cout << "depth-first traversal" << endl;
-	g.traverse(graph<int>::traversal_order::depth_first, visitor);
+	switch (op) {
+		case DUMP:
+			g.dump();
+			break;
 
-	cout << "breadth-first traversal" << endl;
-	g.traverse(graph<int>::traversal_order::breadth_first, visitor);
+		case DEGREE:
+			cout << g.degree(v1) << endl;
+			break;
 
-	if (g.path_exists(1, 8))
-		cout << "path from 1 to 8 exists" << endl;
-	else
-		cout << "no path from 1 to 8" << endl;
+		case PATH_EXISTS:
+			cout << boolalpha << g.path_exists(v1, v2) << endl;
+			break;
 
-	if (g.path_exists(6, 9))
-		cout << "path from 6 to 9 exists" << endl;
-	else
-		cout << "no path from 6 to 9" << endl;
+		case GET_PATHS:
+			g.get_paths(v1, v2);
+			break;
 
-	cout << "all paths from 4 to 8" << endl;
-	g.get_paths(4, 8);
+		case SERIALIZE:
+			g.serialize(cout);
+			break;
+
+		case DFS:
+			g.traverse(graph<int>::traversal_order::depth_first, visitor);
+			break;
+
+		case BFS:
+			g.traverse(graph<int>::traversal_order::breadth_first, visitor);
+			break;
+
+		case IS_CYCLIC:
+			cout << boolalpha << g.is_cyclic(-1) << endl;
+			break;
+
+		case IS_DAG:
+			cout << boolalpha << g.is_dag(-1) << endl;
+			break;
+			
+		default:
+			break;
+	}
 
 	return 0;
 }
