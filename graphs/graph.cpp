@@ -494,6 +494,7 @@ public:
 
 	/*
 	 * Is the graph a directed acyclic graph?
+	 * @param parent parent vertex if the first vertex usually -1 for T = int.
 	 */
 	bool is_dag(T parent)
 	{

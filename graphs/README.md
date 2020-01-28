@@ -534,4 +534,40 @@ Before inserting the relationship, check if the vertex already exists in the hie
 ## Directed Acyclic Graph (DAG)
 DAG is a directed graph with no cycles in it.
 ```C++
+	// Part of graph class
+
+	/*
+	 * Is the graph a directed acyclic graph?
+	 * @param parent parent vertex if the first vertex usually -1 for T = int.
+	 */
+	bool is_dag(T parent)
+	{
+		if (!directed)
+			return false;
+		return !is_cyclic(parent);
+	}
 ```
+
+## Topological Sorting
+Suppose we have *n* jobs at hand with the following constraints:
+* There are only finite number of jobs (which means there is a sink or, in other words, there is at least one job with no dependent job).
+* Only one job can be performed at a time.
+* Certain jobs depend on other jobs. They can only be started when the dependent tasks are done.
+The algorith to generate a schedule is called **topological sorting**. Some examples of use in real life are:
+* Designing the assembly line for a component in a manufacturing division.
+* Generating the classroom schedule.
+The problem can be formulated as a **DAG** where each job represents a vertex and the job dependencies are represented by edges. Let's take an example. There are 6 courses (*A, B, C, D, E, F*) to be taken to get a certain certification. However for many courses there is one or more dependent courses (that must be completed before taking them).
+Course | Dependent Course
+-------|-----------------
+A      | -
+B      | A
+C      | B
+D      | A, C
+E      | C, D
+F      | E
+
+This can be represented as the following DAG with A as the source (no dependency) and E as the sink (no outedge).
+![Topological Sorting](topological-sorting.jpeg)
+
+Alternative this could also be represented in a straight-line as following:
+![Toplogical Sorting Straight Line](topological-sorting-reordered.jpeg)
