@@ -3,7 +3,7 @@
 A graph, **G = (V, E)**, is a data structure that consists of **V** vertices and **E** edges.
 An edge connects two vertices and is represented by a pair of the two vertices it connects, (*v<sub>1</sub>*, *v<sub>2</sub>*).
 A graph could be:
-* **directed**, also called **digraph** with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
+* **directed**, also called **digraph**, with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
 * **undirected** where an edge is an unordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*) and (*v<sub>2</sub>*, *v<sub>1</sub>*).
 
 ![A simple graph](graph.jpg)
@@ -38,7 +38,7 @@ A graph could be:
 10 -> 9
 11 -> 9
 ```
-Adjancency list is the most common representation used for graph. Here is an example:
+Adjancency list is the most common representation used for graph. Here is a possible C++ implementation:
 ```C++
 /*
  * Graph implementation.
@@ -529,4 +529,9 @@ Before inserting the relationship, check if the vertex already exists in the hie
 
 		return false;
 	}
+```
+
+## Directed Acyclic Graph (DAG)
+DAG is a directed graph with no cycles in it.
+```C++
 ```
