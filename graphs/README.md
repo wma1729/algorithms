@@ -553,10 +553,13 @@ Suppose we have *n* jobs at hand with the following constraints:
 * There are only finite number of jobs (which means there is a sink or, in other words, there is at least one job with no dependent job).
 * Only one job can be performed at a time.
 * Certain jobs depend on other jobs. They can only be started when the dependent tasks are done.
+
 The algorith to generate a schedule is called **topological sorting**. Some examples of use in real life are:
 * Designing the assembly line for a component in a manufacturing division.
 * Generating the classroom schedule.
+
 The problem can be formulated as a **DAG** where each job represents a vertex and the job dependencies are represented by edges. Let's take an example. There are 6 courses (*A, B, C, D, E, F*) to be taken to get a certain certification. However for many courses there is one or more dependent courses (that must be completed before taking them).
+
 Course | Dependent Course
 -------|-----------------
 A      | -
