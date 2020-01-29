@@ -8,6 +8,7 @@
 #include <set>
 #include <map>
 #include <queue>
+#include <stack>
 #include <algorithm>
 
 using namespace std;
@@ -375,6 +376,36 @@ class graph
 		return false;
 	}
 
+	/*
+	 * Perform topological sorting.
+	 *
+	 * @param stk toplogical sorted vertex on return.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param from    starting vertex.
+	 */
+	void topological_sort(stack<T> &stk, set<T> &visited, const vertex &from)
+	{
+		if (visited.end() != visited.find(from.vrtx))
+			return;
+
+		/*
+		 * Not visited yet; mark as visited.
+		 */
+		visited.insert(from.vrtx);
+
+		/*
+		 * Dive deeper.
+		 */
+		typename vector<T>::const_iterator it;
+		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
+			topological_sort(stk, visited, get_vertex(*it));
+
+		/*
+		 * Add the vertex to the stack.
+		 */
+		stk.push(from.vrtx);
+	}
+
 public:
 	enum class traversal_order
 	{
@@ -504,6 +535,20 @@ public:
 	}
 
 	/*
+	 * Perform topological sorting.
+	 * @param stk toplogical sorted vertex on return.
+	 */
+	void topological_sort(stack<T> &stk)
+	{
+		set<T> visited;
+
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it) {
+			topological_sort(stk, visited, *it);
+		}
+	}
+
+	/*
 	 * Serialize a graph.
 	 */
 	void serialize(ostream &os)
@@ -550,7 +595,8 @@ usage(const char *progname)
 		<< "    [-dfs]                                  Depth first search traversal." << endl
 		<< "    [-bfs]                                  Breadth first search traversal." << endl
 		<< "    [-is_cyclic]                            Is there a cycle in the graph?" << endl
-		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl;
+		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl
+		<< "    [-sort  ]                               Topological sorting." << endl;
 	return 1;
 }
 
@@ -565,7 +611,8 @@ enum operation
 	DFS,
 	BFS,
 	IS_CYCLIC,
-	IS_DAG
+	IS_DAG,
+	TOPOLOGICAL_SORT
 };
 
 // Driver code
@@ -619,6 +666,8 @@ main(int argc, const char **argv)
 			op = IS_CYCLIC;
 		} else if (strcmp(argv[i], "-is_dag") == 0) {
 			op = IS_DAG;
+		} else if (strcmp(argv[i], "-sort") == 0) {
+			op = TOPOLOGICAL_SORT;
 		} else {
 			return usage(argv[0]);
 		}
@@ -631,6 +680,7 @@ main(int argc, const char **argv)
 
 	fstream fin(file, ios_base::in);
 	graph<int> g(fin);
+	stack<int> stk;
 
 	switch (op) {
 		case DUMP:
@@ -668,7 +718,16 @@ main(int argc, const char **argv)
 		case IS_DAG:
 			cout << boolalpha << g.is_dag(-1) << endl;
 			break;
-			
+
+		case TOPOLOGICAL_SORT:
+			g.topological_sort(stk);
+			while (!stk.empty()) {
+				cout << stk.top() << " ";
+				stk.pop();
+			}
+			cout << endl;
+			break;
+
 		default:
 			break;
 	}

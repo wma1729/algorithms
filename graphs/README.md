@@ -584,10 +584,55 @@ As can been seen, A has indegree of 0. It is not dependent on any course. A is o
 * We are left with just F which too has indegree of 0. Remove F. Add F to the queue. Q = A B C D E F.
 
 The algorithm involves:
-* calculating the indegree of all the vertices. This can be done with **DFS**.
+* Calculating the indegree of all the vertices. This can be done with **DFS**.
 * Removing vertex with indegree of 0. This also mean updating the indegree of vertices adjacent to the removed vertex.
+* Putting the removed vertex in a queue.
 
 There is an alternate approach to get the same result. Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. When you pop the vertices from the stack, you get the correct order.
 ```C++
 	// Part of graph class.
+
+	/*
+	 * Perform topological sorting.
+	 *
+	 * @param stk toplogical sorted vertex on return.
+	 * @param visited maintains a set of vertices that are already visited.
+	 * @param from    starting vertex.
+	 */
+	void topological_sort(stack<T> &stk, set<T> &visited, const vertex &from)
+	{
+		if (visited.end() != visited.find(from.vrtx))
+			return;
+
+		/*
+		 * Not visited yet; mark as visited.
+		 */
+		visited.insert(from.vrtx);
+
+		/*
+		 * Dive deeper.
+		 */
+		typename vector<T>::const_iterator it;
+		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
+			topological_sort(stk, visited, get_vertex(*it));
+
+		/*
+		 * Add the vertex to the stack.
+		 */
+		stk.push(from.vrtx);
+	}
+
+	/*
+	 * Perform topological sorting.
+	 * @param stk toplogical sorted vertex on return.
+	 */
+	void topological_sort(stack<T> &stk)
+	{
+		set<T> visited;
+
+		typename vector<vertex>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it) {
+			topological_sort(stk, visited, *it);
+		}
+	}
 ```
