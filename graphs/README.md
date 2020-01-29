@@ -558,7 +558,7 @@ The algorith to generate a schedule is called **topological sorting**. Some exam
 * Designing the assembly line for a component in a manufacturing division.
 * Generating the classroom schedule.
 
-The problem can be formulated as a **DAG** where each job represents a vertex and the job dependencies are represented by edges. Let's take an example. There are 6 courses (*A, B, C, D, E, F*) to be taken to get a certain certification. However for many courses there is one or more dependent courses (that must be completed before taking them).
+The problem can be formulated as a **DAG** where each job represents a vertex and the job dependencies are represented by edges. Let's take an example. There are 6 courses (*A, B, C, D, E, F*) to be taken to get a certain certification. However for many courses there is one or more dependent courses (the dependent courses must be completed before taking a course).
 
 Course | Dependent Course
 -------|-----------------
@@ -574,3 +574,20 @@ This can be represented as the following DAG with A as the source (no dependency
 
 Alternative this could also be represented in a straight-line as following:
 ![Toplogical Sorting Straight Line](topological-sorting-reordered.jpeg)
+
+As can been seen, A has indegree of 0. It is not dependent on any course. A is our **source**. F has outdegree of 0. It is our **sink**. The algorithm for topological sorting involves finding the vertex with indegree of 0 and removing the vertex and the outgoing edges. Put this in a queue. Repeat the process until we are left with no more vertices. Let's see how this applies to our case.
+* A has indegree of 0. Remove A. Add A to a queue. Q = A.
+* Now B has indegree of 0. Remove B. Add B to the queue. Q = A B.
+* C now has indegree of 0. Remove C. Add C to the queue. Q = A B C.
+* D now has indegree of 0. Remove D. Add D to the queue. Q = A B C D.
+* E now has indegree of 0. Remove E. Add E to the queue. Q = A B C D E.
+* We are left with just F which too has indegree of 0. Remove F. Add F to the queue. Q = A B C D E F.
+
+The algorithm involves:
+* calculating the indegree of all the vertices. This can be done with **DFS**.
+* Removing vertex with indegree of 0. This also mean updating the indegree of vertices adjacent to the removed vertex.
+
+There is an alternate approach to get the same result. Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. When you pop the vertices from the stack, you get the correct order.
+```C++
+	// Part of graph class.
+```
