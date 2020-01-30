@@ -435,7 +435,7 @@ void visitor(T v)
 * current vertex
 * vertex from where the current vertex is visited or simply the parent vertex.
 
-Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the **backedge** in case of **undirected** graph. We do not want to count (*v<sub>1</sub> -> v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
+Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the edge going back to the parent. We do not want to count (*v<sub>1</sub> -> v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
 ```C++
 	// Part of graph class.
 
@@ -459,7 +459,10 @@ Before inserting the relationship, check if the vertex already exists in the hie
 			hierarchy[v] = parent;
 		} else {
 			/*
-			 * Already in hierarchy. Check if it is a back-edge.
+			 * Already in hierarchy. Check if it is an edge
+			 * going back to the parent (forming a small loop
+			 * involving just two nodes).
+			 *
 			 * Hierarchy table for graph 1 <--> 2
 			 * vertex | parent
 			 *   1    |  -1

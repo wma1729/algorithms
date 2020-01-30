@@ -323,7 +323,10 @@ class graph
 			hierarchy[v] = parent;
 		} else {
 			/*
-			 * Already in hierarchy. Check if it is a back-edge.
+			 * Already in hierarchy. Check if it is an edge
+			 * going back to the parent (forming a small loop
+			 * involving just two nodes).
+			 *
 			 * Hierarchy table for graph 1 <--> 2
 			 * vertex | parent
 			 *   1    |  -1
