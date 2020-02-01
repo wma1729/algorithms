@@ -639,3 +639,30 @@ There is an alternate approach to get the same result. Perform **DFS**. When you
 		}
 	}
 ```
+
+## Connected components
+### Undirected graph
+![Connected components in undirected graph](undirected.jpeg)
+The above graph has 3 **connected components (CC)**. Usually a graph is pre-processed to find the connected components. A *component ID* is assigned to each vertex. Thereafter, we can easily answer the following questions:
+* How many connected components are in the graph?
+* Is vertex, *v* connected to vertex, *w*? We can answer this in constant time by checking if both *v* and *w* have the same *component ID*.
+
+#### How to assign component IDs to the vertices of an undirected graph?
+* Initialize component ID to 0.
+* Pick an unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 0.
+* Increment component ID.
+* Pick the next unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 1.
+* Continue until all the vertices are marked.
+
+### Directed graph
+![Connected components in directed graph](directed.jpeg)
+Two vertices, *v* and *w* are called **strongly connected** if there is a path from *v* to *w* and from *w* back to *v*. This implies a loop and *v* and *w* are two vertices of that loop. A directed graph could be divided in multiple such **strongly connected components (SCC)**. If each strong connected component is considered as a single entity (**metagraph**), we end up with a **DAG**. Like connected components of an undirected graph, the graph is usually preprocessed and the above questions (number of strongly connected components and if two vertices are strongly connected) can be similarly answered.
+
+#### How to assign strong component IDs to the vertices of an directed graph?
+* Reverse the graph. The reversed graph has the same strong components.
+* Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. Basically we are doing topological sort.
+* Initialize component ID to 0.
+* Pop a vertex from the stack. Perform DFS marking the vertex as visited and setting the component ID to 0.
+* Increment component ID.
+* Pop the next vertex. If unmarked, perform DFS marking the vertex as visited and setting the component ID to 1.
+* Continue until all the vertices are popped.
