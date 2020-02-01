@@ -6,7 +6,7 @@ A graph could be:
 * **directed**, also called **digraph**, with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
 * **undirected** where an edge is an unordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*) and (*v<sub>2</sub>*, *v<sub>1</sub>*).
 
-![A simple graph](graph.jpg)
+![A simple graph](graph.jpeg)
 
 ## Graph representation
 * Adjacency matrix *undirected*
