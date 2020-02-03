@@ -41,48 +41,36 @@ A graph could be:
 Adjancency list is the most common representation used for graph. Here is a possible C++ implementation:
 ```C++
 /*
+ * Vertex of a graph.
+ */
+template<typename T>
+struct vertex
+{
+	T           vrtx;       // the vertex itself
+	vector<T>   adjacent;   // adjacent vertices
+
+	explicit vertex(T v) : vrtx(v) {}
+	bool operator==(T v) const { return (this->vrtx == v); }
+};
+
+/*
  * Graph implementation.
  */
 template<typename T>
 class graph
 {
 private:
-	struct vertex
-	{
-		T           vrtx;       // vertex
-		vector<T>   adjacent;   // adjacent vertices
-
-		explicit vertex(T v) : vrtx(v) {}
-		bool operator==(T v) const { return (this->vrtx == v); }
-	};
-
-	bool            directed;       // directed or undirected?
-	size_t          count;          // number of vertices
-	vector<vertex>  vertices;       // vertices in the graph
-
-	/*
-	 * Get a vertex, v. The const version.
-	 * Throws out_of_range exception if the vertex is not found.
-	 */
-	const vertex & get_vertex(T v) const
-	{
-		typename vector<vertex>::const_iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			ostringstream oss;
-			oss << "vertex " << v << " not found";
-			throw out_of_range(oss.str());
-		} else {
-			return *it;
-		}
-	}
+	bool                directed;       // directed or undirected?
+	size_t              count;          // number of vertices
+	vector<vertex<T>>   vertices;       // vertices in the graph
 
 	/*
 	 * Get a vertex, v.
 	 * Throws out_of_range exception if the vertex is not found.
 	 */
-	vertex & get_vertex(T v)
+	vertex<T> & get_vertex(const T &v)
 	{
-		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
+		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
 		if (it == vertices.end()) {
 			ostringstream oss;
 			oss << "vertex " << v << " not found";
@@ -95,7 +83,7 @@ private:
 	/*
 	 * Add an edge (from, to).
 	 */
-	void add_edge(vertex &from, const vertex &to)
+	void add_edge(vertex<T> &from, const vertex<T> &to)
 	{
 		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
 			from.adjacent.push_back(to.vrtx);
@@ -107,9 +95,9 @@ public:
 	/*
 	 * Add a vertex, v.
 	 */
-	void add_vertex(T v)
+	void add_vertex(const T &v)
 	{
-		typename vector<vertex>::iterator it = find(vertices.begin(), vertices.end(), v);
+		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
 		if (it == vertices.end()) {
 			vertices.emplace_back(v);
 			++count;
@@ -117,43 +105,41 @@ public:
 	}
 
 	/*
-	 * Add an edge, (from, to). If the graph is undirected, edge (to, from)
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	const vertex<T> & get_vertex(const T &v) const
+	{
+		typename vector<vertex<T>>::const_iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
+
+	/*
+	 * Add an edge (from, to). If the graph is undirected, edge (to, from)
 	 * is added as well.
 	 */
-	void add_edge(T from, T to)
+	void add_edge(const T &from, const T &to)
 	{
 		add_vertex(from);
 		add_vertex(to);
 
-		vertex &v1 = get_vertex(from);
-		vertex &v2 = get_vertex(to);
+		vertex<T> &v1 = get_vertex(from);
+		vertex<T> &v2 = get_vertex(to);
 
 		add_edge(v1, v2);
 		if (!directed)
 			add_edge(v2, v1);
 	}
 
+	bool is_directed() const { return directed; }
 	size_t num_vertices() const { return count; }
-
-	/*
-	 * Prints the graph on the screen.
-	 */
-	void dump()
-	{
-		cout << "Number of vertices: " << count << endl;
-
-		for (auto v : vertices) {
-			cout << v.vrtx;
-
-			if (!v.adjacent.empty())
-				cout << " -> ";
-
-			for (auto adj : v.adjacent) 
-				cout << adj << " ";
-
-			cout << endl;
-		}
-	}
+	const vector<vertex<T>> &get_vertices() const { return vertices; }
 };
 ```
 
@@ -175,259 +161,280 @@ The number of edges coming out of a vertex is the degree of that edge.
 There are two main graph traversal methods based on the order in which the vertices are visited:
 * **Depth First Search (DFS)** A very popular approach suitable to recursion. An arbitrary vertex is chosen. The action needed on the vertex is performed and the vertex is marked as *visited*. Then an adjacent, unvisited, vertex is picked up arbitrarily. The action needed is performed and that vertex is marked as *visited* as well. The process continues, as we go deeper into the graph, until all the connected vertices are processed and marked as *visited*. The data structure used to save the *unexplored* vertices is stack and that makes it apt for recursion.
 * **Breadth First Search (BFS)** An organized approach were vertices are visited level by level. An arbitrary vertex is chosen. The action needed on the vertex is performed and the vertex is marked as *visited*. Next all adjacent, unvisited, vertices are processed and marked as *visited*. The process continues until all the vertices at all levels are processed and marked as *visited*. The data structure used to save the *unexplored* vertices is queue. BFS gives the **shortest path** between any two vertices of the graph.
+
+We need a data structure to do processing at the vertex and mark the vertex as visited. Here is one possibility:
 ```C++
 /*
- * Sample visitor function type.
+ * The default vertex visitor. It provides two functionalities:
+ * 1) Perform needed pre/post processing while traversing the graph.
+ * 2) Maintains a set of vertices already visited.
+ *
+ * It is implemented as a C++ class.
+ * Default pre processing: prints the vertex.
+ * Default post processing: no-op.
+ * This can be overridden in the sub-class to do something
+ * more meaningful.
  */
 template<typename T>
-using visitor_t = void(*)(T);
-
-/*
- * Sample visitor function definition.
- * The visitor simply prints the vertex.
- */
-template<typename T>
-void visitor(T v)
+class visitor
 {
-	cout << v << endl;
+private:
+	set<T> visited;
+
+public:
+	virtual ~visitor() {}
+
+	/* Override as needed */
+	virtual void pre(const vertex<T> &v)
+	{
+		cout << v.vrtx << endl;
+	}
+
+	/* Override as needed */
+	virtual void post(const vertex<T> &)
+	{
+		return;
+	}
+
+	bool is_visited(const T &v)
+	{
+		return (visited.end() != visited.find(v));
+	}
+
+	bool is_visited(const vertex<T> &v)
+	{
+		return is_visited(v.vrtx);
+	}
+
+	void set_visited(const T &v, bool val)
+	{
+		if (val)
+			visited.insert(v);
+		else
+			visited.erase(v);
+	}
+
+	void set_visited(const vertex<T> &v, bool val)
+	{
+		set_visited(v.vrtx, val);
+	}
+};
+```
+With the graph and visitor in place, a number of algorithms could be fairly easily developed.
+```C++
+/*
+ * Depth first traversal starting from vertex, from.
+ * @param [in]  g       the graph.
+ * @param [in]  visitor the visitor class.
+ * @param [in]  from    the starting vertex.
+ */
+template<typename T>
+static void
+dfs(const graph<T> &g, visitor<T> &visitor, const vertex<T> &from)
+{
+	if (visitor.is_visited(from)) 
+		return;
+
+	// Process and mark as visited
+	visitor.pre(from);
+	visitor.set_visited(from, true);
+
+	typename vector<T>::const_iterator it;
+	for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
+		dfs(g, visitor, g.get_vertex(*it));
+
+	// Perform post processing
+	visitor.post(from);
 }
 
-	// Part of graph class
+/*
+ * Depth first traversal for the whole graph.
+ * @param [in]  g       the graph.
+ * @param [in]  visitor the visitor class.
+ */
+template<typename T>
+void
+dfs(const graph<T> &g, visitor<T> &visitor)
+{
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
+		dfs(g, visitor, *it);
+}
 
-	/*
-	 * Depth first traversal starting from vertex *from*.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param visitor performs processing at the each vertex.
-	 * @param from    starting vertex.
-	 */
-	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor, const vertex &from)
-	{
-		if (visited.end() != visited.find(from.vrtx))
-			return;
+/*
+ * Breadth first traversal starting from vertex, from
+ * @param [in]  g       the graph.
+ * @param [in]  visitor the visitor class.
+ * @param [in]  from    the starting vertex.
+ */
+template<typename T>
+static void
+bfs(const graph<T> &g, visitor<T> &visitor, const vertex<T> &from)
+{
+	queue<T> q;
 
-		/*
-		 * Not visited yet.
-		 * Process and mark as visited.
-		 */
-		(*visitor)(from.vrtx);
-		visited.insert(from.vrtx);
+	// Add the first vertex to the queue and mark as visited.
+	q.push(from.vrtx);
+	visitor.set_visited(from, true);
 
-		/*
-		 * Dive deeper.
-		 */
+	while (!q.empty()) {
+		T v = q.front();
+		q.pop();
+
+		const vertex<T> &current = g.get_vertex(v);
+		visitor.pre(current);
+
+		// Now add all the adjacent ones to the queue.
 		typename vector<T>::const_iterator it;
-		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
-			depth_first_traversal(visited, visitor, get_vertex(*it));
-	}
-
-	/*
-	 * Depth first traversal for the whole graph.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param visitor performs processing at the each vertex.
-	 */
-	void depth_first_traversal(set<T> &visited, visitor_t<T> visitor)
-	{
-		/*
-		 * Do DFS for each vertex.
-		 */
-		typename vector<vertex>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it)
-			depth_first_traversal(visited, visitor, *it);
-	}
-
-	/*
-	 * Breadth first traversal starting from vertex *from*.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param visitor performs processing at the each vertex.
-	 * @param from    starting vertex.
-	 */
-	void breadth_first_traversal(set<T> &visited, visitor_t<T> visitor, T from)
-	{
-		queue<T> q;
-
-		q.push(from);
-
-		while (!q.empty()) {
-			from = q.front();
-			q.pop();
-
-			if (visited.end() == visited.find(from)) {
-				/*
-				 * Not visited yet.
-				 * Process and mark as visited.
-				 */
-				(*visitor)(from);
-				visited.insert(from);
-
-				vertex &v = get_vertex(from);
-
-				/*
-				 * Now add all the adjacent ones to the queue.
-				 */
-				typename vector<T>::const_iterator it;
-				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it)
-					q.push(*it);
+		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+			if (!visitor.is_visited(*it)) {
+				q.push(*it);
+				visitor.set_visited(*it, true);
 			}
 		}
 	}
+}
 
-	/*
-	 * Breadth first traversal for the whole graph.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param visitor performs processing at the each vertex.
-	 */
-	void breadth_first_traversal(set<T> &visited, visitor_t<T> visitor)
-	{
-		/*
-		 * Do BFS for each vertex.
-		 */
-		typename vector<vertex>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it)
-			breadth_first_traversal(visited, visitor, it->vrtx);
+/*
+ * Breadth first traversal for the whole graph.
+ * @param [in]  g       the graph.
+ * @param [in]  visitor the visitor class.
+ */
+template<typename T>
+void
+bfs(const graph<T> &g, visitor<T> &visitor)
+{
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (!visitor.is_visited(*it))
+			bfs(g, visitor, *it);
 	}
-
-	enum class traversal_order
-	{
-		depth_first,
-		breadth_first
-	};
-
-	/*
-	 * Traverse the graph based on the traveral order requested
-	 * and applying visitor at each vertex.
-	 */
-	void traverse(traversal_order order, visitor_t<T> visitor)
-	{
-		set<T> visited;
-		if (order == traversal_order::depth_first)
-			depth_first_traversal(visited, visitor);
-		else if (order == traversal_order::breadth_first)
-			breadth_first_traversal(visited, visitor);
-	}
+}
 ```
 ## Traversal Problem 1
-*Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>?<br>
+*Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>? Or simply is vertex v<sub>target</sub> reachable from v<sub>source</sub>?<br>
 *Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. If we encounter v<sub>target</sub>, then a path exists. If the DFS traversal completes without finding v<sub>target</sub>, then no path exists between them.
 ```C++
-	// Part of graph class
+/*
+ * Determine if vertex, target, is reachable from vertex, source.
+ * We are essentially doing depth first search starting from source
+ * until we find target.
+ *
+ * @param [in] g       the graph.
+ * @param [in] visitor the visitor class.
+ * @param [in] source  the source vertex.
+ * @param [in] target  the target vertex.
+ *
+ * @return true if a path exists, false otherwise.
+ */
+template<typename T>
+static bool
+is_reachable(const graph<T> &g, visitor<T> &visitor, const vertex<T> &source, const T &target)
+{
+	visitor.set_visited(source, true);
 
-	/*
-	 * Determine if a path exists between two vertices.
-	 * We are essentially doing depth first search starting from source
-	 * until we find target.
-	 *
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param source  source vertex.
-	 * @param target  target vertex.
-	 * @return true if a path exists, false otherwise.
-	 */
-	bool path_exists(set<T> &visited, const vertex &source, T target)
-	{
-		if (visited.end() != visited.find(source.vrtx))
-			return false;
-
-		/*
-		 * Not visited yet. Mark as visited.
-		 */
-		visited.insert(source.vrtx);
-
-		/*
-		 * Short-cut: See if we have reached the target vertex.
-		 * This check could well be in the loop below as well.
-		 * See the commented code in the loop below.
-		 */
-		typename vector<T>::const_iterator it = find(source.adjacent.begin(), source.adjacent.end(), target);
-		if (it != source.adjacent.end())
-			return true;
-
-		/*
-		 * Dive deeper looking for target.
-		 */
-		for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
-			/*
-			 * if (it->vrtx == target)
-			 *     return true;
-			 */
-			if (path_exists(visited, get_vertex(*it), target))
+	typename vector<T>::const_iterator it;
+	for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+		if (!visitor.is_visited(*it)) {
+			if (*it == target)
+				return true;
+			if (is_reachable(g, visitor, g.get_vertex(*it), target))
 				return true;
 		}
-
-		return false;
 	}
 
-	/*
-	 * Determine if a path exists between two vertices.
-	 * @param source source vertex.
-	 * @param target target vertex.
-	 * @return true if a path exists, false otherwise.
-	 */
-	bool path_exists(T source, T target)
-	{
-		set<T> visited;
-		return path_exists(visited, get_vertex(source), target);
+	return false;
+}
+
+/*
+ * Determine if vertex, target, is reachable from vertex, source.
+ *
+ * @param [in] g       the graph.
+ * @param [in] source  the source vertex.
+ * @param [in] target  the target vertex.
+ *
+ * @return true if a path exists, false otherwise.
+ */
+template<typename T>
+bool
+is_reachable(const graph<T> &g, const T &source, const T &target)
+{
+	if (source != target) {
+		visitor<T> visitor;
+		return is_reachable(g, visitor, g.get_vertex(source), target);
 	}
+	return true;
+}
 ```
 ## Traversal Problem 2
 *Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, find all paths between vertex v<sub>source</sub> and v<sub>target</sub>?<br>
 *Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. Keep recording the paths until we reach the vertex v<sub>target</sub>. We must also mark the vertex as visited as we proceed. This is to avoid cycles, especially for undirected graphs. This is yet another example of **backtracking** problem.
 ```C++
-	// Part of graph class
-
+/*
+ * Get all paths between two vertices: source and target
+ *
+ * @param [in]    g       the graph.
+ * @param [in]    visitor the visitor class.
+ * @param [in]    source  the source vertex.
+ * @param [in]    target  the target vertex.
+ * @param [inout] paths   a container vector to hold paths as they are discovered.
+ */
+template<typename T>
+static void
+get_paths(const graph<T> &g, visitor<T> &visitor, const vertex<T> &source, const T &target, vector<T> &paths)
+{
 	/*
-	 * Get all paths between two vertices.
-	 * @param paths  maintains paths already visited.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param source source vertex.
-	 * @param target target vertex.
+	 * Mark the path as visited.
+	 * Add the vertex to the set of path list.
 	 */
-	void get_paths(vector<T> &paths, set<T> &visited, const vertex &from, T to)
-	{
-		/*
-		 * Mark the path as visited.
-		 * Add the vertex to the set of path list.
-		 */
-		visited.insert(from.vrtx);
-		paths.push_back(from.vrtx);
+	visitor.set_visited(source, true);
+	paths.push_back(source.vrtx);
 
-		typename vector<T>::const_iterator it = find(from.adjacent.begin(), from.adjacent.end(), to);
-		if (it != from.adjacent.end()) {
-			/*
-			 * We have reached the target vertex, print the paths.
-			 */
-			cout << "path: ";
-			for (auto v : paths)
-				cout << v << " ";
-			cout << to << endl;
-		} else {
-			/*
-			 * Dive deeper.
-			 */
-			for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
-				if (visited.end() == visited.find(*it)) {
-					get_paths(paths, visited, get_vertex(*it), to);
-				}
+	typename vector<T>::const_iterator it;
+	for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+		if (!visitor.is_visited(*it)) {
+			if (*it == target) {
+				/*
+				 * We have reached the target vertex, print the paths.
+				 */
+				cout << "path: ";
+				for (auto v : paths)
+					cout << v << " ";
+				cout << target << endl;
+			} else {
+				get_paths(g, visitor, g.get_vertex(*it), target, paths);
 			}
 		}
-
-		/*
-		 * Remove the vertex from path list.
-		 * Unmark the path as visited.
-		 */
-		paths.pop_back();
-		visited.erase(from.vrtx);
 	}
 
 	/*
-	 * Get all paths between two vertices.
-	 * @param source source vertex.
-	 * @param target target vertex.
+	 * Backtrack.
+	 * Remove the vertex from path list.
+	 * Unmark the path as visited.
 	 */
-	void get_paths(T source, T target)
-	{
+	paths.pop_back();
+	visitor.set_visited(source, false);
+}
+
+/*
+ * Get all paths between two vertices: source and target
+ *
+ * @param [in] g       the graph.
+ * @param [in] source  the source vertex.
+ * @param [in] target  the target vertex.
+ */
+template<typename T>
+void
+get_paths(const graph<T> &g, const T &source, const T &target)
+{
+	if (source != target) {
+		visitor<T> visitor;
 		vector<T> paths;
-		set<T> visited;
-		get_paths(paths, visited, get_vertex(source), target);
+		get_paths(g, visitor, g.get_vertex(source), target, paths);
+	} else {
+		cout << source << endl;
 	}
+}
 ``` 
 ## Traversal Problem 3
 *Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, find if there is a cycle in the graph.<br>
@@ -437,118 +444,125 @@ void visitor(T v)
 
 Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the edge going back to the parent. We do not want to count (*v<sub>1</sub> -> v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
 ```C++
-	// Part of graph class.
-
-	/*
-	 * Is there a cycle in the graph?
-	 *
-	 * @param hierarchy maintains a (vertex -> parent vertex) map.
-	 * @param visited   maintains a set of vertices that are already visited.
-	 * @param v         vertex being visited.
-	 * @param parent    parent vertex. -1 if there is no parent.
-	 *
-	 * @return true if there is a cycle and false otherwise.
-	 * If there is a loop, the vertices in the loop are printed as well.
-	 */
-	bool is_cyclic(map<T, T> &hierarchy, set<T> &visited, T v, T parent)
-	{
-		if (hierarchy.end() == hierarchy.find(v)) {
-			/*
-			 * Not in hierarchy at all; add the relationship.
-			 */
-			hierarchy[v] = parent;
-		} else {
-			/*
-			 * Already in hierarchy. Check if it is an edge
-			 * going back to the parent (forming a small loop
-			 * involving just two nodes).
-			 *
-			 * Hierarchy table for graph 1 <--> 2
-			 * vertex | parent
-			 *   1    |  -1
-			 *   2    |   1
-			 * This function is called with v = 1, parent = 2.
-			 */
-			typename map<T, T>::const_iterator it = hierarchy.find(parent);
-			if (it != hierarchy.end()) {
-				if (it->second == v) {
-					/*
-					 * It is a back-edge. Ignore it.
-					 */
-					return false;
-				} else {
-					/*
-					 * Print the cycle and return true.
-					 */
-					cout << v << " " << parent << " ";
-					while (it != hierarchy.end()) {
-						cout << it->second << " ";
-						it = hierarchy.find(it->second);
-						if (it->first == v)
-							break;
-					}
-					cout << endl;
-					return true;
+/*
+ * Is there a cycle in the graph?
+ *
+ * @param [in] g             the graph.
+ * @param [in] visitor       the visitor class.
+ * @param [in] current       the current vertex being visited.
+ * @param [in] parent        the parent vertex of the current vertex.
+ * @param [inout] hierarchy  maintains parent/child relationship for each vertex.
+ *
+ * @return true if there is a cycle and false otherwise.
+ * If there is a loop, the vertices in the loop are printed as well.
+ */
+template<typename T>
+static bool
+is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T parent, map<T, T> &hierarchy)
+{
+	if (hierarchy.end() == hierarchy.find(current.vrtx)) {
+		/*
+		 * Not in hierarchy at all; add the relationship.
+		 */
+		hierarchy[current.vrtx] = parent;
+	} else {
+		/*
+		 * Already in hierarchy. Check if it is an edge
+		 * going back to the parent (forming a small loop
+		 * involving just two nodes).
+		 *
+		 * Hierarchy table for graph 1 <--> 2
+		 * vertex | parent
+		 *   1    |  -1
+		 *   2    |   1
+		 * This function is called with current = 1, parent = 2.
+		 */
+		typename map<T, T>::const_iterator it = hierarchy.find(parent);
+		if (it != hierarchy.end()) {
+			if (it->second == current.vrtx) {
+				/*
+				 * It is a back-edge to the immediate parent. Ignore it.
+				 */
+				return false;
+			} else {
+				/*
+				 * Print the cycle and return true.
+				 */
+				cout << current.vrtx << " " << parent << " ";
+				while (it != hierarchy.end()) {
+					cout << it->second << " ";
+					it = hierarchy.find(it->second);
+					if (it->first == current.vrtx)
+						break;
 				}
+				cout << endl;
+				return true;
 			}
 		}
-
-		if (visited.end() == visited.find(v)) {
-			/*
-			 * Not visited yet; mark as visited.
-			 */
-			visited.insert(v);
-
-			/*
-			 * Dive deeper.
-			 */
-			const vertex &V = get_vertex(v);
-			typename vector<T>::const_iterator it;
-			for (it = V.adjacent.begin(); it != V.adjacent.end(); ++it) {
-				if (is_cyclic(hierarchy, visited, *it, v))
-					return true;
-			}
-		}
-
-		/* Backtrack */
-		hierarchy.erase(v);
-		return false;
 	}
 
-	/*
-	 * Is there a cycle in the graph?
-	 * @param parent parent vertex if the first vertex usually -1 for T = int.
-	 */
-	bool is_cyclic(T parent)
-	{
-		map<T, T> hierarchy;
-		set<T> visited;
-
-		typename vector<vertex>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it) {
-			if (is_cyclic(hierarchy, visited, it->vrtx, parent))
+	if (!visitor.is_visited(current)) {
+		/*
+		 * Not visited yet; mark as visited.
+		 */
+		visitor.set_visited(current, true);
+	
+		typename vector<T>::const_iterator it;
+		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+			if (is_cyclic(g, visitor, g.get_vertex(*it), current.vrtx, hierarchy))
 				return true;
 		}
-
-		return false;
 	}
+
+	/* Backtrack */
+	hierarchy.erase(current.vrtx);
+	return false;
+}
+
+/*
+ * Is there a cycle in the graph?
+ *
+ * @param [in] g       the graph.
+ * @param [in] parent  the parent vertex of the first vertex; usually -1 for T = int.
+ *
+ * @return true if there is a cycle in the graph, false otherwise.
+ */
+template<typename T>
+bool
+is_cyclic(const graph<T> &g, T parent)
+{
+	map<T, T> hierarchy;
+	visitor<T> visitor;
+
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (is_cyclic(g, visitor, *it, parent, hierarchy))
+			return true;
+	}
+
+	return false;
+}
 ```
 
 ## Directed Acyclic Graph (DAG)
 DAG is a directed graph with no cycles in it.
 ```C++
-	// Part of graph class
-
-	/*
-	 * Is the graph a directed acyclic graph?
-	 * @param parent parent vertex if the first vertex usually -1 for T = int.
-	 */
-	bool is_dag(T parent)
-	{
-		if (!directed)
-			return false;
-		return !is_cyclic(parent);
-	}
+/*
+ * Is the graph a directed acyclic graph (DAG)?
+ *
+ * @param [in] g       the graph.
+ * @param [in] parent  the parent vertex of the first vertex; usually -1 for T = int.
+ *
+ * @return true if there graph is a DAG, false otherwise.
+ */
+template<typename T>
+bool
+is_dag(const graph<T> &g, T parent)
+{
+	if (!g.is_directed())
+		return false;
+	return !is_cyclic(g, parent);
+}
 ```
 
 ## Topological Sorting
@@ -593,51 +607,49 @@ The algorithm involves:
 
 There is an alternate approach to get the same result. Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. When you pop the vertices from the stack, you get the correct order.
 ```C++
-	// Part of graph class.
+/*
+ * Perform topological sorting.
+ *
+ * @param [in]  g       the graph.
+ * @param [in]  visitor the visitor class.
+ * @param [in]  current the current vertex being visited.
+ * @param [out] stk     the toplogical sorted vertex on return.
+ */
+template<typename T>
+static void
+topological_sort(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, stack<T> &stk)
+{
+	if (visitor.is_visited(current))
+		return;
+
+	visitor.set_visited(current, true);
+
+	typename vector<T>::const_iterator it;
+	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it)
+		topological_sort(g, visitor, g.get_vertex(*it), stk);
 
 	/*
-	 * Perform topological sorting.
-	 *
-	 * @param stk toplogical sorted vertex on return.
-	 * @param visited maintains a set of vertices that are already visited.
-	 * @param from    starting vertex.
+	 * Add the vertex to the stack.
 	 */
-	void topological_sort(stack<T> &stk, set<T> &visited, const vertex &from)
-	{
-		if (visited.end() != visited.find(from.vrtx))
-			return;
+	stk.push(current.vrtx);
+}
 
-		/*
-		 * Not visited yet; mark as visited.
-		 */
-		visited.insert(from.vrtx);
+/*
+ * Perform topological sorting.
+ *
+ * @param [in]  g      the graph.
+ * @param [out] stk    the toplogical sorted vertex on return.
+ */
+template<typename T>
+void
+topological_sort(const graph<T> &g, stack<T> &stk)
+{
+	visitor<T> visitor;
 
-		/*
-		 * Dive deeper.
-		 */
-		typename vector<T>::const_iterator it;
-		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
-			topological_sort(stk, visited, get_vertex(*it));
-
-		/*
-		 * Add the vertex to the stack.
-		 */
-		stk.push(from.vrtx);
-	}
-
-	/*
-	 * Perform topological sorting.
-	 * @param stk toplogical sorted vertex on return.
-	 */
-	void topological_sort(stack<T> &stk)
-	{
-		set<T> visited;
-
-		typename vector<vertex>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it) {
-			topological_sort(stk, visited, *it);
-		}
-	}
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
+		topological_sort(g, visitor, *it, stk);
+}
 ```
 
 ## Connected components
