@@ -140,6 +140,25 @@ public:
 	bool is_directed() const { return directed; }
 	size_t num_vertices() const { return count; }
 	const vector<vertex<T>> &get_vertices() const { return vertices; }
+
+	/*
+	 * Reverse a graph.
+	 */
+	graph<T> reverse()
+	{
+		graph<T> g(true);
+
+		if (directed) {
+			for (auto v : vertices) {
+				for (auto adj : v.adjacent) 
+					add_edge(adj, v.vrtx);
+			}
+		} else {
+			g = *this;
+		}
+
+		return g;
+	}
 };
 ```
 

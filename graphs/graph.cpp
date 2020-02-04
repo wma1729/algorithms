@@ -171,6 +171,25 @@ public:
 	}
 
 	/*
+	 * Reverse a graph.
+	 */
+	graph<T> reverse()
+	{
+		graph<T> g(true);
+
+		if (directed) {
+			for (auto v : vertices) {
+				for (auto adj : v.adjacent) 
+					add_edge(adj, v.vrtx);
+			}
+		} else {
+			g = *this;
+		}
+
+		return g;
+	}
+
+	/*
 	 * Serialize a graph.
 	 * Line 1: 0|1 (undirected or directed)
 	 * Line 2: v1 v2 (two vertices of an edge)
