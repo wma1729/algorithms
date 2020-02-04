@@ -227,6 +227,7 @@ private:
 	set<T> visited;
 
 public:
+	visitor() {}
 	virtual ~visitor() {}
 
 	/* Override as needed */
@@ -631,6 +632,63 @@ topological_sort(const graph<T> &g, stack<T> &stk)
 		topological_sort(g, visitor, *it, stk);
 }
 
+/*
+ * A visitor subclass to find the connected components in a graph.
+ * The first component ID is 1 and is incremented.
+ * A map of vertex to component ID is prepared while traversing the graph.
+ */
+template<typename T>
+class connected_components : public visitor<T>
+{
+private:
+	map<T, int>  cc_map;
+	int          cc_count;
+
+public:
+	connected_components() : visitor<T>(), cc_count(0) {}
+	virtual ~connected_components() {}
+
+	int num_of_comp() const { return cc_count; }
+
+	bool connected(const T &v1, const T &v2) const
+	{
+		typename map<T, int>::const_iterator it1, it2;
+		it1 = cc_map.find(v1);
+		it2 = cc_map.find(v2);
+		return ((it1 != cc_map.end()) && (it2 != cc_map.end()) && (it1->second == it2->second));
+	}
+
+	void next_component()
+	{
+		cc_count++;
+	}
+
+	void pre(const vertex<T> &) {}
+
+	void post(const vertex<T> &v)
+	{
+		cc_map[v.vrtx] = cc_count;
+	}
+};
+
+/*
+ * Traverses the graph using dfs and prepares a connected component map.
+ *
+ * @param [in]    g       the graph.
+ * @param [inout] cc      the visitor for connected components.
+ */
+template<typename T>
+void
+find_connected_components(const graph<T> &g, connected_components<T> &cc)
+{
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (!cc.is_visited(*it))
+			cc.next_component();
+		dfs(g, cc, *it);
+	}
+}
+
 static int
 usage(const char *progname)
 {
@@ -644,7 +702,9 @@ usage(const char *progname)
 		<< "    [-bfs]                                  Breadth first search traversal." << endl
 		<< "    [-is_cyclic]                            Is there a cycle in the graph?" << endl
 		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl
-		<< "    [-sort  ]                               Topological sorting." << endl;
+		<< "    [-sort]                                 Topological sorting." << endl
+		<< "    [-cc_num]                               Number of connected components." << endl
+		<< "    [-cc -v <vertex1, vertex2>]             Is vertex1 and vertex2 connected?" << endl;
 	return 1;
 }
 
@@ -660,7 +720,9 @@ enum operation
 	BFS,
 	IS_CYCLIC,
 	IS_DAG,
-	TOPOLOGICAL_SORT
+	TOPOLOGICAL_SORT,
+	CC_NUM,
+	CC
 };
 
 // Driver code
@@ -716,6 +778,10 @@ main(int argc, const char **argv)
 			op = IS_DAG;
 		} else if (strcmp(argv[i], "-sort") == 0) {
 			op = TOPOLOGICAL_SORT;
+		} else if (strcmp(argv[i], "-cc_num") == 0) {
+			op = CC_NUM;
+		} else if (strcmp(argv[i], "-cc") == 0) {
+			op = CC;
 		} else {
 			return usage(argv[0]);
 		}
@@ -780,6 +846,22 @@ main(int argc, const char **argv)
 				stk.pop();
 			}
 			cout << endl;
+			break;
+
+		case CC_NUM:
+			{
+				connected_components<int> cc;
+				find_connected_components(g, cc);
+				cout << cc.num_of_comp() << endl;
+			}
+			break;
+
+		case CC:
+			{
+				connected_components<int> cc;
+				find_connected_components(g, cc);
+				cout << boolalpha << cc.connected(v1, v2) << endl;
+			}
 			break;
 
 		default:

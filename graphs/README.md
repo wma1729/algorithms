@@ -182,6 +182,7 @@ private:
 	set<T> visited;
 
 public:
+	visitor() {}
 	virtual ~visitor() {}
 
 	/* Override as needed */
@@ -658,6 +659,66 @@ topological_sort(const graph<T> &g, stack<T> &stk)
 The above graph has 3 **connected components (CC)**. Usually a graph is pre-processed to find the connected components. A *component ID* is assigned to each vertex. Thereafter, we can easily answer the following questions:
 * How many connected components are in the graph?
 * Is vertex, *v* connected to vertex, *w*? We can answer this in constant time by checking if both *v* and *w* have the same *component ID*.
+
+In the code below, the *visitor* class is overridden so that *post* prepares a vertex -> component ID map.
+```C++
+/*
+ * A visitor subclass to find the connected components in a graph.
+ * The first component ID is 1 and is incremented.
+ * A map of vertex to component ID is prepared while traversing the graph.
+ */
+template<typename T>
+class connected_components : public visitor<T>
+{
+private:
+	map<T, int>  cc_map;
+	int          cc_count;
+
+public:
+	connected_components() : visitor<T>(), cc_count(0) {}
+	virtual ~connected_components() {}
+
+	int num_of_comp() const { return cc_count; }
+
+	bool connected(const T &v1, const T &v2) const
+	{
+		typename map<T, int>::const_iterator it1, it2;
+		it1 = cc_map.find(v1);
+		it2 = cc_map.find(v2);
+		return ((it1 != cc_map.end()) && (it2 != cc_map.end()) && (it1->second == it2->second));
+	}
+
+	void next_component()
+	{
+		cc_count++;
+	}
+
+	void pre(const vertex<T> &) {}
+
+	void post(const vertex<T> &v)
+	{
+		cc_map[v.vrtx] = cc_count;
+	}
+};
+
+/*
+ * Traverses the graph using dfs and prepares a connected component map.
+ *
+ * @param [in]    g       the graph.
+ * @param [inout] cc      the visitor for connected components.
+ */
+template<typename T>
+void
+find_connected_components(const graph<T> &g, connected_components<T> &cc)
+{
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (!cc.is_visited(*it))
+			cc.next_component();
+		dfs(g, cc, *it);
+	}
+}
+```
 
 #### How to assign component IDs to the vertices of an undirected graph?
 * Initialize component ID to 0.
