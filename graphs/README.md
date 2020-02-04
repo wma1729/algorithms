@@ -660,6 +660,13 @@ The above graph has 3 **connected components (CC)**. Usually a graph is pre-proc
 * How many connected components are in the graph?
 * Is vertex, *v* connected to vertex, *w*? We can answer this in constant time by checking if both *v* and *w* have the same *component ID*.
 
+#### How to assign component IDs to the vertices of an undirected graph?
+* Initialize component ID to 0.
+* Pick an unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 0.
+* Increment component ID.
+* Pick the next unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 1.
+* Continue until all the vertices are marked.
+
 In the code below, the *visitor* class is overridden so that *post* prepares a vertex -> component ID map.
 ```C++
 /*
@@ -719,14 +726,6 @@ find_connected_components(const graph<T> &g, connected_components<T> &cc)
 	}
 }
 ```
-
-#### How to assign component IDs to the vertices of an undirected graph?
-* Initialize component ID to 0.
-* Pick an unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 0.
-* Increment component ID.
-* Pick the next unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 1.
-* Continue until all the vertices are marked.
-
 ### Directed graph
 ![Connected components in directed graph](directed.jpeg)
 Two vertices, *v* and *w* are called **strongly connected** if there is a path from *v* to *w* and from *w* back to *v*. This implies a loop and *v* and *w* are two vertices of that loop. A directed graph could be divided in multiple such **strongly connected components (SCC)**. If each strong connected component is considered as a single entity (**metagraph**), we end up with a **DAG**. Like connected components of an undirected graph, the graph is usually preprocessed and the above questions (number of strongly connected components and if two vertices are strongly connected) can be similarly answered.
