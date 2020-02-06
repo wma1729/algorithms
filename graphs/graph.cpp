@@ -82,7 +82,7 @@ private:
 				 */
 				visited.insert(current);
 
-				vertex<T> &v = get_vertex(current);
+				const vertex<T> &v = get_vertex(current);
 
 				/*
 				 * Now add all the adjacent ones to the queue.
@@ -173,14 +173,14 @@ public:
 	/*
 	 * Reverse a graph.
 	 */
-	graph<T> reverse()
+	graph<T> reverse() const
 	{
 		graph<T> g(true);
 
 		if (directed) {
 			for (auto v : vertices) {
 				for (auto adj : v.adjacent) 
-					add_edge(adj, v.vrtx);
+					g.add_edge(adj, v.vrtx);
 			}
 		} else {
 			g = *this;
@@ -688,10 +688,17 @@ public:
 	{
 		cc_map[v.vrtx] = cc_count;
 	}
+
+	void dump()
+	{
+		for (auto ent : cc_map)
+			cout << ent.first << " " << ent.second << endl;
+	}
 };
 
 /*
- * Traverses the graph using dfs and prepares a connected component map.
+ * Traverses the graph using dfs and prepares a connected component map for
+ * undirected graph.
  *
  * @param [in]    g       the graph.
  * @param [inout] cc      the visitor for connected components.
@@ -708,11 +715,42 @@ find_connected_components(const graph<T> &g, connected_components<T> &cc)
 	}
 }
 
+/*
+ * Finds the strongly connected components of a directed graph.
+ *
+ * @param [in]    g       the graph.
+ * @param [inout] scc     the visitor for strongly connected components.
+ *
+ * The same visitor is used for strongly connected components as connected
+ * component. The difference is:
+ * - the graph is first reversed.
+ * - a topological sort is performed.
+ * - the vertices (of the original graph) are visited in the topological sort order.
+ */
+template<typename T>
+void
+find_strongly_connected_components(const graph<T> &g, connected_components<T> &scc)
+{
+	graph<T> gr = std::move(g.reverse());
+	stack<T> stk;
+	topological_sort(gr, stk);
+
+	while (!stk.empty()) {
+		T v = stk.top();
+		stk.pop();
+
+		if (!scc.is_visited(v))
+			scc.next_component();
+		dfs(g, scc, g.get_vertex(v));
+	}
+}
+
 static int
 usage(const char *progname)
 {
 	cerr << progname << " -in <file> " << endl
 		<< "    [-dump]                                 Dump the graph read from file." << endl
+		<< "    [-reverse]                              Reverse a directed graph." << endl
 		<< "    [-degree -v <vertex>]                   Degree of the vertex." << endl
 		<< "    [-reachable -v <vertex1, vertex2>]      Is vertex2 reachable from vertex1?" << endl
 		<< "    [-paths -v <vertex1, vertex2>]          All paths between vertex1 and vertex2." << endl
@@ -723,7 +761,9 @@ usage(const char *progname)
 		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl
 		<< "    [-sort]                                 Topological sorting." << endl
 		<< "    [-cc_num]                               Number of connected components." << endl
-		<< "    [-cc -v <vertex1, vertex2>]             Is vertex1 and vertex2 connected?" << endl;
+		<< "    [-cc -v <vertex1, vertex2>]             Is vertex1 and vertex2 connected?" << endl
+		<< "    [-scc_num]                              Number of connected components." << endl
+		<< "    [-scc -v <vertex1, vertex2>]            Is vertex1 and vertex2 connected?" << endl;
 	return 1;
 }
 
@@ -731,6 +771,7 @@ enum operation
 {
 	NONE,
 	DUMP,
+	REVERSE,
 	DEGREE,
 	REACHABLE,
 	PATHS,
@@ -741,7 +782,9 @@ enum operation
 	IS_DAG,
 	TOPOLOGICAL_SORT,
 	CC_NUM,
-	CC
+	CC,
+	SCC_NUM,
+	SCC
 };
 
 // Driver code
@@ -779,6 +822,8 @@ main(int argc, const char **argv)
 			}
 		} else if (strcmp(argv[i], "-dump") == 0) {
 			op = DUMP;
+		} else if (strcmp(argv[i], "-reverse") == 0) {
+			op = REVERSE;
 		} else if (strcmp(argv[i], "-degree") == 0) {
 			op = DEGREE;
 		} else if (strcmp(argv[i], "-reachable") == 0) {
@@ -801,6 +846,10 @@ main(int argc, const char **argv)
 			op = CC_NUM;
 		} else if (strcmp(argv[i], "-cc") == 0) {
 			op = CC;
+		} else if (strcmp(argv[i], "-scc_num") == 0) {
+			op = SCC_NUM;
+		} else if (strcmp(argv[i], "-scc") == 0) {
+			op = SCC;
 		} else {
 			return usage(argv[0]);
 		}
@@ -818,6 +867,13 @@ main(int argc, const char **argv)
 	switch (op) {
 		case DUMP:
 			g.dump();
+			break;
+
+		case REVERSE:
+			{
+				graph<int> gr = std::move(g.reverse());
+				gr.dump();
+			}
 			break;
 
 		case DEGREE:
@@ -872,6 +928,7 @@ main(int argc, const char **argv)
 				connected_components<int> cc;
 				find_connected_components(g, cc);
 				cout << cc.num_of_comp() << endl;
+				cc.dump();
 			}
 			break;
 
@@ -880,6 +937,23 @@ main(int argc, const char **argv)
 				connected_components<int> cc;
 				find_connected_components(g, cc);
 				cout << boolalpha << cc.connected(v1, v2) << endl;
+			}
+			break;
+
+		case SCC_NUM:
+			{
+				connected_components<int> scc;
+				find_strongly_connected_components(g, scc);
+				cout << scc.num_of_comp() << endl;
+				scc.dump();
+			}
+			break;
+
+		case SCC:
+			{
+				connected_components<int> scc;
+				find_strongly_connected_components(g, scc);
+				cout << boolalpha << scc.connected(v1, v2) << endl;
 			}
 			break;
 

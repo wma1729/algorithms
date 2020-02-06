@@ -680,10 +680,10 @@ The above graph has 3 **connected components (CC)**. Usually a graph is pre-proc
 * Is vertex, *v* connected to vertex, *w*? We can answer this in constant time by checking if both *v* and *w* have the same *component ID*.
 
 #### How to assign component IDs to the vertices of an undirected graph?
-* Initialize component ID to 0.
-* Pick an unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 0.
+* Initialize component ID to 1.
+* Pick an unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 1.
 * Increment component ID.
-* Pick the next unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 1.
+* Pick the next unmarked vertex. Perform DFS marking the vertex as visited and setting the component ID to 2.
 * Continue until all the vertices are marked.
 
 In the code below, the *visitor* class is overridden so that *post* prepares a vertex -> component ID map.
@@ -752,8 +752,39 @@ Two vertices, *v* and *w* are called **strongly connected** if there is a path f
 #### How to assign strong component IDs to the vertices of an directed graph?
 * Reverse the graph. The reversed graph has the same strong components.
 * Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. Basically we are doing topological sort.
-* Initialize component ID to 0.
-* Pop a vertex from the stack. Perform DFS marking the vertex as visited and setting the component ID to 0.
+* Initialize component ID to 1.
+* Pop a vertex from the stack. Perform DFS on the original graph and not the reversed one marking the vertex as visited and setting the component ID to 1.
 * Increment component ID.
-* Pop the next vertex. If unmarked, perform DFS marking the vertex as visited and setting the component ID to 1.
+* Pop the next vertex. If unmarked, perform DFS marking the vertex as visited and setting the component ID to 2.
 * Continue until all the vertices are popped.
+```C++
+/*
+ * Finds the strongly connected components of a directed graph.
+ *
+ * @param [in]    g       the graph.
+ * @param [inout] scc     the visitor for strongly connected components.
+ *
+ * The same visitor is used for strongly connected components as connected
+ * component. The difference is:
+ * - the graph is first reversed.
+ * - a topological sort is performed.
+ * - the vertices (of the original graph) are visited in the topological sort order.
+ */
+template<typename T>
+void
+find_strongly_connected_components(const graph<T> &g, connected_components<T> &scc)
+{
+	graph<T> gr = std::move(g.reverse());
+	stack<T> stk;
+	topological_sort(gr, stk);
+
+	while (!stk.empty()) {
+		T v = stk.top();
+		stk.pop();
+
+		if (!scc.is_visited(v))
+			scc.next_component();
+		dfs(g, scc, g.get_vertex(v));
+	}
+}
+```
