@@ -884,5 +884,12 @@ find_strongly_connected_components(const graph<T> &g, connected_components<T> &s
 Google Konigsberh puzzle.<br>
 *Problem:* For a given undirected graph G(V, E) with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, is it possible to traverse the whole graph and come back to the starting vertex, say v<sub>m</sub>, visiting each egde only once?<br>
 *Solution:* Euler concluded that it is possible iff the following conditions are true:<br>
-* The graph is a connected graph i.e., there is a path from any vertex in the graph to any other vertex.
+* The graph is a connected graph.
 * All the vertices have even degrees i.e., each vertex has even number of adjacent vertices.
+
+## Glossary
+
+* A graph is called **connected** if there is a path from any vertex in the graph to any other vertex.
+* A  **circuit** is a path where starting vertex is same as the last vertex.
+* A **forest** is a graph that does not contain a cycle.
+* A **tree** is a connected forest i.e., path from any vertex to any other vertex and no cycles.
