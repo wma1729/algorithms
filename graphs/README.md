@@ -673,7 +673,7 @@ topological_sort(const graph<T> &g, stack<T> &stk)
 ```
 
 ## Traversal problem 4
-*Problem:* Determine if a given graph is a **bipartite**.
+*Problem:* Determine if a given graph is a **bipartite**.<br>
 *Solution:* A bipartite graph is one whose vertices could be divided in two sets such all the edges connect vertices from one set to vertices in another set.<br>
 Edges allowed (connected vertices from different sets):
 * (v<sub>m-set1</sub>, v<sub>n-set2</sub>)
