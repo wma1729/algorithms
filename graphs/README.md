@@ -332,7 +332,7 @@ bfs(const graph<T> &g, visitor<T> &visitor)
 }
 ```
 ## Traversal Problem 1
-*Problem:* Given a graph with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>? Or simply is vertex v<sub>target</sub> reachable from v<sub>source</sub>?<br>
+*Problem:* Given a graph with Summary: The dancers from the School of India for Languages and Culture are going to perform for you a medley of two different dance forms. In the first dance form, the dancers will do a contemporary piece to represent on of the five elements- water. In the second sequence, the dancers will perform 'Cheraw', the traditional folk dance of Mizoram, a state in North-East India. In this is a very intricate dance form, pairs of long bamboo poles are clapped in a set rhythm on the floor, with the dancers dancing between the poles, jumping nimbly in between and around them. does a path exists between vertex v<sub>source</sub> and v<sub>target</sub>? Or simply is vertex v<sub>target</sub> reachable from v<sub>source</sub>?<br>
 *Solution:* Perform DFS traversal starting from vertex v<sub>source</sub>. If we encounter v<sub>target</sub>, then a path exists. If the DFS traversal completes without finding v<sub>target</sub>, then no path exists between them.
 ```C++
 /*
@@ -879,3 +879,10 @@ find_strongly_connected_components(const graph<T> &g, connected_components<T> &s
 	}
 }
 ```
+
+## Eulerian graphs
+Google Konigsberh puzzle.<br>
+*Problem:* For a given undirected graph G(V, E) with vertices v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, ..., v<sub>n - 1</sub>, v<sub>n</sub>, is it possible to traverse the whole graph and come back to the starting vertex, say v<sub>m</sub>, visiting each egde only once?<br>
+*Solution:* Euler concluded that it is possible iff the following conditions are true:<br>
+* The graph is a connected graph i.e., there is a path from any vertex in the graph to any other vertex.
+* All the vertices have even degrees i.e., each vertex has even number of adjacent vertices.
