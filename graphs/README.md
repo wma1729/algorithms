@@ -462,7 +462,7 @@ get_paths(const graph<T> &g, const T &source, const T &target)
 * current vertex
 * vertex from where the current vertex is visited or simply the parent vertex.
 
-Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the edge going back to the parent. We do not want to count (*v<sub>1</sub> -> v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
+Before inserting the relationship, check if the vertex already exists in the hierarchy table. If it does there is a loop. However there is a special case to be handled here. It is the edge going back to the parent for undirected graphs. We do not want to count (*v<sub>1</sub> -> v<sub>2</sub>*) and (*v<sub>2</sub> -> v<sub>1</sub>*) as a loop. Accounting all these considerations, we have the following algorithm:
 ```C++
 /*
  * Is there a cycle in the graph?
@@ -499,7 +499,7 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
 		 */
 		typename map<T, T>::const_iterator it = hierarchy.find(parent);
 		if (it != hierarchy.end()) {
-			if (it->second == current.vrtx) {
+			if (!g.is_directed() && (it->second == current.vrtx)) {
 				/*
 				 * It is a back-edge to the immediate parent. Ignore it.
 				 */

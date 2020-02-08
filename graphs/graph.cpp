@@ -526,7 +526,7 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
 		 */
 		typename map<T, T>::const_iterator it = hierarchy.find(parent);
 		if (it != hierarchy.end()) {
-			if (it->second == current.vrtx) {
+			if (!g.is_directed() && (it->second == current.vrtx)) {
 				/*
 				 * It is a back-edge to the immediate parent. Ignore it.
 				 */
