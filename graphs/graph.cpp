@@ -651,6 +651,83 @@ topological_sort(const graph<T> &g, stack<T> &stk)
 		topological_sort(g, visitor, *it, stk);
 }
 
+enum color_t { red, blue };
+
+/*
+ * Is a graph bipartite?
+ *
+ * @param [in]    g          the graph.
+ * @param [in]    visitor    the visitor class.
+ * @param [in]    current    the current vertex being visited.
+ * @param [in]    curr_color the color of the current vertex.
+ * @param [inout] vrtx_col   the map of colored vertex.
+ *
+ * @return true if the graph is bipartite, false otherwise.
+ */
+template<typename T>
+static bool
+is_bipartite(
+	const graph<T> &g,
+	visitor<T> &visitor,
+	const vertex<T> &current,
+	color_t curr_color,
+	map<T, color_t> &vrtx_col)
+{
+	visitor.set_visited(current, true);
+	// Get the next color
+	color_t next_color = (curr_color == red) ? blue : red;
+
+	typename vector<T>::const_iterator it;
+	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+		if (visitor.is_visited(*it)) {
+			/*
+			 * If the vertex is already visited and is not the expected
+			 * color, it is not a bipartite graph.
+			 */
+			if (vrtx_col[*it] != next_color)
+				return false;
+		} else {
+			/*
+			 * Mark the next vertex with next_color i.e.,
+			 * if current is red, mark it blue
+			 * if current is blue, mark it red
+			 */
+			vrtx_col[*it] = next_color;
+			if (!is_bipartite(g, visitor, g.get_vertex(*it), next_color, vrtx_col))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/*
+ * Is a bipartite graph?
+ *
+ * @param [in]  g      the graph.
+ *
+ * @return true if the graph is bipartite, false otherwise.
+ */
+template<typename T>
+bool
+is_bipartite(const graph<T> &g)
+{
+	visitor<T> visitor;
+	map<T, color_t> vrtx_col;
+
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (!visitor.is_visited(*it)) {
+			// Mark the first unvisited vertex as red
+			vrtx_col[it->vrtx] = red;
+			if (!is_bipartite(g, visitor, *it, red, vrtx_col))
+				return false;
+		}
+	}
+
+	return true;
+}
+
 /*
  * A visitor subclass to find the connected components in a graph.
  * The first component ID is 1 and is incremented.
@@ -760,6 +837,7 @@ usage(const char *progname)
 		<< "    [-is_cyclic]                            Is there a cycle in the graph?" << endl
 		<< "    [-is_dag]                               Is the graph directed acyclic graph?" << endl
 		<< "    [-sort]                                 Topological sorting." << endl
+		<< "    [-bipartite]                            Is the graph bipartite?" << endl
 		<< "    [-cc_num]                               Number of connected components." << endl
 		<< "    [-cc -v <vertex1, vertex2>]             Is vertex1 and vertex2 connected?" << endl
 		<< "    [-scc_num]                              Number of connected components." << endl
@@ -781,6 +859,7 @@ enum operation
 	IS_CYCLIC,
 	IS_DAG,
 	TOPOLOGICAL_SORT,
+	IS_BIPARTITE,
 	CC_NUM,
 	CC,
 	SCC_NUM,
@@ -842,6 +921,8 @@ main(int argc, const char **argv)
 			op = IS_DAG;
 		} else if (strcmp(argv[i], "-sort") == 0) {
 			op = TOPOLOGICAL_SORT;
+		} else if (strcmp(argv[i], "-bipartite") == 0) {
+			op = IS_BIPARTITE;
 		} else if (strcmp(argv[i], "-cc_num") == 0) {
 			op = CC_NUM;
 		} else if (strcmp(argv[i], "-cc") == 0) {
@@ -921,6 +1002,10 @@ main(int argc, const char **argv)
 				stk.pop();
 			}
 			cout << endl;
+			break;
+
+		case IS_BIPARTITE:
+			cout << boolalpha << is_bipartite(g) << endl;
 			break;
 
 		case CC_NUM:

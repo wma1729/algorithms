@@ -672,6 +672,97 @@ topological_sort(const graph<T> &g, stack<T> &stk)
 }
 ```
 
+## Traversal problem 4
+*Problem:* Determine if a given graph is a **bipartite**.
+*Solution:* A bipartite graph is one whose vertices could be divided in two sets such all the edges connect vertices from one set to vertices in another set.<br>
+Edges allowed (connected vertices from different sets):
+* (v<sub>m-set1</sub>, v<sub>n-set2</sub>)
+* (v<sub>s-set2</sub>, v<sub>t-set1</sub>)
+
+Edges not allowed (connected vertices from the same set):
+* (v<sub>M-set1</sub>, v<sub>N-set1</sub>)
+* (v<sub>S-set2</sub>, v<sub>T-set2</sub>)
+
+The way to solve this is to perform DFS. Assign altenate colors to vertices are we go down the tree. If we hit a condition where the current vertex being visited has the same color as the adjacent one, the graph is not bipartite.
+```C++
+enum color_t { red, blue };
+
+/*
+ * Is a graph bipartite?
+ *
+ * @param [in]    g          the graph.
+ * @param [in]    visitor    the visitor class.
+ * @param [in]    current    the current vertex being visited.
+ * @param [in]    curr_color the color of the current vertex.
+ * @param [inout] vrtx_col   the map of colored vertex.
+ *
+ * @return true if the graph is bipartite, false otherwise.
+ */
+template<typename T>
+static bool
+is_bipartite(
+	const graph<T> &g,
+	visitor<T> &visitor,
+	const vertex<T> &current,
+	color_t curr_color,
+	map<T, color_t> &vrtx_col)
+{
+	visitor.set_visited(current, true);
+	// Get the next color
+	color_t next_color = (curr_color == red) ? blue : red;
+
+	typename vector<T>::const_iterator it;
+	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+		if (visitor.is_visited(*it)) {
+			/*
+			 * If the vertex is already visited and is not the expected
+			 * color, it is not a bipartite graph.
+			 */
+			if (vrtx_col[*it] != next_color)
+				return false;
+		} else {
+			/*
+			 * Mark the next vertex with next_color i.e.,
+			 * if current is red, mark it blue
+			 * if current is blue, mark it red
+			 */
+			vrtx_col[*it] = next_color;
+			if (!is_bipartite(g, visitor, g.get_vertex(*it), next_color, vrtx_col))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/*
+ * Is a bipartite graph?
+ *
+ * @param [in]  g      the graph.
+ *
+ * @return true if the graph is bipartite, false otherwise.
+ */
+template<typename T>
+bool
+is_bipartite(const graph<T> &g)
+{
+	visitor<T> visitor;
+	map<T, color_t> vrtx_col;
+
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+		if (!visitor.is_visited(*it)) {
+			// Mark the first unvisited vertex as red
+			vrtx_col[it->vrtx] = red;
+			if (!is_bipartite(g, visitor, *it, red, vrtx_col))
+				return false;
+		}
+	}
+
+	return true;
+}
+```
+
 ## Connected components
 ### Undirected graph
 ![Connected components in undirected graph](undirected.jpeg)
