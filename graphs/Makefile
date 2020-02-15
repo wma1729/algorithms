@@ -1,14 +1,17 @@
-DBG     = -O
+DBG     = -g
 CFLAGS  = -c
 DEFINES = -DDEBUG
 
-OBJS   = graph.o
+OBJS   = graph.o wgraph.o
 
-EXES   = graph
+EXES   = graph wgraph
 
 all: ${EXES}
 
 graph: graph.o
+	g++ ${DBG} $^ -o $@
+
+wgraph: wgraph.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp

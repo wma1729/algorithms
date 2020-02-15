@@ -888,8 +888,442 @@ Google Konigsberh puzzle.<br>
 * All the vertices have even degrees i.e., each vertex has even number of adjacent vertices.
 
 ## Glossary
-
 * A graph is called **connected** if there is a path from any vertex in the graph to any other vertex.
 * A  **circuit** is a path where starting vertex is same as the last vertex.
 * A **forest** is a graph that does not contain a cycle.
 * A **tree** is a connected forest i.e., path from any vertex to any other vertex and no cycles.
+
+# Weighted graph
+
+A graph where weights (cost/length/time, etc.) are associated with edges. The graph representation can be slightly modified to assign weights to the edges. Here is a possible C++ implementation:
+```C++
+/*
+ * Represents an end of the edge along with edge's weight.
+ */
+template<typename T>
+struct edge
+{
+	T   vrtx;    // end of the edge
+	int weight;  // weight of the edge
+
+	explicit edge(T v, int w) : vrtx(v), weight(w) {}
+	bool operator==(T v) const { return (this->vrtx == v); }
+};
+
+/*
+ * Vertex of a weighted graph.
+ */
+template<typename T>
+struct vertex
+{
+	T                 vrtx;       // the vertex itself
+	vector<edge<T>>   adjacent;   // adjacent vertices
+
+	explicit vertex(T v) : vrtx(v) {}
+	bool operator==(T v) const { return (this->vrtx == v); }
+};
+
+/*
+ * Weighted Graph implementation.
+ */
+template<typename T>
+class weighted_graph
+{
+private:
+	bool                directed;       // directed or undirected?
+	size_t              count;          // number of vertices
+	vector<vertex<T>>   vertices;       // vertices in the graph
+
+	/*
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	vertex<T> & get_vertex(const T &v)
+	{
+		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
+
+	/*
+	 * Add an edge (from, to, weight).
+	 */
+	void add_edge(vertex<T> &from, const vertex<T> &to, int weight)
+	{
+		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
+			from.adjacent.emplace_back(to.vrtx, weight);
+	}
+
+	/*
+	 * Serialize the graph using BFS.
+	 */
+	void serialize(ostream &os, set<T> &visited, const T &from)
+	{
+		queue<T> q;
+
+		q.push(from);
+
+		while (!q.empty()) {
+			T current = q.front();
+			q.pop();
+
+			if (visited.end() == visited.find(from)) {
+				/*
+				 * Not visited yet.
+				 * Process and mark as visited.
+				 */
+				visited.insert(current);
+
+				const vertex<T> &v = get_vertex(current);
+
+				/*
+				 * Now add all the adjacent ones to the queue.
+				 */
+				typename vector<edge<T>>::const_iterator it;
+				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it) {
+					os << from << " " << it->vrtx << " " << it->weight << endl;
+					q.push(it->vrtx);
+				}
+			}
+		}
+	}
+
+public:
+	weighted_graph(bool dir = true) : directed(dir), count(0) {}
+
+	weighted_graph(istream &is)
+	{
+		int dir;
+		int v1, v2, w;
+
+		is >> dir;
+		directed = (dir == 1);
+
+		while (is) {
+			is >> v1 >> v2 >> w;
+			add_edge(v1, v2, w);
+		}
+	}
+
+	/*
+	 * Add a vertex, v.
+	 */
+	void add_vertex(const T &v)
+	{
+		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			vertices.emplace_back(v);
+			++count;
+		}
+	}
+
+	/*
+	 * Get a vertex, v.
+	 * Throws out_of_range exception if the vertex is not found.
+	 */
+	const vertex<T> & get_vertex(const T &v) const
+	{
+		typename vector<vertex<T>>::const_iterator it = find(vertices.begin(), vertices.end(), v);
+		if (it == vertices.end()) {
+			ostringstream oss;
+			oss << "vertex " << v << " not found";
+			throw out_of_range(oss.str());
+		} else {
+			return *it;
+		}
+	}
+
+	/*
+	 * Add an edge (from, to, weight). If the graph is undirected, edge (to, from)
+	 * is added as well.
+	 */
+	void add_edge(const T &from, const T &to, int weight)
+	{
+		add_vertex(from);
+		add_vertex(to);
+
+		vertex<T> &v1 = get_vertex(from);
+		vertex<T> &v2 = get_vertex(to);
+
+		add_edge(v1, v2, weight);
+		if (!directed)
+			add_edge(v2, v1, weight);
+	}
+
+	bool is_directed() const { return directed; }
+	size_t num_vertices() const { return count; }
+	const vector<vertex<T>> &get_vertices() const { return vertices; }
+
+	/*
+	 * Find the degree of an vertex, v.
+	 */
+	size_t degree(const T &v) const
+	{
+		return get_vertex(v).adjacent.size();
+	}
+
+	/*
+	 * Reverse a graph.
+	 */
+	weighted_graph<T> reverse() const
+	{
+		weighted_graph<T> g(true);
+
+		if (directed) {
+			for (auto v : vertices) {
+				for (auto adj : v.adjacent) 
+					g.add_edge(adj.vrtx, v.vrtx, adj.weight);
+			}
+		} else {
+			g = *this;
+		}
+
+		return g;
+	}
+
+	/*
+	 * Serialize a graph.
+	 * Line 1: 0|1 (undirected or directed)
+	 * Line 2: v1 v2 w1 (two vertices of an edge and its weight)
+	 * Line 3: v3 v4 w2 (two vertices of an edge and its weight)
+	 * ...
+	 */
+	void serialize(ostream &os)
+	{
+		set<T> visited;
+
+		cout << (directed ? "1" : "0") << endl;
+		
+		typename vector<vertex<T>>::const_iterator it;
+		for (it = vertices.begin(); it != vertices.end(); ++it)
+			serialize(os, visited, it->vrtx);
+	}
+
+	/*
+	 * Prints the graph on the screen.
+	 */
+	void dump()
+	{
+		cout << "Number of vertices: " << count << endl;
+
+		for (auto v : vertices) {
+			cout << v.vrtx;
+
+			if (!v.adjacent.empty())
+				cout << " -> ";
+
+			for (auto adj : v.adjacent) 
+				cout << adj.vrtx << "(" << adj.weight << ") ";
+
+			cout << endl;
+		}
+	}
+};
+```
+
+## Single Source Shortest Path (SSSP)
+The problem is to find shortest paths from a given vertex *v* to all other vertices of the graph.<br>
+
+We develop a simple data structure that:
+- Tracks weight at each vertex (we are tracking cumulative weight).
+- Tracks the parent vertex that used to reach the current vertex. This enables us to generate the whole path.
+
+```C++
+/*
+ * Path information. Structurally similar to edge<T>.
+ */
+template<typename T>
+struct path_info
+{
+	T   parent;     // parent vertex
+	int weight;     // cummulative weight so far
+
+	explicit path_info(const T &p, int w) : parent(p), weight(w) {}
+};
+
+/*
+ * Manages shortest path details.
+ */
+template<typename T>
+class shortest_path
+{
+private:
+	T sentinel;                     // sentinel to indicate no parent, typically -1 or null.
+	map<T, path_info<T>> sp;	// vertex -> (parent-vertex + cummulative-weight)
+
+public:
+	shortest_path(const T &s) : sentinel(s) {}
+
+	/*
+	 * If the vertex has already been visited, return the assigned weight. Else
+	 * return INT_MAX (representative of infinity).
+	 */
+	int weight(const T &v) const
+	{
+		typename map<T, path_info<T>>::const_iterator it;
+		if ((it = sp.find(v)) != sp.end())
+			return it->second.weight;
+		return INT_MAX;
+	}
+
+	/*
+	 * Assign weight to the vertex. No parent.
+	 */
+	void add(const T &v, int w)
+	{
+		add(v, sentinel, w);
+	}
+
+	/*
+	 * Assign weight to the vertex.
+	 */
+	void add(const T &v, const T &p, int w)
+	{
+		typename map<T, path_info<T>>::iterator it;
+		it = sp.find(v);
+		if (it == sp.end()) {
+			path_info<T> pi(p, w);
+			sp.insert(make_pair(v, pi));
+		} else {
+			it->second.parent = p;
+			it->second.weight = w;
+		}
+	}
+
+	/*
+	 * Return path taken from src vertex to dest vertex.
+	 */
+	vector<T> path(const T &src, const T &dest)
+	{
+		vector<T> p;
+		const T &v = dest;
+
+		while (sp[v].parent != sentinel) {
+			p.push_back(v);
+			v = sp[v].parent;
+		}
+
+		return p;
+	}
+
+	void dump()
+	{
+		for (auto elem : sp)
+			cout << elem.first << " -> "
+				<< elem.second.weight << " ("
+				<< elem.second.parent << ")"
+				<< endl;
+	}
+};
+```
+
+### Special case (DAG)
+- Perform toplogical sort.
+- All vertices, other than the starting vertex *v*, are assigned weight of infinity.
+- The starting vertex *v* is assigned the weight of 0.
+- The other vertices are traversed (and cummulative weight of each vertex is calculated) in the toplogical sort order.
+- If the weight is less than what we already have, update it.
+```C++
+/*
+ * Perform topological sorting.
+ *
+ * @param [in]  g       the weighted graph.
+ * @param [in]  visitor the visitor class.
+ * @param [in]  current the current vertex being visited.
+ * @param [in]  stop    the last vertex to add to the stack.
+ * @param [out] stk     the toplogical sorted vertex on return.
+ */
+template<typename T>
+static void
+topological_sort(const weighted_graph<T> &g, visitor<T> &visitor, const vertex<T> &current, const T &stop, stack<T> &stk)
+{
+	if (visitor.is_visited(current))
+		return;
+
+	visitor.set_visited(current, true);
+
+	typename vector<edge<T>>::const_iterator it;
+	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it)
+		topological_sort(g, visitor, g.get_vertex(it->vrtx), stop, stk);
+
+	/*
+	 * Add the vertex to the stack until vertex 'stop' is seen.
+	 */
+	if (stk.empty() || (stk.top() != stop))
+		stk.push(current.vrtx);
+}
+
+/*
+ * Perform topological sorting.
+ *
+ * @param [in]  g      the graph.
+ * @param [in]  stop   the last vertex to add to the stack.
+ * @param [out] stk    the toplogical sorted vertex on return.
+ */
+template<typename T>
+void
+topological_sort(const weighted_graph<T> &g, const T &stop, stack<T> &stk)
+{
+	visitor<T> visitor;
+
+	typename vector<vertex<T>>::const_iterator it;
+	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
+		topological_sort(g, visitor, *it, stop, stk);
+}
+
+/*
+ * Single Source Shortest Path (SSSP) for DAG.
+ *
+ * Determine the minimum cost (weight) to traverse all vertices in the graph
+ * starting from the given vertex. The cost to traverse the starting
+ * vertex is 0. If the starting vertex is not the source of the DAG,
+ * some vertices will never be visited.
+ *
+ * Note: The vertices are visited in topological sort order, starting
+ * with the given 'start' vertex.
+ *
+ * @param [in]  g       the weighted graph.
+ * @param [in]  start   the starting vertex.
+ * @param [out] sp      the shortest path object with cost table.
+ */ 
+template<typename T>
+void
+dag_sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
+{
+	/*
+	 * Perform topological sort. Pass 'start' so that no vertex is pushed
+	 * on the stack once 'start' is seen.
+	 */
+	stack<T> stk;
+	topological_sort(g, start, stk);
+
+	/* Add the start vertex with weight of 0. */
+	sp.add(start, 0);
+
+	while (!stk.empty()) {
+		T v = stk.top();
+		stk.pop();
+
+		const vertex<T> &current = g.get_vertex(v);
+
+		typename vector<edge<T>>::const_iterator it;
+		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+			/*
+			 * Find the new cummulative weight of visiting it->vrtx from v.
+			 */
+			int w = sp.weight(v) + it->weight;
+
+			/*
+			 * If it is less than what is already in the table, update it.
+			 */
+			if (w < sp.weight(it->vrtx))
+				sp.add(it->vrtx, v, w);
+		}
+	}
+}
+```
