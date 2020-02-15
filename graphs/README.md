@@ -1127,11 +1127,11 @@ public:
 ```
 
 ## Single Source Shortest Path (SSSP)
-The problem is to find shortest paths from a given vertex *v* to all other vertices of the graph.<br>
+The problem is to find shortest paths from a given vertex *v* to all other vertices of the graph.
 
-We develop a simple data structure that:
-- Tracks weight at each vertex (we are tracking cumulative weight).
-- Tracks the parent vertex that used to reach the current vertex. This enables us to generate the whole path.
+A simple data structure is used to:
+- track weight at each vertex (we are tracking cumulative weight).
+- track the parent vertex that is used to reach the current vertex. This enables us to generate the whole path.
 
 ```C++
 /*
@@ -1226,8 +1226,8 @@ public:
 - Perform toplogical sort.
 - All vertices, other than the starting vertex *v*, are assigned weight of infinity.
 - The starting vertex *v* is assigned the weight of 0.
-- The other vertices are traversed (and cummulative weight of each vertex is calculated) in the toplogical sort order.
-- If the weight is less than what we already have, update it.
+- The other vertices are traversed (and cummulative weight of each vertex is calculated) in the **toplogical sort** order.
+- If the computed weight is lower that what has already been seen, the lower weight is assigned to the vertex.
 ```C++
 /*
  * Perform topological sorting.
