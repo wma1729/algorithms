@@ -1226,8 +1226,8 @@ public:
 - Perform toplogical sort.
 - All vertices, other than the starting vertex *v*, are assigned weight of infinity.
 - The starting vertex *v* is assigned the weight of 0.
-- The other vertices are traversed (and cummulative weight of each vertex is calculated) in the **toplogical sort** order.
-- If the computed weight is lower that what has already been seen, the lower weight is assigned to the vertex.
+- The other vertices are traversed in the **toplogical sort** order and the cummulative path to each vertex is calculated.
+- If the computed path is shorter that what has already been seen, the weight assigned to the vertex is updated.
 ```C++
 /*
  * Perform topological sorting.
@@ -1323,6 +1323,68 @@ dag_sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 			 */
 			if (w < sp.weight(it->vrtx))
 				sp.add(it->vrtx, v, w);
+		}
+	}
+}
+```
+
+### Generic case (Dijkstra's Algorithm)
+The idea is to perform DFS. But instead of picking the adjacent vertex arbitrarily, the vertex that yields the shortest path is chosen. This means all the unvisited adjacent vertices are evaluated first to find the shortest path. Most implementations however evaluate the path to the adjacent vertices and store them in a priority queue. A fetch from the priority queue then gives the vertex with the shortest path.
+```C++
+/*
+ * Single Source Shortest Path (SSSP) for generic case.
+ *
+ * Determine the minimum cost (weight) to traverse all vertices in the graph
+ * starting from the given vertex. The cost to traverse the starting
+ * vertex is 0.
+ *
+ * Note: The vertices are visited in priority search order i.e., the next
+ * vertex visited is the one with the minimum weight.
+ *
+ * @param [in]  g       the weighted graph.
+ * @param [in]  start   the starting vertex.
+ * @param [out] sp      the shortest path object with cost table.
+ */ 
+template<typename T>
+void
+sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
+{
+	visitor<T> visitor;
+
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
+
+	/* Push the current vertex to the priority queue with weight 0. */
+	pq.emplace(start, 0);
+
+	/* Add the start vertex with weight of 0. */
+	sp.add(start, 0);
+
+	while (!pq.empty()) {
+		edge<T> wv = pq.top();
+		pq.pop();
+
+		visitor.set_visited(wv.vrtx, true);
+
+		const vertex<T> &current = g.get_vertex(wv.vrtx);
+
+		typename vector<edge<T>>::const_iterator it;
+		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+			if (!visitor.is_visited(it->vrtx)) {
+				/*
+				 * Find the new cummulative weight of visiting it->vrtx from v.
+				 */
+				int w = sp.weight(wv.vrtx) + it->weight;
+
+				/*
+				 * If it is less than what is already in the table,
+				 * - update the shortest path table.
+				 * - push the vertex in to the priority queue.
+				 */
+				if (w < sp.weight(it->vrtx)) {
+					sp.add(it->vrtx, wv.vrtx, w);
+					pq.emplace(it->vrtx, w);
+				}
+			}
 		}
 	}
 }
