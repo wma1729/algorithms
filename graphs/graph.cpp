@@ -102,7 +102,7 @@ public:
 	graph(istream &is)
 	{
 		int dir;
-		int v1, v2;
+		T v1, v2;
 
 		is >> dir;
 		directed = (dir == 1);

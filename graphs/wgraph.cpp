@@ -15,16 +15,18 @@
 using namespace std;
 
 /*
- * Represents an end of the edge along with edge's weight.
+ * Represents an edge along with its weight.
  */
 template<typename T>
 struct edge
 {
-	T   vrtx;    // end of the edge
+	T   from;    // one end of the edge
+	T   to;      // the other end of the edge
 	int weight;  // weight of the edge
 
-	explicit edge(T v, int w) : vrtx(v), weight(w) {}
-	bool operator==(T v) const { return (this->vrtx == v); }
+	explicit edge(const T &v1, const T &v2, int w)
+		: from(v1), to(v2), weight(w) {}
+	bool operator==(const T &v) const { return (this->to == v); }
 };
 
 /*
@@ -34,7 +36,7 @@ template<typename T>
 struct vertex
 {
 	T                 vrtx;       // the vertex itself
-	vector<edge<T>>   adjacent;   // adjacent vertices
+	vector<edge<T> *> adjacent;   // adjacent vertices
 
 	explicit vertex(T v) : vrtx(v) {}
 	bool operator==(T v) const { return (this->vrtx == v); }
@@ -50,6 +52,7 @@ private:
 	bool                directed;       // directed or undirected?
 	size_t              count;          // number of vertices
 	vector<vertex<T>>   vertices;       // vertices in the graph
+	vector<edge<T> *>   edges;
 
 	/*
 	 * Get a vertex, v.
@@ -72,8 +75,16 @@ private:
 	 */
 	void add_edge(vertex<T> &from, const vertex<T> &to, int weight)
 	{
-		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
-			from.adjacent.emplace_back(to.vrtx, weight);
+		typename vector<edge<T> *>::iterator it;
+		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
+			edge<T> *e = *it;
+			if (e->to == to.vrtx)
+				return;
+		}
+
+		edge<T> *e = new edge<T>(from.vrtx, to.vrtx, weight);
+		edges.push_back(e);
+		from.adjacent.push_back(e);
 	}
 
 	/*
@@ -101,10 +112,11 @@ private:
 				/*
 				 * Now add all the adjacent ones to the queue.
 				 */
-				typename vector<edge<T>>::const_iterator it;
+				typename vector<edge<T> *>::const_iterator it;
 				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it) {
-					os << from << " " << it->vrtx << " " << it->weight << endl;
-					q.push(it->vrtx);
+					const edge<T> *e =  *it;
+					os << e->from << " " << e->to << " " << e->weight << endl;
+					q.push(e->to);
 				}
 			}
 		}
@@ -116,7 +128,8 @@ public:
 	weighted_graph(istream &is)
 	{
 		int dir;
-		int v1, v2, w;
+		T v1, v2;
+		int w;
 
 		is >> dir;
 		directed = (dir == 1);
@@ -124,6 +137,16 @@ public:
 		while (is) {
 			is >> v1 >> v2 >> w;
 			add_edge(v1, v2, w);
+		}
+	}
+
+	~weighted_graph()
+	{
+		typename vector<edge<T> *>::iterator it = edges.begin();
+		while (it != edges.end()) {
+			edge<T> *e = *it;
+			delete e;
+			++it;
 		}
 	}
 
@@ -185,25 +208,6 @@ public:
 	}
 
 	/*
-	 * Reverse a graph.
-	 */
-	weighted_graph<T> reverse() const
-	{
-		weighted_graph<T> g(true);
-
-		if (directed) {
-			for (auto v : vertices) {
-				for (auto adj : v.adjacent) 
-					g.add_edge(adj.vrtx, v.vrtx, adj.weight);
-			}
-		} else {
-			g = *this;
-		}
-
-		return g;
-	}
-
-	/*
 	 * Serialize a graph.
 	 * Line 1: 0|1 (undirected or directed)
 	 * Line 2: v1 v2 w1 (two vertices of an edge and its weight)
@@ -227,18 +231,8 @@ public:
 	void dump()
 	{
 		cout << "Number of vertices: " << count << endl;
-
-		for (auto v : vertices) {
-			cout << v.vrtx;
-
-			if (!v.adjacent.empty())
-				cout << " -> ";
-
-			for (auto adj : v.adjacent) 
-				cout << adj.vrtx << "(" << adj.weight << ") ";
-
-			cout << endl;
-		}
+		for (auto e : edges)
+			cout << e->from << " -> " << e->to << "(" << e->weight << ")" << endl;
 	}
 };
 
@@ -317,9 +311,11 @@ topological_sort(const weighted_graph<T> &g, visitor<T> &visitor, const vertex<T
 
 	visitor.set_visited(current, true);
 
-	typename vector<edge<T>>::const_iterator it;
-	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it)
-		topological_sort(g, visitor, g.get_vertex(it->vrtx), stop, stk);
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+		const edge<T> *e = *it;
+		topological_sort(g, visitor, g.get_vertex(e->to), stop, stk);
+	}
 
 	/*
 	 * Add the vertex to the stack until vertex 'stop' is seen.
@@ -347,7 +343,7 @@ topological_sort(const weighted_graph<T> &g, const T &stop, stack<T> &stk)
 }
 
 /*
- * Path information. Structurally similar to edge<T>.
+ * Path information.
  */
 template<typename T>
 struct path_info
@@ -370,6 +366,8 @@ private:
 
 public:
 	shortest_path(const T &s) : sentinel(s) {}
+
+	const T &sentinel_value() const { return sentinel; }
 
 	/*
 	 * If the vertex has already been visited, return the assigned weight. Else
@@ -468,18 +466,19 @@ dag_sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 
 		const vertex<T> &current = g.get_vertex(v);
 
-		typename vector<edge<T>>::const_iterator it;
+		typename vector<edge<T> *>::const_iterator it;
 		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+			const edge<T> *e = *it;
 			/*
-			 * Find the new cummulative weight of visiting it->vrtx from v.
+			 * Find the new cummulative weight of visiting e->to from e->from.
 			 */
-			int w = sp.weight(v) + it->weight;
+			int w = sp.weight(e->from) + e->weight;
 
 			/*
 			 * If it is less than what is already in the table, update it.
 			 */
-			if (w < sp.weight(it->vrtx))
-				sp.add(it->vrtx, v, w);
+			if (w < sp.weight(e->to))
+				sp.add(e->to, e->from, w);
 		}
 	}
 }
@@ -516,35 +515,36 @@ sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
 
 	/* Push the current vertex to the priority queue with weight 0. */
-	pq.emplace(start, 0);
+	pq.emplace(sp.sentinel_value(), start, 0);
 
 	/* Add the start vertex with weight of 0. */
 	sp.add(start, 0);
 
 	while (!pq.empty()) {
-		edge<T> wv = pq.top();
+		edge<T> the_edge = pq.top();
 		pq.pop();
 
-		visitor.set_visited(wv.vrtx, true);
+		visitor.set_visited(the_edge.to, true);
 
-		const vertex<T> &current = g.get_vertex(wv.vrtx);
+		const vertex<T> &current = g.get_vertex(the_edge.to);
 
-		typename vector<edge<T>>::const_iterator it;
+		typename vector<edge<T> *>::const_iterator it;
 		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
-			if (!visitor.is_visited(it->vrtx)) {
+			const edge<T> *e = *it;
+			if (!visitor.is_visited(e->to)) {
 				/*
-				 * Find the new cummulative weight of visiting it->vrtx from v.
+				 * Find the new cummulative weight of visiting e->to from e->from
 				 */
-				int w = sp.weight(wv.vrtx) + it->weight;
+				int w = sp.weight(e->from) + e->weight;
 
 				/*
 				 * If it is less than what is already in the table,
 				 * - update the shortest path table.
 				 * - push the vertex in to the priority queue.
 				 */
-				if (w < sp.weight(it->vrtx)) {
-					sp.add(it->vrtx, wv.vrtx, w);
-					pq.emplace(it->vrtx, w);
+				if (w < sp.weight(e->to)) {
+					sp.add(e->to, e->from, w);
+					pq.emplace(e->from, e->to, w);
 				}
 			}
 		}
