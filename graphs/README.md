@@ -1227,7 +1227,7 @@ public:
 - All vertices, other than the starting vertex *v*, are assigned weight of infinity.
 - The starting vertex *v* is assigned the weight of 0.
 - The other vertices are traversed in the **toplogical sort** order and the cummulative path to each vertex is calculated.
-- If the computed path is shorter that what has already been seen, the weight assigned to the vertex is updated.
+- If the computed path is shorter than what has already been seen, the weight assigned to the vertex is updated.
 ```C++
 /*
  * Perform topological sorting.
@@ -1329,11 +1329,11 @@ dag_sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 ```
 
 ### Generic case (Dijkstra's Algorithm)
-When traversing the graph, always pick the next vertex as the one that yields the shortest path. This means all the unvisited adjacent vertices are evaluated first to find the shortest path. Most implementations however evaluate the path to the adjacent vertices and store them in a priority queue. A fetch from the priority queue then gives the vertex with the shortest path.
-Similar to DAG case,
+When traversing the graph, always pick the next vertex as the one that yields the shortest path. This means all the unvisited adjacent vertices are evaluated first to find the shortest path. Most implementations, however, evaluate the path to all the adjacent vertices and store them in a priority queue. A fetch from the priority queue then gives the vertex with the shortest path.
+Similar to the DAG case,
 - All vertices, other than the starting vertex *v*, are assigned weight of infinity.
 - The starting vertex *v* is assigned the weight of 0.
-- The path to all unvisited adjacent vertices is evaluated and stored in a priority queue.
+- The paths to all the unvisited adjacent vertices are evaluated and stored in a priority queue.
 - The vertex with the shortest path is evaluated next (as a result of fetching next vertex from the priority queue).
 - This continues until all the vertices are visited and the priority queue is empty.
 ```C++
@@ -1395,3 +1395,9 @@ sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 	}
 }
 ```
+## Minimum-cost Spanning Tree (MCST or simply MST)
+A **spanning tree** of a given undirected (and connected) graph is a subgraph that is a tree and contains all the vertices of the graph. The **minimum-cost spanning tree** is a spanning tree with minimum cost (or weight) for such a weighted graph.
+
+### Prim's algorithm
+
+### Kruskal's algorithm
