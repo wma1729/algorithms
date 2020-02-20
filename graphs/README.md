@@ -1409,5 +1409,78 @@ sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 A **spanning tree** of a given undirected (and connected) graph is a subgraph that is a tree and contains all the vertices of the graph. The **minimum-cost spanning tree** is a spanning tree with minimum cost (or weight) for such a weighted graph.
 
 ### Prim's algorithm
+An arbitrary starting vertex is chosen. Look at all the edges originating from the starting vertex. Add the edge with the minumum weight to the MST. The edges gives us the next set of vertices to be looked at (provided they are not already visited). As the edges are discovered, new edges are looked at and edges with minumum weight amongst them are added to the MST tree.
+```C++
+/*
+ * Add edges originiating from a given vertex to the priority queue.
+ *
+ * @param [inout] pq       the priority queue.
+ * @param [inout] visitor  the visitor class.
+ * @param [in]    origin   the origin vertex.
+ */
+template<typename T>
+void
+add_edges(priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> &pq,
+	visitor<T> &visitor,
+	const vertex<T> &origin)
+{
+	/* Mark the vertex as visited. */
+	visitor.set_visited(origin, true);
+
+	/*
+	 * Add all the edges originating from the origin to the priority queue
+	 * (provided the other end-point is not already visited).
+	 */
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = origin.adjacent.begin(); it != origin.adjacent.end(); ++it) {
+		const edge<T> *e = *it;
+		if (!visitor.is_visited(e->to))
+			pq.push(*e);
+	}
+}
+
+/*
+ * Find the minimum-cost spanning tree: Prim
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_prim(const weighted_graph<T> &g)
+{
+	size_t vc = g.num_vertices();   // number of vertices in the graph
+	size_t ec = vc - 1;             // number of edges in the MST
+	visitor<T> visitor;
+	vector<edge<T>> mst_edges;
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
+
+	/*
+	 * Pick an arbitrary vertex (the first in our case).
+	 */
+	add_edges(pq, visitor, g.first());
+
+	/*
+	 * While the priority queue is not empty
+	 * and not all the edges are discovered.
+	 */
+	while (!pq.empty() && (mst_edges.size() < ec)) {
+		const edge<T> the_edge = pq.top();
+		pq.pop();
+
+		// If both the end-point of the edge are visited, continue.
+		if (visitor.is_visited(the_edge.to))
+			continue;
+
+		// Add the edge to the MST
+		mst_edges.push_back(the_edge);
+
+		add_edges(pq, visitor, g.get_vertex(the_edge.to));
+	}
+
+	return mst_edges;
+}
+```
 
 ### Kruskal's algorithm

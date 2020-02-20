@@ -179,6 +179,14 @@ public:
 	}
 
 	/*
+	 * Get the first vertex.
+	 */
+	const vertex<T> & first() const
+	{
+		return vertices[0];
+	}
+
+	/*
 	 * Add an edge (from, to, weight). If the graph is undirected, edge (to, from)
 	 * is added as well.
 	 */
@@ -281,6 +289,9 @@ public:
 
 	void set_visited(const T &v, bool val)
 	{
+#if defined(DEBUG)
+		cout << "set_visited(" << v << ") = " << boolalpha << val << endl;
+#endif
 		if (val)
 			visited.insert(v);
 		else
@@ -551,6 +562,77 @@ sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 	}
 }
 
+/*
+ * Add edges originiating from a given vertex to the priority queue.
+ *
+ * @param [inout] pq       the priority queue.
+ * @param [inout] visitor  the visitor class.
+ * @param [in]    origin   the origin vertex.
+ */
+template<typename T>
+void
+add_edges(priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> &pq,
+	visitor<T> &visitor,
+	const vertex<T> &origin)
+{
+	/* Mark the vertex as visited. */
+	visitor.set_visited(origin, true);
+
+	/*
+	 * Add all the edges originating from the origin to the priority queue
+	 * (provided the other end-point is not already visited).
+	 */
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = origin.adjacent.begin(); it != origin.adjacent.end(); ++it) {
+		const edge<T> *e = *it;
+		if (!visitor.is_visited(e->to))
+			pq.push(*e);
+	}
+}
+
+/*
+ * Find the minimum-cost spanning tree: Prim
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_prim(const weighted_graph<T> &g)
+{
+	size_t vc = g.num_vertices();   // number of vertices in the graph
+	size_t ec = vc - 1;             // number of edges in the MST
+	visitor<T> visitor;
+	vector<edge<T>> mst_edges;
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
+
+	/*
+	 * Pick an arbitrary vertex (the first in our case).
+	 */
+	add_edges(pq, visitor, g.first());
+
+	/*
+	 * While the priority queue is not empty
+	 * and not all the edges are discovered.
+	 */
+	while (!pq.empty() && (mst_edges.size() < ec)) {
+		const edge<T> the_edge = pq.top();
+		pq.pop();
+
+		// If both the end-point of the edge are visited, continue.
+		if (visitor.is_visited(the_edge.to))
+			continue;
+
+		// Add the edge to the MST
+		mst_edges.push_back(the_edge);
+
+		add_edges(pq, visitor, g.get_vertex(the_edge.to));
+	}
+
+	return mst_edges;
+}
+
 static int
 usage(const char *progname)
 {
@@ -558,7 +640,8 @@ usage(const char *progname)
 		<< "    [-dump]                                 Dump the graph read from file." << endl
 		<< "    [-serialize]                            Serialize the graph." << endl
 		<< "    [-dag_sssp -v <vertex>]                 DAG single source shortest path." << endl
-		<< "    [-sssp -v <vertex>]                     Single source shortest path." << endl;
+		<< "    [-sssp -v <vertex>]                     Single source shortest path." << endl
+		<< "    [-mst_prim]                             Minumum spanning tree." << endl;
 	return 1;
 }
 
@@ -568,7 +651,8 @@ enum operation
 	DUMP,
 	SERIALIZE,
 	DAG_SSSP,
-	SSSP
+	SSSP,
+	MST_PRIM
 };
 
 // Driver code
@@ -612,6 +696,8 @@ main(int argc, const char **argv)
 			op = DAG_SSSP;
 		} else if (strcmp(argv[i], "-sssp") == 0) {
 			op = SSSP;
+		} else if (strcmp(argv[i], "-mst_prim") == 0) {
+			op = MST_PRIM;
 		} else {
 			return usage(argv[0]);
 		}
@@ -647,6 +733,18 @@ main(int argc, const char **argv)
 				shortest_path<int> sp(-1);
 				sssp(g, v1, sp);
 				sp.dump();
+			}
+			break;
+
+		case MST_PRIM:
+			{
+				vector<edge<int>> mst_edges = std::move(mst_prim(g));
+				int sum = 0;
+				for (auto edge : mst_edges) {
+					sum += edge.weight;
+					cout << edge.from << " " << edge.to << " (" << edge.weight << ")" << endl;
+				}
+				cout << "Minimum-cost = " << sum << endl;
 			}
 			break;
 
