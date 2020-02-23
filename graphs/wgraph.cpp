@@ -11,6 +11,7 @@
 #include <stack>
 #include <algorithm>
 #include <climits>
+#include "uf.h"
 
 using namespace std;
 
@@ -206,6 +207,7 @@ public:
 	bool is_directed() const { return directed; }
 	size_t num_vertices() const { return count; }
 	const vector<vertex<T>> &get_vertices() const { return vertices; }
+	const vector<edge<T> *> &get_edges() const { return edges; }
 
 	/*
 	 * Find the degree of an vertex, v.
@@ -633,6 +635,56 @@ mst_prim(const weighted_graph<T> &g)
 	return mst_edges;
 }
 
+template<typename T>
+bool weight_lt(const edge<T> *v1, const edge<T> *v2)
+{
+	return (v1->weight < v2->weight);
+}
+
+/*
+ * Find the minimum-cost spanning tree: Kruskal
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_kruskal(const weighted_graph<T> &g)
+{
+	vector<edge<T>> mst_edges;
+
+	/*
+	 * Get all the edges of the graph.
+	 */
+	vector<edge<T> *> edges = g.get_edges();
+
+	/*
+	 * Sort the edges based on the weight.
+	 */
+	sort(edges.begin(), edges.end(), weight_lt<T>);
+
+	union_find<T> uf;
+
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = edges.begin(); it != edges.end(); ++it) {
+		const edge<T> *e = *it;
+
+		/*
+		 * Add the edges to the MST as long as
+		 * no loops are formed. The union-find is
+		 * used to determine if a loop is formed
+		 * by adding an edge.
+		 */
+		if (!uf.connected(e->from, e->to)) {
+			uf.union_op(e->from, e->to);
+			mst_edges.push_back(*e);
+		}
+	}
+
+	return mst_edges;
+}
+
 static int
 usage(const char *progname)
 {
@@ -652,7 +704,8 @@ enum operation
 	SERIALIZE,
 	DAG_SSSP,
 	SSSP,
-	MST_PRIM
+	MST_PRIM,
+	MST_KRUSKAL
 };
 
 // Driver code
@@ -698,6 +751,8 @@ main(int argc, const char **argv)
 			op = SSSP;
 		} else if (strcmp(argv[i], "-mst_prim") == 0) {
 			op = MST_PRIM;
+		} else if (strcmp(argv[i], "-mst_kruskal") == 0) {
+			op = MST_KRUSKAL;
 		} else {
 			return usage(argv[0]);
 		}
@@ -739,6 +794,18 @@ main(int argc, const char **argv)
 		case MST_PRIM:
 			{
 				vector<edge<int>> mst_edges = std::move(mst_prim(g));
+				int sum = 0;
+				for (auto edge : mst_edges) {
+					sum += edge.weight;
+					cout << edge.from << " " << edge.to << " (" << edge.weight << ")" << endl;
+				}
+				cout << "Minimum-cost = " << sum << endl;
+			}
+			break;
+
+		case MST_KRUSKAL:
+			{
+				vector<edge<int>> mst_edges = std::move(mst_kruskal(g));
 				int sum = 0;
 				for (auto edge : mst_edges) {
 					sum += edge.weight;

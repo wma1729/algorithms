@@ -1484,3 +1484,55 @@ mst_prim(const weighted_graph<T> &g)
 ```
 
 ### Kruskal's algorithm
+All the edges of the graphs are sorted in ascending order of weight. The edges with lowest weights are chosen and added to the MST. If adding an edge results in a loop, that edge is skipped. Union-Find is an easy way to determine if adding an edge will lead to a loop.
+```C++
+template<typename T>
+bool weight_lt(const edge<T> *v1, const edge<T> *v2)
+{
+	return (v1->weight < v2->weight);
+}
+
+/*
+ * Find the minimum-cost spanning tree: Kruskal
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_kruskal(const weighted_graph<T> &g)
+{
+	vector<edge<T>> mst_edges;
+
+	/*
+	 * Get all the edges of the graph.
+	 */
+	vector<edge<T> *> edges = g.get_edges();
+
+	/*
+	 * Sort the edges based on the weight.
+	 */
+	sort(edges.begin(), edges.end(), weight_lt<T>);
+
+	union_find<T> uf;
+
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = edges.begin(); it != edges.end(); ++it) {
+		const edge<T> *e = *it;
+
+		/*
+		 * Add the edges to the MST as long as
+		 * no loops are formed. The union-find is
+		 * used to determine if a loop is formed
+		 * by adding an edge.
+		 */
+		if (!uf.connected(e->from, e->to)) {
+			uf.union_op(e->from, e->to);
+			mst_edges.push_back(*e);
+		}
+	}
+
+	return mst_edges;
+}
+```
