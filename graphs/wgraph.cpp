@@ -356,18 +356,6 @@ topological_sort(const weighted_graph<T> &g, const T &stop, stack<T> &stk)
 }
 
 /*
- * Path information.
- */
-template<typename T>
-struct path_info
-{
-	T   parent;     // parent vertex
-	int weight;     // cummulative weight so far
-
-	explicit path_info(const T &p, int w) : parent(p), weight(w) {}
-};
-
-/*
  * Manages shortest path details.
  */
 template<typename T>
@@ -375,7 +363,39 @@ class shortest_path
 {
 private:
 	T sentinel;                     // sentinel to indicate no parent, typically -1 or null.
-	map<T, path_info<T>> sp;	// vertex -> (parent-vertex + cummulative-weight)
+	vector<edge<T>> paths;          // all paths recorded
+	set<T> vertices;                // all known vertices
+
+	const T &find_parent(const T &v, int &w)
+	{
+		typename vector<edge<T>>::const_iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->to == v) {
+				w = it->weight;	
+				return it->from;
+			}
+		}
+		w = 0;
+		return sentinel;
+	}
+
+	/*
+	 * Print path taken from src vertex to dest vertex.
+	 */
+	void path(const T &src, const T &dest)
+	{
+		int w = 0;
+		T v = dest;
+
+		do {
+			const T &to = find_parent(v, w);
+			cout << v << " (" << w << "), ";
+			w = 0;
+			v = to;
+		} while (v != src);
+
+		cout << src << " (" << 0 << ")" << endl;
+	}
 
 public:
 	shortest_path(const T &s) : sentinel(s) {}
@@ -388,9 +408,11 @@ public:
 	 */
 	int weight(const T &v) const
 	{
-		typename map<T, path_info<T>>::const_iterator it;
-		if ((it = sp.find(v)) != sp.end())
-			return it->second.weight;
+		typename vector<edge<T>>::const_iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->to == v)
+				return it->weight;
+		}
 		return INT_MAX;
 	}
 
@@ -399,48 +421,37 @@ public:
 	 */
 	void add(const T &v, int w)
 	{
-		add(v, sentinel, w);
+		add(sentinel, v, w);
 	}
 
 	/*
 	 * Assign weight to the vertex.
 	 */
-	void add(const T &v, const T &p, int w)
+	void add(const T &p, const T &v, int w)
 	{
-		typename map<T, path_info<T>>::iterator it;
-		it = sp.find(v);
-		if (it == sp.end()) {
-			path_info<T> pi(p, w);
-			sp.insert(make_pair(v, pi));
-		} else {
-			it->second.parent = p;
-			it->second.weight = w;
-		}
-	}
+		if (p != sentinel)
+			vertices.insert(p);
+		vertices.insert(v);
 
-	/*
-	 * Return path taken from src vertex to dest vertex.
-	 */
-	vector<T> path(const T &src, const T &dest)
-	{
-		vector<T> p;
-		const T &v = dest;
-
-		while (sp[v].parent != sentinel) {
-			p.push_back(v);
-			v = sp[v].parent;
+		typename vector<edge<T>>::iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->to == v) {
+				it->from = p;
+				it->weight = w;
+				return;
+			}
 		}
 
-		return p;
+		edge<T> e(p, v, w);
+		paths.push_back(e);
 	}
 
-	void dump()
+	void dump(const T &src)
 	{
-		for (auto elem : sp)
-			cout << elem.first << " -> "
-				<< elem.second.weight << " ("
-				<< elem.second.parent << ")"
-				<< endl;
+		for (auto v : vertices) {
+			if (v != src)
+				path(src, v);
+		}
 	}
 };
 
@@ -491,7 +502,7 @@ dag_sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 			 * If it is less than what is already in the table, update it.
 			 */
 			if (w < sp.weight(e->to))
-				sp.add(e->to, e->from, w);
+				sp.add(e->from, e->to, w);
 		}
 	}
 }
@@ -556,7 +567,7 @@ sssp(const weighted_graph<T> &g, const T &start, shortest_path<T> &sp)
 				 * - push the vertex in to the priority queue.
 				 */
 				if (w < sp.weight(e->to)) {
-					sp.add(e->to, e->from, w);
+					sp.add(e->from, e->to, w);
 					pq.emplace(e->from, e->to, w);
 				}
 			}
@@ -693,7 +704,8 @@ usage(const char *progname)
 		<< "    [-serialize]                            Serialize the graph." << endl
 		<< "    [-dag_sssp -v <vertex>]                 DAG single source shortest path." << endl
 		<< "    [-sssp -v <vertex>]                     Single source shortest path." << endl
-		<< "    [-mst_prim]                             Minumum spanning tree." << endl;
+		<< "    [-mst_prim]                             Minumum spanning tree (Prim's algorithm)." << endl
+		<< "    [-mst_kruskal]                          Minumum spanning tree (Kruskal's algorithm)." << endl;
 	return 1;
 }
 
@@ -779,7 +791,7 @@ main(int argc, const char **argv)
 			{
 				shortest_path<int> sp(-1);
 				dag_sssp(g, v1, sp);
-				sp.dump();
+				sp.dump(v1);
 			}
 			break;
 
@@ -787,7 +799,7 @@ main(int argc, const char **argv)
 			{
 				shortest_path<int> sp(-1);
 				sssp(g, v1, sp);
-				sp.dump();
+				sp.dump(v1);
 			}
 			break;
 

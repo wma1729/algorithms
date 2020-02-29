@@ -1,6 +1,6 @@
 DBG     = -g
 CFLAGS  = -c
-DEFINES = -DDEBUG
+DEFINES =
 
 OBJS   = graph.o wgraph.o
 
