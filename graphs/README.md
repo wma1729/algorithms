@@ -5,6 +5,9 @@ An edge connects two vertices and is represented by a pair of the two vertices i
 A graph could be:
 * **directed**, also called **digraph**, with a sense of direction, where an edge is an ordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*),
 * **undirected** where an edge is an unordered pair (*v<sub>1</sub>*, *v<sub>2</sub>*) and (*v<sub>2</sub>*, *v<sub>1</sub>*).
+A graph could be:
+* **unweighted** where there is no cost/length/time is associated with an edge.
+* **weighted** where is a a cost/length/time associated with an edge.
 
 ![A simple graph](graph.jpeg)
 
@@ -41,17 +44,111 @@ A graph could be:
 Adjancency list is the most common representation used for graph. Here is a possible C++ implementation:
 ```C++
 /*
+ * Represents an edge and optional weight.
+ */
+template<typename T>
+class edge
+{
+private:
+	T       _from;   // start/source vertex
+	T       _to;     // end/sink vertex
+	double  _wt;     // optional weight, 0.0 for unweighted graph.
+
+public:
+	explicit edge(const T & v1, const T & v2)
+		: _from(v1), _to(v2), _wt(0.0) {}
+	explicit edge(const T & v1, const T & v2, double w)
+		: _from(v1), _to(v2), _wt(w) {}
+
+	T source() const { return _from; }
+	void source(const T & v) { _from = v; }
+
+	T sink() const { return _to; }
+	void sink(const T & v) { _to = v; }
+
+	double weight() const { return _wt; }
+	void weight(double w) { _wt = w; }
+	bool is_weighted() const { return (_wt != 0.0); }
+
+	bool operator==(const T & v) { return (sink() == v); }
+	bool operator==(const edge<T> &e)
+	{
+		return ((source() == e.source()) &&
+			(sink() == e.sink()) &&
+			(weight() == e.weight()));
+	}
+};
+
+template<typename T>
+ostream &
+operator << (ostream &os, const edge<T> &e)
+{
+	os << "[(" << e.source() << ", " << e.sink() << ")";
+	if (e.is_weighted())
+		os << ", "  << e.weight();
+	os << "]";
+	return os;
+}
+
+/*
  * Vertex of a graph.
  */
 template<typename T>
-struct vertex
+class vertex
 {
-	T           vrtx;       // the vertex itself
-	vector<T>   adjacent;   // adjacent vertices
+private:
+	T                   _vrtx;  // the vertex itself
+	vector<edge<T> *>   _edges; // edges originating from the vertex
 
-	explicit vertex(T v) : vrtx(v) {}
-	bool operator==(T v) const { return (this->vrtx == v); }
+public:
+	explicit vertex(const T & v) : _vrtx(v) {}
+
+	// type operator
+	operator T() const { return _vrtx; }
+
+	// get adjacent vertices
+	vector<T> adjacent() const
+	{
+		vector<T> v;
+		for (auto e : _edges)
+			v.push_back(e->sink());
+		return v;
+	}
+
+	// add edge
+	void add_edge(edge<T> *e)
+	{
+		if (e && (e->source() == _vrtx))
+			_edges.push_back(e);
+	}
+
+	// get all edges originating from the vertex
+	const vector<edge<T> *> & edges() const { return _edges; }
+	vector<edge<T> *> & edges() { return _edges; }
+
+	// get degree of the vertex.
+	size_t degree() const { return _edges.size(); }
+
+	bool operator==(const T & v) const { return (_vrtx == v); }
 };
+
+template<typename T>
+ostream &
+operator << (ostream &os, const vertex<T> &v)
+{
+	T vrtx = v;
+	os << vrtx << " : ";
+
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = v.edges().begin(); it != v.edges().end(); ++it) {
+		if (it != v.edges().begin())
+			os << ", ";
+		const edge<T> *e = *it;
+		os << *e;
+	}
+
+	return os;
+}
 
 /*
  * Graph implementation.
@@ -60,9 +157,10 @@ template<typename T>
 class graph
 {
 private:
-	bool                directed;       // directed or undirected?
-	size_t              count;          // number of vertices
-	vector<vertex<T>>   vertices;       // vertices in the graph
+	bool                _directed;      // directed or undirected?
+	size_t              _count;         // number of vertices
+	vector<vertex<T>>   _vertices;      // vertices in the graph
+	vector<edge<T> *>   _edges;         // all edges in the graph
 
 	/*
 	 * Get a vertex, v.
@@ -70,8 +168,8 @@ private:
 	 */
 	vertex<T> & get_vertex(const T &v)
 	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
+		typename vector<vertex<T>>::iterator it = find(_vertices.begin(), _vertices.end(), v);
+		if (it == _vertices.end()) {
 			ostringstream oss;
 			oss << "vertex " << v << " not found";
 			throw out_of_range(oss.str());
@@ -81,26 +179,101 @@ private:
 	}
 
 	/*
-	 * Add an edge (from, to).
+	 * Add an edge (from, to, optional-weight).
 	 */
-	void add_edge(vertex<T> &from, const vertex<T> &to)
+	void add_edge(vertex<T> &from, const vertex<T> &to, double weight = 0.0)
 	{
-		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
-			from.adjacent.push_back(to.vrtx);
+		// check if the edge already exists
+		typename vector<edge<T> *>::iterator it;
+		for (it = from.edges().begin(); it != from.edges().end(); ++it) {
+			edge<T> *e = *it;
+			if (e->sink() == to) {
+				// edge already exists! update weight.
+				e->weight(weight);
+				return;
+			}
+		}
+
+		edge<T> *e = new edge<T>(from, to, weight);
+		_edges.push_back(e);
+		from.add_edge(e);
+	}
+
+	/*
+	 * Serialize the graph using BFS.
+	 */
+	void serialize(ostream &os, set<T> &visited, const T &from)
+	{
+		queue<T> q;
+
+		q.push(from);
+
+		while (!q.empty()) {
+			T current = q.front();
+			q.pop();
+
+			if (visited.end() == visited.find(from)) {
+				/*
+				 * Not visited yet.
+				 * Process and mark as visited.
+				 */
+				visited.insert(current);
+
+				const vertex<T> &v = get_vertex(current);
+
+				/*
+				 * Now add all the adjacent ones to the queue.
+				 */
+				typename vector<edge<T> *>::const_iterator it;
+				for (it = v.edges().begin(); it != v.edges().end(); ++it) {
+					const edge<T> *e =  *it;
+					os << e->source() << " " << e->sink() << " " << e->weight() << endl;
+					q.push(e->sink());
+				}
+			}
+		}
 	}
 
 public:
-	graph(bool dir = true) : directed(dir), count(0) {}
+	graph(bool dir = true) : _directed(dir), _count(0) {}
+
+	graph(istream &is)
+	{
+		int dir;
+		T v1, v2;
+		double w = 0.0;
+
+		_count = 0;
+
+		is >> dir;
+		_directed = (dir == 1);
+
+		while (is) {
+			is >> v1 >> v2 >> w;
+			add_edge(v1, v2, w);
+		}
+
+	}
+
+	~graph()
+	{
+		typename vector<edge<T> *>::iterator it = _edges.begin();
+		while (it != _edges.end()) {
+			edge<T> *e = *it;
+			delete e;
+			++it;
+		}
+	}
 
 	/*
 	 * Add a vertex, v.
 	 */
 	void add_vertex(const T &v)
 	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			vertices.emplace_back(v);
-			++count;
+		typename vector<vertex<T>>::iterator it = find(_vertices.begin(), _vertices.end(), v);
+		if (it == _vertices.end()) {
+			_vertices.emplace_back(v);
+			++_count;
 		}
 	}
 
@@ -110,8 +283,8 @@ public:
 	 */
 	const vertex<T> & get_vertex(const T &v) const
 	{
-		typename vector<vertex<T>>::const_iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
+		typename vector<vertex<T>>::const_iterator it = find(_vertices.begin(), _vertices.end(), v);
+		if (it == _vertices.end()) {
 			ostringstream oss;
 			oss << "vertex " << v << " not found";
 			throw out_of_range(oss.str());
@@ -121,10 +294,18 @@ public:
 	}
 
 	/*
-	 * Add an edge (from, to). If the graph is undirected, edge (to, from)
-	 * is added as well.
+	 * Get the first vertex.
 	 */
-	void add_edge(const T &from, const T &to)
+	const vertex<T> & first() const
+	{
+		return _vertices[0];
+	}
+
+	/*
+	 * Add an edge (from, to, optional-weight). If the graph is undirected,
+	 * edge (to, from, optional-weight) is added as well.
+	 */
+	void add_edge(const T &from, const T &to, double weight = 0.0)
 	{
 		add_vertex(from);
 		add_vertex(to);
@@ -132,26 +313,38 @@ public:
 		vertex<T> &v1 = get_vertex(from);
 		vertex<T> &v2 = get_vertex(to);
 
-		add_edge(v1, v2);
-		if (!directed)
-			add_edge(v2, v1);
+		add_edge(v1, v2, weight);
+		if (!_directed)
+			add_edge(v2, v1, weight);
 	}
 
-	bool is_directed() const { return directed; }
-	size_t num_vertices() const { return count; }
-	const vector<vertex<T>> &get_vertices() const { return vertices; }
+	bool directed() const { return _directed; }
+	size_t count() const { return _count; }
+	const vector<vertex<T>> &vertices() const { return _vertices; }
+	const vector<edge<T> *> &edges() const { return _edges; }
+
+	/*
+	 * Find the degree of an vertex, v.
+	 */
+	size_t degree(const T &v) const
+	{
+		return get_vertex(v).degree();
+	}
 
 	/*
 	 * Reverse a graph.
 	 */
-	graph<T> reverse()
+	graph<T> reverse() const
 	{
 		graph<T> g(true);
 
-		if (directed) {
-			for (auto v : vertices) {
-				for (auto adj : v.adjacent) 
-					add_edge(adj, v.vrtx);
+		if (_directed) {
+			for (auto v : _vertices) {
+				typename vector<edge<T> *>::const_iterator it;
+				for (it = v.edges().begin(); it != v.edges().end(); ++it) {
+					const edge<T> *e = *it;
+					g.add_edge(e->sink(), e->source(), e->weight());
+				}
 			}
 		} else {
 			g = *this;
@@ -159,22 +352,41 @@ public:
 
 		return g;
 	}
+	/*
+	 * Serialize a graph.
+	 * Line 1: 0|1 (undirected or directed)
+	 * Line 2: v1 v2 w1 (two vertices of an edge and its weight)
+	 * Line 3: v3 v4 w2 (two vertices of an edge and its weight)
+	 * ...
+	 */
+	void serialize(ostream &os)
+	{
+		set<T> visited;
+
+		cout << (_directed ? "1" : "0") << endl;
+		
+		typename vector<vertex<T>>::const_iterator it;
+		for (it = _vertices.begin(); it != _vertices.end(); ++it)
+			serialize(os, visited, *it);
+	}
 };
+
+template<typename T>
+ostream &
+operator << (ostream &os, const graph<T> &g)
+{
+	os << (g.directed() ? "Directed" : "Un-directed") << " graph with "
+		<< g.count() << " vertices" << endl;
+
+	for (auto v : g.vertices())
+		cout << v << endl;
+
+	return os;
+}
 ```
 
 ## Degree of a vertex
 The number of edges coming out of a vertex is the degree of that edge.
-```C++
-	// Part of graph class
-
-	/*
-	 * Find the degree of an vertex, v.
-	 */
-	size_t degree(T v) const
-	{
-		return get_vertex(v).adjacent.size();
-	}
-```
 
 ## Graph Traversal
 There are two main graph traversal methods based on the order in which the vertices are visited:
@@ -543,7 +755,7 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
  * Is there a cycle in the graph?
  *
  * @param [in] g       the graph.
- * @param [in] parent  the parent vertex of the first vertex; usually -1 for T = int.
+ * @param [in] parent  the sentinel vertex, usually -1 or NULL.
  *
  * @return true if there is a cycle in the graph, false otherwise.
  */
@@ -625,51 +837,32 @@ The algorithm involves:
 * Removing vertex with indegree of 0. This also mean updating the indegree of vertices adjacent to the removed vertex.
 * Putting the removed vertex in a queue.
 
-There is an alternate approach to get the same result. Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. When you pop the vertices from the stack, you get the correct order.
+There is an alternate approach to get the same result. Perform **DFS**. When you are returning from the last vertex (*sink*), add it to a stack. The stack holds the results of topological sorting in reversed order. When you pop the vertices from the stack, you get the correct order. In short, we do DFS with a specialized visitor.
 ```C++
 /*
- * Perform topological sorting.
- *
- * @param [in]  g       the graph.
- * @param [in]  visitor the visitor class.
- * @param [in]  current the current vertex being visited.
- * @param [out] stk     the toplogical sorted vertex on return.
+ * A visitor subclass to find to do topological sorting.
  */
 template<typename T>
-static void
-topological_sort(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, stack<T> &stk)
+class topological_sort : public visitor<T>
 {
-	if (visitor.is_visited(current))
-		return;
+private:
+	stack<T>     _stk;
 
-	visitor.set_visited(current, true);
+public:
+	topological_sort() {}
+	virtual ~topological_sort() {}
 
-	typename vector<T>::const_iterator it;
-	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it)
-		topological_sort(g, visitor, g.get_vertex(*it), stk);
+	void pre(const vertex<T> &) {}
+	void post(const vertex<T> &v)
+	{
+		T vrtx = v;
+		_stk.push(vrtx);
+	}
 
-	/*
-	 * Add the vertex to the stack.
-	 */
-	stk.push(current.vrtx);
-}
-
-/*
- * Perform topological sorting.
- *
- * @param [in]  g      the graph.
- * @param [out] stk    the toplogical sorted vertex on return.
- */
-template<typename T>
-void
-topological_sort(const graph<T> &g, stack<T> &stk)
-{
-	visitor<T> visitor;
-
-	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
-		topological_sort(g, visitor, *it, stk);
-}
+	bool empty() const { return _stk.empty(); }
+	const T &top() const { return _stk.top(); } 
+	void pop() { _stk.pop(); }
+};
 ```
 
 ## Traversal problem 4
@@ -895,230 +1088,7 @@ Google Konigsberh puzzle.<br>
 
 # Weighted graph
 
-A graph where weights (cost/length/time, etc.) are associated with edges. The graph representation can be slightly modified to assign weights to the edges. Here is a possible C++ implementation:
-```C++
-/*
- * Represents an edge along with its weight.
- */
-template<typename T>
-struct edge
-{
-	T   from;    // one end of the edge
-	T   to;      // the other end of the edge
-	int weight;  // weight of the edge
-
-	explicit edge(const T &v1, const T &v2, int w)
-		: from(v1), to(v2), weight(w) {}
-	bool operator==(const T &v) const { return (this->to == v); }
-};
-
-/*
- * Vertex of a weighted graph.
- */
-template<typename T>
-struct vertex
-{
-	T                 vrtx;       // the vertex itself
-	vector<edge<T> *> adjacent;   // adjacent vertices
-
-	explicit vertex(T v) : vrtx(v) {}
-	bool operator==(T v) const { return (this->vrtx == v); }
-};
-
-/*
- * Weighted Graph implementation.
- */
-template<typename T>
-class weighted_graph
-{
-private:
-	bool                directed;       // directed or undirected?
-	size_t              count;          // number of vertices
-	vector<vertex<T>>   vertices;       // vertices in the graph
-	vector<edge<T> *>   edges;
-
-	/*
-	 * Get a vertex, v.
-	 * Throws out_of_range exception if the vertex is not found.
-	 */
-	vertex<T> & get_vertex(const T &v)
-	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			ostringstream oss;
-			oss << "vertex " << v << " not found";
-			throw out_of_range(oss.str());
-		} else {
-			return *it;
-		}
-	}
-
-	/*
-	 * Add an edge (from, to, weight).
-	 */
-	void add_edge(vertex<T> &from, const vertex<T> &to, int weight)
-	{
-		typename vector<edge<T> *>::iterator it;
-		for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it) {
-			edge<T> *e = *it;
-			if (e->to == to.vrtx)
-				return;
-		}
-
-		edge<T> *e = new edge<T>(from.vrtx, to.vrtx, weight);
-		edges.push_back(e);
-		from.adjacent.push_back(e);
-	}
-
-	/*
-	 * Serialize the graph using BFS.
-	 */
-	void serialize(ostream &os, set<T> &visited, const T &from)
-	{
-		queue<T> q;
-
-		q.push(from);
-
-		while (!q.empty()) {
-			T current = q.front();
-			q.pop();
-
-			if (visited.end() == visited.find(from)) {
-				/*
-				 * Not visited yet.
-				 * Process and mark as visited.
-				 */
-				visited.insert(current);
-
-				const vertex<T> &v = get_vertex(current);
-
-				/*
-				 * Now add all the adjacent ones to the queue.
-				 */
-				typename vector<edge<T> *>::const_iterator it;
-				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it) {
-					const edge<T> *e =  *it;
-					os << e->from << " " << e->to << " " << e->weight << endl;
-					q.push(e->to);
-				}
-			}
-		}
-	}
-
-public:
-	weighted_graph(bool dir = true) : directed(dir), count(0) {}
-
-	weighted_graph(istream &is)
-	{
-		int dir;
-		T v1, v2;
-		int w;
-
-		is >> dir;
-		directed = (dir == 1);
-
-		while (is) {
-			is >> v1 >> v2 >> w;
-			add_edge(v1, v2, w);
-		}
-	}
-
-	~weighted_graph()
-	{
-		typename vector<edge<T> *>::iterator it = edges.begin();
-		while (it != edges.end()) {
-			edge<T> *e = *it;
-			delete e;
-			++it;
-		}
-	}
-
-	/*
-	 * Add a vertex, v.
-	 */
-	void add_vertex(const T &v)
-	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			vertices.emplace_back(v);
-			++count;
-		}
-	}
-
-	/*
-	 * Get a vertex, v.
-	 * Throws out_of_range exception if the vertex is not found.
-	 */
-	const vertex<T> & get_vertex(const T &v) const
-	{
-		typename vector<vertex<T>>::const_iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			ostringstream oss;
-			oss << "vertex " << v << " not found";
-			throw out_of_range(oss.str());
-		} else {
-			return *it;
-		}
-	}
-
-	/*
-	 * Add an edge (from, to, weight). If the graph is undirected, edge (to, from)
-	 * is added as well.
-	 */
-	void add_edge(const T &from, const T &to, int weight)
-	{
-		add_vertex(from);
-		add_vertex(to);
-
-		vertex<T> &v1 = get_vertex(from);
-		vertex<T> &v2 = get_vertex(to);
-
-		add_edge(v1, v2, weight);
-		if (!directed)
-			add_edge(v2, v1, weight);
-	}
-
-	bool is_directed() const { return directed; }
-	size_t num_vertices() const { return count; }
-	const vector<vertex<T>> &get_vertices() const { return vertices; }
-
-	/*
-	 * Find the degree of an vertex, v.
-	 */
-	size_t degree(const T &v) const
-	{
-		return get_vertex(v).adjacent.size();
-	}
-
-	/*
-	 * Serialize a graph.
-	 * Line 1: 0|1 (undirected or directed)
-	 * Line 2: v1 v2 w1 (two vertices of an edge and its weight)
-	 * Line 3: v3 v4 w2 (two vertices of an edge and its weight)
-	 * ...
-	 */
-	void serialize(ostream &os)
-	{
-		set<T> visited;
-
-		cout << (directed ? "1" : "0") << endl;
-		
-		typename vector<vertex<T>>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it)
-			serialize(os, visited, it->vrtx);
-	}
-
-	/*
-	 * Prints the graph on the screen.
-	 */
-	void dump()
-	{
-		cout << "Number of vertices: " << count << endl;
-		for (auto e : edges)
-			cout << e->from << " -> " << e->to << "(" << e->weight << ")" << endl;
-	}
-};
-```
+A graph where weights (cost/length/time, etc.) are associated with edges.
 
 ## Single Source Shortest Path (SSSP)
 The problem is to find shortest paths from a given vertex *v* to all other vertices of the graph.

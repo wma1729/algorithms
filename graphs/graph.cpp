@@ -1,289 +1,11 @@
-#include <iostream>
-#include <ostream>
-#include <sstream>
 #include <fstream>
 #include <cstring>
 #include <string>
-#include <vector>
-#include <set>
 #include <map>
-#include <queue>
 #include <stack>
-#include <algorithm>
-
-using namespace std;
-
-/*
- * Vertex of a graph.
- */
-template<typename T>
-struct vertex
-{
-	T           vrtx;       // the vertex itself
-	vector<T>   adjacent;   // adjacent vertices
-
-	explicit vertex(T v) : vrtx(v) {}
-	bool operator==(T v) const { return (this->vrtx == v); }
-};
-
-/*
- * Graph implementation.
- */
-template<typename T>
-class graph
-{
-private:
-	bool                directed;       // directed or undirected?
-	size_t              count;          // number of vertices
-	vector<vertex<T>>   vertices;       // vertices in the graph
-
-	/*
-	 * Get a vertex, v.
-	 * Throws out_of_range exception if the vertex is not found.
-	 */
-	vertex<T> & get_vertex(const T &v)
-	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			ostringstream oss;
-			oss << "vertex " << v << " not found";
-			throw out_of_range(oss.str());
-		} else {
-			return *it;
-		}
-	}
-
-	/*
-	 * Add an edge (from, to).
-	 */
-	void add_edge(vertex<T> &from, const vertex<T> &to)
-	{
-		if (from.adjacent.end() == find(from.adjacent.begin(), from.adjacent.end(), to.vrtx))
-			from.adjacent.push_back(to.vrtx);
-	}
-
-	/*
-	 * Serialize the graph using BFS.
-	 */
-	void serialize(ostream &os, set<T> &visited, const T &from)
-	{
-		queue<T> q;
-
-		q.push(from);
-
-		while (!q.empty()) {
-			T current = q.front();
-			q.pop();
-
-			if (visited.end() == visited.find(from)) {
-				/*
-				 * Not visited yet.
-				 * Process and mark as visited.
-				 */
-				visited.insert(current);
-
-				const vertex<T> &v = get_vertex(current);
-
-				/*
-				 * Now add all the adjacent ones to the queue.
-				 */
-				typename vector<T>::const_iterator it;
-				for (it = v.adjacent.begin(); it != v.adjacent.end(); ++it) {
-					os << from << " " << *it << endl;
-					q.push(*it);
-				}
-			}
-		}
-	}
-
-public:
-	graph(bool dir = true) : directed(dir), count(0) {}
-
-	graph(istream &is)
-	{
-		int dir;
-		T v1, v2;
-
-		is >> dir;
-		directed = (dir == 1);
-
-		while (is) {
-			is >> v1 >> v2;
-			add_edge(v1, v2);
-		}
-	}
-
-	/*
-	 * Add a vertex, v.
-	 */
-	void add_vertex(const T &v)
-	{
-		typename vector<vertex<T>>::iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			vertices.emplace_back(v);
-			++count;
-		}
-	}
-
-	/*
-	 * Get a vertex, v.
-	 * Throws out_of_range exception if the vertex is not found.
-	 */
-	const vertex<T> & get_vertex(const T &v) const
-	{
-		typename vector<vertex<T>>::const_iterator it = find(vertices.begin(), vertices.end(), v);
-		if (it == vertices.end()) {
-			ostringstream oss;
-			oss << "vertex " << v << " not found";
-			throw out_of_range(oss.str());
-		} else {
-			return *it;
-		}
-	}
-
-	/*
-	 * Add an edge (from, to). If the graph is undirected, edge (to, from)
-	 * is added as well.
-	 */
-	void add_edge(const T &from, const T &to)
-	{
-		add_vertex(from);
-		add_vertex(to);
-
-		vertex<T> &v1 = get_vertex(from);
-		vertex<T> &v2 = get_vertex(to);
-
-		add_edge(v1, v2);
-		if (!directed)
-			add_edge(v2, v1);
-	}
-
-	bool is_directed() const { return directed; }
-	size_t num_vertices() const { return count; }
-	const vector<vertex<T>> &get_vertices() const { return vertices; }
-
-	/*
-	 * Find the degree of an vertex, v.
-	 */
-	size_t degree(const T &v) const
-	{
-		return get_vertex(v).adjacent.size();
-	}
-
-	/*
-	 * Reverse a graph.
-	 */
-	graph<T> reverse() const
-	{
-		graph<T> g(true);
-
-		if (directed) {
-			for (auto v : vertices) {
-				for (auto adj : v.adjacent) 
-					g.add_edge(adj, v.vrtx);
-			}
-		} else {
-			g = *this;
-		}
-
-		return g;
-	}
-
-	/*
-	 * Serialize a graph.
-	 * Line 1: 0|1 (undirected or directed)
-	 * Line 2: v1 v2 (two vertices of an edge)
-	 * Line 3: v3 v4 (two vertices of an edge)
-	 * ...
-	 */
-	void serialize(ostream &os)
-	{
-		set<T> visited;
-
-		cout << (directed ? "1" : "0") << endl;
-		
-		typename vector<vertex<T>>::const_iterator it;
-		for (it = vertices.begin(); it != vertices.end(); ++it)
-			serialize(os, visited, it->vrtx);
-	}
-
-	/*
-	 * Prints the graph on the screen.
-	 */
-	void dump()
-	{
-		cout << "Number of vertices: " << count << endl;
-
-		for (auto v : vertices) {
-			cout << v.vrtx;
-
-			if (!v.adjacent.empty())
-				cout << " -> ";
-
-			for (auto adj : v.adjacent) 
-				cout << adj << " ";
-
-			cout << endl;
-		}
-	}
-};
-
-/*
- * The default vertex visitor. It provides two functionalities:
- * 1) Perform needed pre/post processing while traversing the graph.
- * 2) Maintains a set of vertices already visited.
- *
- * It is implemented as a C++ class.
- * Default pre processing: prints the vertex.
- * Default post processing: no-op.
- * This can be overridden in the sub-class to do something
- * more meaningful.
- */
-template<typename T>
-class visitor
-{
-private:
-	set<T> visited;
-
-public:
-	visitor() {}
-	virtual ~visitor() {}
-
-	/* Override as needed */
-	virtual void pre(const vertex<T> &v)
-	{
-		cout << v.vrtx << endl;
-	}
-
-	/* Override as needed */
-	virtual void post(const vertex<T> &)
-	{
-		return;
-	}
-
-	bool is_visited(const T &v)
-	{
-		return (visited.end() != visited.find(v));
-	}
-
-	bool is_visited(const vertex<T> &v)
-	{
-		return is_visited(v.vrtx);
-	}
-
-	void set_visited(const T &v, bool val)
-	{
-		if (val)
-			visited.insert(v);
-		else
-			visited.erase(v);
-	}
-
-	void set_visited(const vertex<T> &v, bool val)
-	{
-		set_visited(v.vrtx, val);
-	}
-};
+#include <climits>
+#include "graph.h"
+#include "uf.h"
 
 /*
  * Depth first traversal starting from vertex, from.
@@ -302,8 +24,10 @@ dfs(const graph<T> &g, visitor<T> &visitor, const vertex<T> &from)
 	visitor.pre(from);
 	visitor.set_visited(from, true);
 
+	vector<T> adjacent = std::move(from.adjacent());
+
 	typename vector<T>::const_iterator it;
-	for (it = from.adjacent.begin(); it != from.adjacent.end(); ++it)
+	for (it = adjacent.begin(); it != adjacent.end(); ++it)
 		dfs(g, visitor, g.get_vertex(*it));
 
 	// Perform post processing
@@ -320,7 +44,7 @@ void
 dfs(const graph<T> &g, visitor<T> &visitor)
 {
 	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
+	for (it = g.vertices().begin(); it != g.vertices().end(); ++it)
 		dfs(g, visitor, *it);
 }
 
@@ -337,7 +61,7 @@ bfs(const graph<T> &g, visitor<T> &visitor, const vertex<T> &from)
 	queue<T> q;
 
 	// Add the first vertex to the queue and mark as visited.
-	q.push(from.vrtx);
+	q.push(from);
 	visitor.set_visited(from, true);
 
 	while (!q.empty()) {
@@ -348,8 +72,10 @@ bfs(const graph<T> &g, visitor<T> &visitor, const vertex<T> &from)
 		visitor.pre(current);
 
 		// Now add all the adjacent ones to the queue.
+		vector<T> adjacent = std::move(current.adjacent());
+
 		typename vector<T>::const_iterator it;
-		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+		for (it = adjacent.begin(); it != adjacent.end(); ++it) {
 			if (!visitor.is_visited(*it)) {
 				q.push(*it);
 				visitor.set_visited(*it, true);
@@ -368,7 +94,7 @@ void
 bfs(const graph<T> &g, visitor<T> &visitor)
 {
 	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+	for (it = g.vertices().begin(); it != g.vertices().end(); ++it) {
 		if (!visitor.is_visited(*it))
 			bfs(g, visitor, *it);
 	}
@@ -392,8 +118,10 @@ is_reachable(const graph<T> &g, visitor<T> &visitor, const vertex<T> &source, co
 {
 	visitor.set_visited(source, true);
 
+	vector<T> adjacent = std::move(source.adjacent());
+
 	typename vector<T>::const_iterator it;
-	for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+	for (it = adjacent.begin(); it != adjacent.end(); ++it) {
 		if (!visitor.is_visited(*it)) {
 			if (*it == target)
 				return true;
@@ -443,10 +171,12 @@ get_paths(const graph<T> &g, visitor<T> &visitor, const vertex<T> &source, const
 	 * Add the vertex to the set of path list.
 	 */
 	visitor.set_visited(source, true);
-	paths.push_back(source.vrtx);
+	paths.push_back(source);
+
+	vector<T> adjacent = std::move(source.adjacent());
 
 	typename vector<T>::const_iterator it;
-	for (it = source.adjacent.begin(); it != source.adjacent.end(); ++it) {
+	for (it = adjacent.begin(); it != adjacent.end(); ++it) {
 		if (!visitor.is_visited(*it)) {
 			if (*it == target) {
 				/*
@@ -507,11 +237,11 @@ template<typename T>
 static bool
 is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T parent, map<T, T> &hierarchy)
 {
-	if (hierarchy.end() == hierarchy.find(current.vrtx)) {
+	if (hierarchy.end() == hierarchy.find(current)) {
 		/*
 		 * Not in hierarchy at all; add the relationship.
 		 */
-		hierarchy[current.vrtx] = parent;
+		hierarchy[current] = parent;
 	} else {
 		/*
 		 * Already in hierarchy. Check if it is an edge
@@ -526,7 +256,7 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
 		 */
 		typename map<T, T>::const_iterator it = hierarchy.find(parent);
 		if (it != hierarchy.end()) {
-			if (!g.is_directed() && (it->second == current.vrtx)) {
+			if (!g.directed() && (it->second == current)) {
 				/*
 				 * It is a back-edge to the immediate parent. Ignore it.
 				 */
@@ -535,11 +265,11 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
 				/*
 				 * Print the cycle and return true.
 				 */
-				cout << current.vrtx << " " << parent << " ";
+				cout << current << " " << parent << " ";
 				while (it != hierarchy.end()) {
 					cout << it->second << " ";
 					it = hierarchy.find(it->second);
-					if (it->first == current.vrtx)
+					if (it->first == current)
 						break;
 				}
 				cout << endl;
@@ -553,16 +283,19 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
 		 * Not visited yet; mark as visited.
 		 */
 		visitor.set_visited(current, true);
+
+		vector<T> adjacent = std::move(current.adjacent());
 	
 		typename vector<T>::const_iterator it;
-		for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
-			if (is_cyclic(g, visitor, g.get_vertex(*it), current.vrtx, hierarchy))
+		for (it = adjacent.begin(); it != adjacent.end(); ++it) {
+			T parent = current;
+			if (is_cyclic(g, visitor, g.get_vertex(*it), parent, hierarchy))
 				return true;
 		}
 	}
 
 	/* Backtrack */
-	hierarchy.erase(current.vrtx);
+	hierarchy.erase(current);
 	return false;
 }
 
@@ -570,7 +303,7 @@ is_cyclic(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, T pa
  * Is there a cycle in the graph?
  *
  * @param [in] g       the graph.
- * @param [in] parent  the parent vertex of the first vertex; usually -1 for T = int.
+ * @param [in] parent  the sentinel vertex, usually -1 or NULL.
  *
  * @return true if there is a cycle in the graph, false otherwise.
  */
@@ -582,7 +315,7 @@ is_cyclic(const graph<T> &g, T parent)
 	visitor<T> visitor;
 
 	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+	for (it = g.vertices().begin(); it != g.vertices().end(); ++it) {
 		if (is_cyclic(g, visitor, *it, parent, hierarchy))
 			return true;
 	}
@@ -602,54 +335,35 @@ template<typename T>
 bool
 is_dag(const graph<T> &g, T parent)
 {
-	if (!g.is_directed())
+	if (!g.directed())
 		return false;
 	return !is_cyclic(g, parent);
 }
 
 /*
- * Perform topological sorting.
- *
- * @param [in]  g       the graph.
- * @param [in]  visitor the visitor class.
- * @param [in]  current the current vertex being visited.
- * @param [out] stk     the toplogical sorted vertex on return.
+ * A visitor subclass to find to do topological sorting.
  */
 template<typename T>
-static void
-topological_sort(const graph<T> &g, visitor<T> &visitor, const vertex<T> &current, stack<T> &stk)
+class topological_sort : public visitor<T>
 {
-	if (visitor.is_visited(current))
-		return;
+private:
+	stack<T>     _stk;
 
-	visitor.set_visited(current, true);
+public:
+	topological_sort() {}
+	virtual ~topological_sort() {}
 
-	typename vector<T>::const_iterator it;
-	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it)
-		topological_sort(g, visitor, g.get_vertex(*it), stk);
+	void pre(const vertex<T> &) {}
+	void post(const vertex<T> &v)
+	{
+		T vrtx = v;
+		_stk.push(vrtx);
+	}
 
-	/*
-	 * Add the vertex to the stack.
-	 */
-	stk.push(current.vrtx);
-}
-
-/*
- * Perform topological sorting.
- *
- * @param [in]  g      the graph.
- * @param [out] stk    the toplogical sorted vertex on return.
- */
-template<typename T>
-void
-topological_sort(const graph<T> &g, stack<T> &stk)
-{
-	visitor<T> visitor;
-
-	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it)
-		topological_sort(g, visitor, *it, stk);
-}
+	bool empty() const { return _stk.empty(); }
+	const T &top() const { return _stk.top(); } 
+	void pop() { _stk.pop(); }
+};
 
 enum color_t { red, blue };
 
@@ -677,8 +391,10 @@ is_bipartite(
 	// Get the next color
 	color_t next_color = (curr_color == red) ? blue : red;
 
+	vector<T> adjacent = std::move(current.adjacent());
+
 	typename vector<T>::const_iterator it;
-	for (it = current.adjacent.begin(); it != current.adjacent.end(); ++it) {
+	for (it = adjacent.begin(); it != adjacent.end(); ++it) {
 		if (visitor.is_visited(*it)) {
 			/*
 			 * If the vertex is already visited and is not the expected
@@ -716,10 +432,10 @@ is_bipartite(const graph<T> &g)
 	map<T, color_t> vrtx_col;
 
 	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+	for (it = g.vertices().begin(); it != g.vertices().end(); ++it) {
 		if (!visitor.is_visited(*it)) {
 			// Mark the first unvisited vertex as red
-			vrtx_col[it->vrtx] = red;
+			vrtx_col[*it] = red;
 			if (!is_bipartite(g, visitor, *it, red, vrtx_col))
 				return false;
 		}
@@ -763,7 +479,7 @@ public:
 
 	void post(const vertex<T> &v)
 	{
-		cc_map[v.vrtx] = cc_count;
+		cc_map[v] = cc_count;
 	}
 
 	void dump()
@@ -785,7 +501,7 @@ void
 find_connected_components(const graph<T> &g, connected_components<T> &cc)
 {
 	typename vector<vertex<T>>::const_iterator it;
-	for (it = g.get_vertices().begin(); it != g.get_vertices().end(); ++it) {
+	for (it = g.vertices().begin(); it != g.vertices().end(); ++it) {
 		if (!cc.is_visited(*it))
 			cc.next_component();
 		dfs(g, cc, *it);
@@ -795,8 +511,8 @@ find_connected_components(const graph<T> &g, connected_components<T> &cc)
 /*
  * Finds the strongly connected components of a directed graph.
  *
- * @param [in]    g       the graph.
- * @param [inout] scc     the visitor for strongly connected components.
+ * @param [in]    g           the graph.
+ * @param [inout] scc         the visitor for strongly connected components.
  *
  * The same visitor is used for strongly connected components as connected
  * component. The difference is:
@@ -809,12 +525,12 @@ void
 find_strongly_connected_components(const graph<T> &g, connected_components<T> &scc)
 {
 	graph<T> gr = std::move(g.reverse());
-	stack<T> stk;
-	topological_sort(gr, stk);
+	topological_sort<T> sorter;
+	dfs(gr, sorter);
 
-	while (!stk.empty()) {
-		T v = stk.top();
-		stk.pop();
+	while (!sorter.empty()) {
+		T v = sorter.top();
+		sorter.pop();
 
 		if (!scc.is_visited(v))
 			scc.next_component();
@@ -822,6 +538,343 @@ find_strongly_connected_components(const graph<T> &g, connected_components<T> &s
 	}
 }
 
+/*
+ * Manages shortest path details.
+ */
+template<typename T>
+class shortest_path
+{
+private:
+	T sentinel;                     // sentinel to indicate no parent, typically -1 or null.
+	vector<edge<T>> paths;          // all paths recorded
+	set<T> vertices;                // all known vertices
+
+	const T find_parent(const T &v, double &w)
+	{
+		typename vector<edge<T>>::const_iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->sink() == v) {
+				w = it->weight();	
+				return it->source();
+			}
+		}
+		w = 0.0;
+		return sentinel;
+	}
+
+	/*
+	 * Print path taken from src vertex to dest vertex.
+	 */
+	void path(const T &src, const T &dest)
+	{
+		double w = 0.0;
+		T v = dest;
+
+		do {
+			const T &to = find_parent(v, w);
+			cout << v << " (" << w << "), ";
+			w = 0;
+			v = to;
+		} while (v != src);
+
+		cout << src << " (" << 0.0 << ")" << endl;
+	}
+
+public:
+	shortest_path(const T &s) : sentinel(s) {}
+
+	const T &sentinel_value() const { return sentinel; }
+
+	/*
+	 * If the vertex has already been visited, return the assigned weight. Else
+	 * return INT_MAX (representative of infinity).
+	 */
+	double weight(const T &v) const
+	{
+		typename vector<edge<T>>::const_iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->sink() == v)
+				return it->weight();
+		}
+		return INT_MAX;
+	}
+
+	/*
+	 * Assign weight to the vertex. No parent.
+	 */
+	void add(const T &v, int w)
+	{
+		add(sentinel, v, w);
+	}
+
+	/*
+	 * Assign weight to the vertex.
+	 */
+	void add(const T &p, const T &v, int w)
+	{
+		if (p != sentinel)
+			vertices.insert(p);
+		vertices.insert(v);
+
+		typename vector<edge<T>>::iterator it;
+		for (it = paths.begin(); it != paths.end(); ++it) {
+			if (it->sink() == v) {
+				it->source(p);
+				it->weight(w);
+				return;
+			}
+		}
+
+		edge<T> e(p, v, w);
+		paths.push_back(e);
+	}
+
+	void dump(const T &src)
+	{
+		for (auto v : vertices) {
+			if (v != src)
+				path(src, v);
+		}
+	}
+};
+
+/*
+ * Single Source Shortest Path (SSSP) for DAG.
+ *
+ * Determine the minimum cost (weight) to traverse all vertices in the graph
+ * starting from the given vertex. The cost to traverse the starting
+ * vertex is 0. If the starting vertex is not the source of the DAG,
+ * some vertices will never be visited.
+ *
+ * Note: The vertices are visited in topological sort order, starting
+ * with the given 'start' vertex.
+ *
+ * @param [in]  g       the weighted graph.
+ * @param [in]  start   the starting vertex.
+ * @param [out] sp      the shortest path object with cost table.
+ */ 
+template<typename T>
+void
+dag_sssp(const graph<T> &g, const T &start, shortest_path<T> &sp)
+{
+	topological_sort<T> sorter;
+	dfs(g, sorter);
+
+	/* Add the start vertex with weight of 0. */
+	sp.add(start, 0);
+
+	while (!sorter.empty()) {
+		T v = sorter.top();
+		sorter.pop();
+
+		const vertex<T> &current = g.get_vertex(v);
+
+		typename vector<edge<T> *>::const_iterator it;
+		for (it = current.edges().begin(); it != current.edges().end(); ++it) {
+			const edge<T> *e = *it;
+			/*
+			 * Find the new cummulative weight of visiting e->sink() from e->source().
+			 */
+			double w = sp.weight(e->source()) + e->weight();
+
+			/*
+			 * If it is less than what is already in the table, update it.
+			 */
+			if (w < sp.weight(e->sink()))
+				sp.add(e->source(), e->sink(), w);
+		}
+	}
+}
+
+template<typename T>
+struct weight_gt
+{
+	bool operator()(const edge<T> &e1, const edge<T> &e2)
+	{
+		return (e1.weight() > e2.weight());
+	}
+};
+
+/*
+ * Single Source Shortest Path (SSSP) for generic case.
+ *
+ * Determine the minimum cost (weight) to traverse all vertices in the graph
+ * starting from the given vertex. The cost to traverse the starting
+ * vertex is 0.
+ *
+ * Note: The vertices are visited in priority search order i.e., the next
+ * vertex visited is the one with the minimum weight.
+ *
+ * @param [in]  g       the weighted graph.
+ * @param [in]  start   the starting vertex.
+ * @param [out] sp      the shortest path object with cost table.
+ */ 
+template<typename T>
+void
+sssp(const graph<T> &g, const T &start, shortest_path<T> &sp)
+{
+	visitor<T> visitor;
+
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
+
+	/* Push the current vertex to the priority queue with weight 0. */
+	pq.emplace(sp.sentinel_value(), start, 0);
+
+	/* Add the start vertex with weight of 0. */
+	sp.add(start, 0);
+
+	while (!pq.empty()) {
+		edge<T> the_edge = pq.top();
+		pq.pop();
+
+		visitor.set_visited(the_edge.sink(), true);
+
+		const vertex<T> &current = g.get_vertex(the_edge.sink());
+
+		typename vector<edge<T> *>::const_iterator it;
+		for (it = current.edges().begin(); it != current.edges().end(); ++it) {
+			const edge<T> *e = *it;
+			if (!visitor.is_visited(e->sink())) {
+				/*
+				 * Find the new cummulative weight of visiting e->sink() from e->source()
+				 */
+				double w = sp.weight(e->source()) + e->weight();
+
+				/*
+				 * If it is less than what is already in the table,
+				 * - update the shortest path table.
+				 * - push the vertex in to the priority queue.
+				 */
+				if (w < sp.weight(e->sink())) {
+					sp.add(e->source(), e->sink(), w);
+					pq.emplace(e->source(), e->sink(), w);
+				}
+			}
+		}
+	}
+}
+
+/*
+ * Add edges originiating from a given vertex to the priority queue.
+ *
+ * @param [inout] pq       the priority queue.
+ * @param [inout] visitor  the visitor class.
+ * @param [in]    origin   the origin vertex.
+ */
+template<typename T>
+void
+add_edges(
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> &pq,
+	visitor<T> &visitor,
+	const vertex<T> &origin)
+{
+	/* Mark the vertex as visited. */
+	visitor.set_visited(origin, true);
+
+	/*
+	 * Add all the edges originating from the origin to the priority queue
+	 * (provided the other end-point is not already visited).
+	 */
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = origin.edges().begin(); it != origin.edges().end(); ++it) {
+		const edge<T> *e = *it;
+		if (!visitor.is_visited(e->sink()))
+			pq.push(*e);
+	}
+}
+
+/*
+ * Find the minimum-cost spanning tree: Prim
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_prim(const graph<T> &g)
+{
+	size_t vc = g.count();   // number of vertices in the graph
+	size_t ec = vc - 1;      // number of edges in the MST
+	visitor<T> visitor;
+	vector<edge<T>> mst_edges;
+	priority_queue<edge<T>, vector<edge<T>>, weight_gt<T>> pq;
+
+	/*
+	 * Pick an arbitrary vertex (the first in our case).
+	 */
+	add_edges(pq, visitor, g.first());
+
+	/*
+	 * While the priority queue is not empty
+	 * and not all the edges are discovered.
+	 */
+	while (!pq.empty() && (mst_edges.size() < ec)) {
+		const edge<T> the_edge = pq.top();
+		pq.pop();
+
+		// If both the end-point of the edge are visited, continue.
+		if (visitor.is_visited(the_edge.sink()))
+			continue;
+
+		// Add the edge to the MST
+		mst_edges.push_back(the_edge);
+
+		add_edges(pq, visitor, g.get_vertex(the_edge.sink()));
+	}
+
+	return mst_edges;
+}
+
+template<typename T>
+bool weight_lt(const edge<T> *v1, const edge<T> *v2)
+{
+	return (v1->weight() < v2->weight());
+}
+
+/*
+ * Find the minimum-cost spanning tree: Kruskal
+ *
+ * @param [in] g the weighted undirected graph.
+ *
+ * @return edges that constitute the minimum-cost spanning tree.
+ */
+template<typename T>
+vector<edge<T>>
+mst_kruskal(const graph<T> &g)
+{
+	vector<edge<T>> mst_edges;
+
+	/*
+	 * Get all the edges of the graph.
+	 */
+	vector<edge<T> *> edges = g.edges();
+
+	/*
+	 * Sort the edges based on the weight.
+	 */
+	sort(edges.begin(), edges.end(), weight_lt<T>);
+
+	union_find<T> uf;
+
+	typename vector<edge<T> *>::const_iterator it;
+	for (it = edges.begin(); it != edges.end(); ++it) {
+		const edge<T> *e = *it;
+
+		/*
+		 * Add the edges to the MST as long as
+		 * no loops are formed. The union-find is
+		 * used to determine if a loop is formed
+		 * by adding an edge.
+		 */
+		if (!uf.connected(e->source(), e->sink())) {
+			uf.union_op(e->source(), e->sink());
+			mst_edges.push_back(*e);
+		}
+	}
+
+	return mst_edges;
+}
 static int
 usage(const char *progname)
 {
@@ -841,7 +894,11 @@ usage(const char *progname)
 		<< "    [-cc_num]                               Number of connected components." << endl
 		<< "    [-cc -v <vertex1, vertex2>]             Is vertex1 and vertex2 connected?" << endl
 		<< "    [-scc_num]                              Number of connected components." << endl
-		<< "    [-scc -v <vertex1, vertex2>]            Is vertex1 and vertex2 connected?" << endl;
+		<< "    [-scc -v <vertex1, vertex2>]            Is vertex1 and vertex2 connected?" << endl
+		<< "    [-dag_sssp -v <vertex>]                 DAG single source shortest path." << endl
+		<< "    [-sssp -v <vertex>]                     Single source shortest path." << endl
+		<< "    [-mst_prim]                             Minumum spanning tree (Prim's algorithm)." << endl
+		<< "    [-mst_kruskal]                          Minumum spanning tree (Kruskal's algorithm)." << endl;
 	return 1;
 }
 
@@ -863,7 +920,11 @@ enum operation
 	CC_NUM,
 	CC,
 	SCC_NUM,
-	SCC
+	SCC,
+	DAG_SSSP,
+	SSSP,
+	MST_PRIM,
+	MST_KRUSKAL
 };
 
 // Driver code
@@ -931,6 +992,14 @@ main(int argc, const char **argv)
 			op = SCC_NUM;
 		} else if (strcmp(argv[i], "-scc") == 0) {
 			op = SCC;
+		} else if (strcmp(argv[i], "-dag_sssp") == 0) {
+			op = DAG_SSSP;
+		} else if (strcmp(argv[i], "-sssp") == 0) {
+			op = SSSP;
+		} else if (strcmp(argv[i], "-mst_prim") == 0) {
+			op = MST_PRIM;
+		} else if (strcmp(argv[i], "-mst_kruskal") == 0) {
+			op = MST_KRUSKAL;
 		} else {
 			return usage(argv[0]);
 		}
@@ -947,13 +1016,13 @@ main(int argc, const char **argv)
 
 	switch (op) {
 		case DUMP:
-			g.dump();
+			cout << g;
 			break;
 
 		case REVERSE:
 			{
 				graph<int> gr = std::move(g.reverse());
-				gr.dump();
+				cout << gr;
 			}
 			break;
 
@@ -996,12 +1065,15 @@ main(int argc, const char **argv)
 			break;
 
 		case TOPOLOGICAL_SORT:
-			topological_sort(g, stk);
-			while (!stk.empty()) {
-				cout << stk.top() << " ";
-				stk.pop();
+			{
+				topological_sort<int> sorter;
+				dfs(g, sorter);
+				while (!sorter.empty()) {
+					cout << sorter.top() << " ";
+					sorter.pop();
+				}
+				cout << endl;
 			}
-			cout << endl;
 			break;
 
 		case IS_BIPARTITE:
@@ -1039,6 +1111,46 @@ main(int argc, const char **argv)
 				connected_components<int> scc;
 				find_strongly_connected_components(g, scc);
 				cout << boolalpha << scc.connected(v1, v2) << endl;
+			}
+			break;
+
+		case DAG_SSSP:
+			{
+				shortest_path<int> sp(-1);
+				dag_sssp(g, v1, sp);
+				sp.dump(v1);
+			}
+			break;
+
+		case SSSP:
+			{
+				shortest_path<int> sp(-1);
+				sssp(g, v1, sp);
+				sp.dump(v1);
+			}
+			break;
+
+		case MST_PRIM:
+			{
+				vector<edge<int>> mst_edges = std::move(mst_prim(g));
+				int sum = 0;
+				for (auto edge : mst_edges) {
+					sum += edge.weight();
+					cout << edge;
+				}
+				cout << "Minimum-cost = " << sum << endl;
+			}
+			break;
+
+		case MST_KRUSKAL:
+			{
+				vector<edge<int>> mst_edges = std::move(mst_kruskal(g));
+				int sum = 0;
+				for (auto edge : mst_edges) {
+					sum += edge.weight();
+					cout << edge;
+				}
+				cout << "Minimum-cost = " << sum << endl;
 			}
 			break;
 
