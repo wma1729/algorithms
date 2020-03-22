@@ -214,11 +214,11 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 static void
 msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t hi, size_t w, size_t max_width)
 {
-	constexpr int N = 256;      // A trick
-	array<int, N + 1> count;    // count of valid characters: one for each character.
-	array<int, N + 1> count2;   // a copy of count
+	constexpr int N = 256;
+	array<int, N + 1> count;    // count of valid characters: one for each character <== trick
+	array<int, N> count2;       // count of valid characters: one for each character <== no trick
 
-	// check if we have checked all the elements
+	// have we scanned all the elements
 	if (w == max_width)
 		return;
 
@@ -235,10 +235,11 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 		aux.push_back(elements[i]);
 
 	// initialize all the counters to 0.
-	for (size_t c = 0; c <= N; ++c) {
+	for (size_t c = 0; c <= N; ++c)
 		count[c] = 0;
+
+	for (size_t c = 0; c < N; ++c)
 		count2[c] = 0;
-	}
 
 	/*
 	 * Set the count of each character. There is a trick here.
@@ -247,8 +248,8 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	 */
 	for (auto a : aux) {
 		int idx = char_at(a, w);
-		count[idx + 1]++;
-		count2[idx]++;
+		count[idx + 1]++;   // trick
+		count2[idx]++;      // no-trick
 	}
 
 	// set the cumulative count.
@@ -267,7 +268,7 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	aux.clear();
 
 #if defined(DEBUG)
-	cout << "w = " << w << " : " << elements << endl;
+	cout << "w = " << w + 1 << " : " << elements << endl;
 #endif // DEBUG
 
 	/*
@@ -285,7 +286,7 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 }
 
 /*
- * MSD radix sort. The sort uses key index count sorting.
+ * MSD radix sort.
  *
  * @param [inout] elements  - the vector to sort.
  * @paran [in]    max_width - the maximum size of string across
@@ -299,7 +300,6 @@ msd_radix_sort(vector<string> &elements, size_t max_width)
 	vector<string> aux;     // auxiliary vector of strings
 	msd_radix_sort(elements, aux, 0, elements.size(), 0, max_width);
 }
-
 
 static int
 usage(const char *progname)
