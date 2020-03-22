@@ -1,6 +1,6 @@
 DBG     = -O -Wall
 CFLAGS  = -c
-DEFINES = 
+DEFINES = -DDEBUG
 
 OBJS   = sort.o
 

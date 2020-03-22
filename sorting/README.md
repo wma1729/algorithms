@@ -28,18 +28,14 @@ m - 255, each digit can have values in the range 0 - 255.
 
 The digits of items are scanned from the least significant digit (LSD) to the most significant digit (MSD).
 
-Input | w = 3 | w = 2 | w = 1
-------|-------|-------|------
-ram   | mad   | mad   | all
-mad   | she   | ram   | bar
-she   | the   | car   | car
-him   | all   | bar   | cat
-the   | ram   | cat   | him
-cat   | him   | she   | mad
-car   | car   | the   | ram
-bar   | bar   | him   | she
-sky   | cat   | sky   | sky
-all   | sky   | all   | the
+```
+input : ram, mad, she, him, the, cat, car, bar, sky, all
+w = 3 : mad, she, the, all, ram, him, car, bar, cat, sky
+w = 2 : mad, ram, car, bar, cat, she, the, him, sky, all
+w = 1 : all, bar, car, cat, him, mad, ram, she, sky, the
+output: all, bar, car, cat, him, mad, ram, she, sky, the
+
+```
 
 This is a stable sort and complexity is *nw*.
 
@@ -66,9 +62,10 @@ char_at(const std::string &s, size_t i)
 ### Implementation using queues.
 ```C++
 /*
- * LSD radix sort. The sort uses multiple queues:
- * 1) main queue.
- * 2) one for every possible character [0-255].
+ * LSD radix sort. This is a straight-forward  implementation
+ * using:
+ * - 1 main queue, initialized with input items.
+ * - 256 auxiliary queues, one for every possible character [0-255].
  *
  * @param [inout] elements  - the vector to sort.
  * @paran [in]    max_width - the maximum size of string across
@@ -85,7 +82,7 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 	/*
 	 * 256 auxiliary queues: one for each valid character.
 	 */
-	array<queue<string>, N> queues;
+	array<queue<string>, N> auxq;
 
 	/*
 	 * Move all the strings to the main queue.
@@ -99,9 +96,9 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 	/*
 	 * Repeat max_width times from least significant digit
 	 * (LSD) to most significant digit (MSD) sorting strings
-	 * based on the character at index i - 1.
+	 * based on the character at index w - 1.
 	 */
-	for (size_t i = max_width; i > 0; --i) {
+	for (size_t w = max_width; w > 0; --w) {
 		/*
 		 * Read the strings from the main queue and
 		 * push the strings in the correct queue.
@@ -109,7 +106,7 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 		while (!mainq.empty()) {
 			string s = mainq.front();
 			mainq.pop();
-			queues[char_at(s, i - 1)].push(s);
+			auxq[char_at(s, w - 1)].push(s);
 		}
 
 		/*
@@ -117,14 +114,14 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 		 * to the main queue.
 		 */
 		for (size_t j = 0; j < N; ++j) {
-			while (!queues[j].empty()) {
-				mainq.push(queues[j].front());
-				queues[j].pop();
+			while (!auxq[j].empty()) {
+				mainq.push(auxq[j].front());
+				auxq[j].pop();
 			}
 		}
 
 #if defined(DEBUG)
-		cout << "i = " << i << " : " << mainq << endl;
+		cout << "w = " << w << " : " << mainq << endl;
 #endif // DEBUG
 	}
 
@@ -143,6 +140,19 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 ```
 
 ### Implementation using key index counting sort.
+LSD radix sort using queues is simple to understand and easy to implement. However, it needs a lot of additional space. Can we do better? In the following counting sort approach, we use an integer array of size (256 + 1). As before, we scan from LSD to MSD. Instead of adding strings to the queue, we increment the corresponding array element count.
+```
+input    : ram, mad, she, him, the, cat, car, bar, sky, all
+i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z {
+count[i] :  0 0 0 0 0 1 2 0 0 0 0 0 0 1 2 0 0 0 0 2 0 1 0 0 0 0 1 0
+```
+Please note that instead of incremented *count[N]*, *count[N + 1]* is incremented. There is a trick involved here. Next, we generate a cumulative count.
+```
+input    : ram, mad, she, him, the, cat, car, bar, sky, all
+i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z {
+count[i] :  0 0 0 0 0 1 3 3 3 3 3 3 3 4 6 6 6 6 6 8 8 9 9 9 9 91010
+```
+Now *count[N]* gives us the index where the item should go. And we do need increment *count[N]* after copying the item. Here is a complete implementation:
 ```C++
 /*
  * LSD radix sort. The sort uses key index count sorting.
@@ -156,25 +166,25 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 void
 lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 {
-	constexpr int N = 257;  // A trick
-	vector<string> aux;     // auxiliary vector of strings
-	array<int, N> count;    // count of valid characters: one for each character.
+	constexpr int N = 256;
+	vector<string> aux;         // auxiliary vector of strings
+	array<int, N + 1> count;    // count of valid characters: one for each character.
 
 	/*
 	 * Repeat max_width times from least significant digit
 	 * (LSD) to most significant digit (MSD) sorting strings
-	 * based on the character at index i - 1.
+	 * based on the character at index w - 1.
 	 */
-	for (size_t i = max_width; i > 0; --i) {
+	for (size_t w = max_width; w > 0; --w) {
 		// character index we are dealing with.
-		int idx = i - 1;
+		int idx = w - 1;
 
 		// copy all elements to the auxiliary vector.
 		for (auto e : elements)
 			aux.push_back(e);
 
 		// initialize all the counters to 0.
-		for (size_t c = 0; c < N; ++c)
+		for (size_t c = 0; c <= N; ++c)
 			count[c] = 0;
 
 		/*
@@ -185,13 +195,13 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 		for (auto a : aux)
 			count[char_at(a, idx) + 1]++;
 
-		// set the cumulative count.
-		for (size_t c = 0; c < N - 1; ++c)
+		// Calculated the cumulative count.
+		for (size_t c = 0; c <= N; ++c)
 			count[c + 1] += count[c];
 
 		/*
 		 * Now count[char_at(a, idx)] represents the index where the
-		 * string should be copied in the main vector. count[char_at(a, idx)]
+		 * string should be copied into the main vector. count[char_at(a, idx)]
 		 * is incremented to represent the next index in case the character
 		 * is seen again.
 		 */
@@ -201,7 +211,7 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 		aux.clear();
 
 #if defined(DEBUG)
-		cout << "i = " << i << " : " << elements << endl;
+		cout << "w = " << w << " : " << elements << endl;
 #endif // DEBUG
 	}
 

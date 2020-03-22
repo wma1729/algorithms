@@ -59,9 +59,10 @@ char_at(const std::string &s, size_t i)
 }
 
 /*
- * LSD radix sort. The sort uses multiple queues:
- * 1) main queue.
- * 2) one for every possible character [0-255].
+ * LSD radix sort. This is a straight-forward  implementation
+ * using:
+ * - 1 main queue, initialized with input items.
+ * - 256 auxiliary queues, one for every possible character [0-255].
  *
  * @param [inout] elements  - the vector to sort.
  * @paran [in]    max_width - the maximum size of string across
@@ -78,7 +79,7 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 	/*
 	 * 256 auxiliary queues: one for each valid character.
 	 */
-	array<queue<string>, N> queues;
+	array<queue<string>, N> auxq;
 
 	/*
 	 * Move all the strings to the main queue.
@@ -92,9 +93,9 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 	/*
 	 * Repeat max_width times from least significant digit
 	 * (LSD) to most significant digit (MSD) sorting strings
-	 * based on the character at index i - 1.
+	 * based on the character at index w - 1.
 	 */
-	for (size_t i = max_width; i > 0; --i) {
+	for (size_t w = max_width; w > 0; --w) {
 		/*
 		 * Read the strings from the main queue and
 		 * push the strings in the correct queue.
@@ -102,7 +103,7 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 		while (!mainq.empty()) {
 			string s = mainq.front();
 			mainq.pop();
-			queues[char_at(s, i - 1)].push(s);
+			auxq[char_at(s, w - 1)].push(s);
 		}
 
 		/*
@@ -110,14 +111,14 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 		 * to the main queue.
 		 */
 		for (size_t j = 0; j < N; ++j) {
-			while (!queues[j].empty()) {
-				mainq.push(queues[j].front());
-				queues[j].pop();
+			while (!auxq[j].empty()) {
+				mainq.push(auxq[j].front());
+				auxq[j].pop();
 			}
 		}
 
 #if defined(DEBUG)
-		cout << "i = " << i << " : " << mainq << endl;
+		cout << "w = " << w << " : " << mainq << endl;
 #endif // DEBUG
 	}
 
@@ -146,25 +147,25 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 void
 lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 {
-	constexpr int N = 257;  // A trick
-	vector<string> aux;     // auxiliary vector of strings
-	array<int, N> count;    // count of valid characters: one for each character.
+	constexpr int N = 256;
+	vector<string> aux;         // auxiliary vector of strings
+	array<int, N + 1> count;    // count of valid characters: one for each character.
 
 	/*
 	 * Repeat max_width times from least significant digit
 	 * (LSD) to most significant digit (MSD) sorting strings
-	 * based on the character at index i - 1.
+	 * based on the character at index w - 1.
 	 */
-	for (size_t i = max_width; i > 0; --i) {
+	for (size_t w = max_width; w > 0; --w) {
 		// character index we are dealing with.
-		int idx = i - 1;
+		int idx = w - 1;
 
 		// copy all elements to the auxiliary vector.
 		for (auto e : elements)
 			aux.push_back(e);
 
 		// initialize all the counters to 0.
-		for (size_t c = 0; c < N; ++c)
+		for (size_t c = 0; c <= N; ++c)
 			count[c] = 0;
 
 		/*
@@ -175,13 +176,13 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 		for (auto a : aux)
 			count[char_at(a, idx) + 1]++;
 
-		// set the cumulative count.
-		for (size_t c = 0; c < N - 1; ++c)
+		// Calculated the cumulative count.
+		for (size_t c = 0; c <= N; ++c)
 			count[c + 1] += count[c];
 
 		/*
 		 * Now count[char_at(a, idx)] represents the index where the
-		 * string should be copied in the main vector. count[char_at(a, idx)]
+		 * string should be copied into the main vector. count[char_at(a, idx)]
 		 * is incremented to represent the next index in case the character
 		 * is seen again.
 		 */
@@ -191,7 +192,7 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 		aux.clear();
 
 #if defined(DEBUG)
-		cout << "i = " << i << " : " << elements << endl;
+		cout << "w = " << w << " : " << elements << endl;
 #endif // DEBUG
 	}
 
