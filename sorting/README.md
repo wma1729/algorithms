@@ -143,16 +143,16 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
 LSD radix sort using queues is simple to understand and easy to implement. However, it needs a lot of additional space. Can we do better? In the following counting sort approach, we use an integer array of size (256 + 1). As before, we scan from LSD to MSD. Instead of adding strings to the queue, we increment the corresponding array element count.
 ```
 input    : ram, mad, she, him, the, cat, car, bar, sky, all
-i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z {
-count[i] :  0 0 0 0 0 1 2 0 0 0 0 0 0 1 2 0 0 0 0 2 0 1 0 0 0 0 1 0
+i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z
+count[i] :  0 0 0 0 0 1 2 0 0 0 0 0 0 1 2 0 0 0 0 2 0 1 0 0 0 0 1
 ```
-Please note that instead of incremented *count[N]*, *count[N + 1]* is incremented. There is a trick involved here. Next, we generate a cumulative count.
+Please note that instead of incrementing *count[N]*, *count[N + 1]* is incremented. There is a trick involved here. Next, we generate a cumulative count.
 ```
 input    : ram, mad, she, him, the, cat, car, bar, sky, all
-i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z {
-count[i] :  0 0 0 0 0 1 3 3 3 3 3 3 3 4 6 6 6 6 6 8 8 9 9 9 9 91010
+i        :  0 a b c d e f g h i j k l m n o p q r s t u v w x y z
+count[i] :  0 0 0 0 0 1 3 3 3 3 3 3 3 4 6 6 6 6 6 8 8 9 9 9 9 9 10
 ```
-Now *count[N]* gives us the index where the item should go. And we do need increment *count[N]* after copying the item. Here is a complete implementation:
+Now *count[N]* gives us the index where the item should go into the sorted sequence. And *count[N]* must be incremented after copying the item. Here is a complete implementation:
 ```C++
 /*
  * LSD radix sort. The sort uses key index count sorting.
