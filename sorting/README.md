@@ -1,7 +1,7 @@
 # Sorting
 
 ## Stable Sort
-A ##stable## sort preserves the original ordering of identical items.
+A **stable** sort preserves the original ordering of identical items.
 
 ```
 Input     : [(a, 10), (b, 7), (c, 8), (d, 7), (e, 6), (f, 10), (g, 3)]
