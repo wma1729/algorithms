@@ -409,4 +409,4 @@ iteration = 8 : comparisons = 2, swap = 0
 iteration = 9 : comparisons = 1, swap = 0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
-As can be seen the number of comparisons in all the cases are *N * (N - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, *N * (N - 1) / 2* if the sequence is reverse sorted, and *N * (N - 1) / 4* if the sequence is initially randomly distributed. The complexity of the algorith is *N*N*.
+As can be seen the number of comparisons in all the cases are *n * (n - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, *n * (n - 1) / 2* if the sequence is reverse sorted, and *n * (n - 1) / 4* if the sequence is initially randomly distributed. Bubble sort is stable and complexity of the algorith is *n * n* for both comparisons and swaps.
