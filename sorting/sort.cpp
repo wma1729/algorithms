@@ -68,7 +68,7 @@ char_at(const std::string &s, size_t i)
  * @paran [in]    max_width - the maximum size of string across
  *                            all elements of the vector.
  *
- * @return elements is sorted on return.
+ * @return elements are sorted on return.
  */
 void
 lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
@@ -142,7 +142,7 @@ lsd_radix_sort_v1(vector<string> &elements, size_t max_width)
  * @paran [in]    max_width - the maximum size of string across
  *                            all elements of the vector.
  *
- * @return elements is sorted on return.
+ * @return elements are sorted on return.
  */
 void
 lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
@@ -209,7 +209,7 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
  * @param [in]    w         - position at which the character is to be processed.
  * @paran [in]    max_width - the maximum size of string across
  *                            all elements of the vector.
- * @return elements is sorted on return.
+ * @return elements are sorted on return.
  */
 static void
 msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t hi, size_t w, size_t max_width)
@@ -268,7 +268,16 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	aux.clear();
 
 #if defined(DEBUG)
-	cout << "w = " << w + 1 << " : " << elements << endl;
+	cout << "w = " << w + 1 << " : ";
+	for (size_t i = 0; i < elements.size(); ++i) {
+		if (i != 0)
+			cout << ", ";
+		if ((i < lo) || (i >= hi))
+			cout << "-";
+		else
+			cout << elements[i];
+	}
+	cout << endl;
 #endif // DEBUG
 
 	/*
@@ -292,7 +301,7 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
  * @paran [in]    max_width - the maximum size of string across
  *                            all elements of the vector.
  *
- * @return elements is sorted on return.
+ * @return elements are sorted on return.
  */
 void
 msd_radix_sort(vector<string> &elements, size_t max_width)
@@ -301,13 +310,49 @@ msd_radix_sort(vector<string> &elements, size_t max_width)
 	msd_radix_sort(elements, aux, 0, elements.size(), 0, max_width);
 }
 
+/*
+ * Perform bubble sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+bubble_sort(vector<T> &elements)
+{
+	size_t length = elements.size();
+	size_t ncmp;
+	size_t nswap;
+
+	for (size_t i = 0; i < length - 1; ++i) {
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = 0; j < length - i - 1; ++j) {
+			ncmp++;
+			if (elements[j] > elements[j + 1]) {
+				nswap++;
+				swap(elements[j], elements[j + 1]);
+			}
+		}
+
+#if defined(DEBUG)
+		cout << "iteration = " << i + 1 << " : comparisons = " << ncmp << ", swap = " << nswap << endl;
+#endif // DEBUG
+	}
+}
+
 static int
 usage(const char *progname)
 {
 	cerr << progname << " -in <file> [-string]" << endl
 		<< "    -lsd_radix_v1               Perform LSD radix sort (using queues)." << endl
 		<< "    -lsd_radix_v2               Perform LSD radix sort (using key index count)." << endl
-		<< "    -msd_radix                  Perform MSD radix sort." << endl;
+		<< "    -msd_radix                  Perform MSD radix sort." << endl
+		<< "    -bubble                     Perform bubble sort." << endl
+		<< "    -selection                  Perform selection sort." << endl
+		<< "    -insertion                  Perform insertion sort." << endl;
 	return 1;
 }
 
@@ -316,7 +361,10 @@ enum sort_algo
 	NONE,
 	LSD_RADIX_V1,
 	LSD_RADIX_V2,
-	MSD_RADIX
+	MSD_RADIX,
+	BUBBLE,
+	SELECTION,
+	INSERTION
 };
 
 int
@@ -347,6 +395,12 @@ main(int argc, const char **argv)
 			algo = LSD_RADIX_V2;
 		} else if (strcmp(argv[i], "-msd_radix") == 0) {
 			algo = MSD_RADIX;
+		} else if (strcmp(argv[i], "-bubble") == 0) {
+			algo = BUBBLE;
+		} else if (strcmp(argv[i], "-selection") == 0) {
+			algo = SELECTION;
+		} else if (strcmp(argv[i], "-insertion") == 0) {
+			algo = INSERTION;
 		} else {
 			return usage(argv[0]);
 		}
@@ -410,6 +464,13 @@ main(int argc, const char **argv)
 				cerr << "MSD radix sort is applicable to strings only." << endl;
 			else
 				msd_radix_sort(svalues, max_width);
+			break;
+
+		case BUBBLE:
+			if (is_string)
+				bubble_sort(svalues);
+			else
+				bubble_sort(ivalues);
 			break;
 
 		default:

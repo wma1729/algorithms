@@ -329,3 +329,84 @@ msd_radix_sort(vector<string> &elements, size_t max_width)
 	msd_radix_sort(elements, aux, 0, elements.size(), 0, max_width);
 }
 ```
+
+## Bubble Sort
+Steps through the input sequence, compares two adjacent elements, and swaps them if they are in wrong order. When sorting the sequence in ascending order, the biggest items bubbles to the top of the sequence.
+```C++
+/*
+ * Perform bubble sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+bubble_sort(vector<T> &elements)
+{
+	size_t length = elements.size();
+	size_t ncmp;
+	size_t nswap;
+
+	for (size_t i = 0; i < length - 1; ++i) {
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = 0; j < length - i - 1; ++j) {
+			ncmp++;
+			if (elements[j] > elements[j + 1]) {
+				nswap++;
+				swap(elements[j], elements[j + 1]);
+			}
+		}
+
+#if defined(DEBUG)
+		cout << "iteration = " << i + 1 << " : comparisons = " << ncmp << ", swap = " << nswap << endl;
+#endif // DEBUG
+	}
+}
+```
+### Bubble sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+iteration = 1 : comparisons = 9, swap = 0
+iteration = 2 : comparisons = 8, swap = 0
+iteration = 3 : comparisons = 7, swap = 0
+iteration = 4 : comparisons = 6, swap = 0
+iteration = 5 : comparisons = 5, swap = 0
+iteration = 6 : comparisons = 4, swap = 0
+iteration = 7 : comparisons = 3, swap = 0
+iteration = 8 : comparisons = 2, swap = 0
+iteration = 9 : comparisons = 1, swap = 0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+iteration = 1 : comparisons = 9, swap = 9
+iteration = 2 : comparisons = 8, swap = 8
+iteration = 3 : comparisons = 7, swap = 7
+iteration = 4 : comparisons = 6, swap = 6
+iteration = 5 : comparisons = 5, swap = 5
+iteration = 6 : comparisons = 4, swap = 4
+iteration = 7 : comparisons = 3, swap = 3
+iteration = 8 : comparisons = 2, swap = 2
+iteration = 9 : comparisons = 1, swap = 1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+iteration = 1 : comparisons = 9, swap = 8
+iteration = 2 : comparisons = 8, swap = 6
+iteration = 3 : comparisons = 7, swap = 3
+iteration = 4 : comparisons = 6, swap = 2
+iteration = 5 : comparisons = 5, swap = 2
+iteration = 6 : comparisons = 4, swap = 2
+iteration = 7 : comparisons = 3, swap = 1
+iteration = 8 : comparisons = 2, swap = 0
+iteration = 9 : comparisons = 1, swap = 0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+As can be seen the number of comparisons in all the cases are *N * (N - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, *N * (N - 1) / 2* if the sequence is reverse sorted, and *N * (N - 1) / 4* if the sequence is initially randomly distributed. The complexity of the algorith is *N*N*.
