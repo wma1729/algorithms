@@ -338,7 +338,47 @@ bubble_sort(vector<T> &elements)
 		}
 
 #if defined(DEBUG)
-		cout << "iteration = " << i + 1 << " : comparisons = " << ncmp << ", swap = " << nswap << endl;
+		cout << "iteration = " << i + 1 << " : " <<  elements <<
+			", comparisons = " << ncmp << ", swap = " << nswap << endl;
+#endif // DEBUG
+	}
+}
+
+/*
+ * Perform selection sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+selection_sort(vector<T> &elements)
+{
+	size_t ncmp;
+	size_t nswap;
+
+	for (size_t i = 0; i < elements.size() - 1; ++i) {
+		size_t min_idx = i;
+
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = i + 1; j < elements.size(); ++j) {
+			ncmp++;
+			if (elements[j] < elements[min_idx]) {
+				min_idx = j;
+			}
+		}
+
+		if (min_idx != i) {
+			nswap++;
+			swap(elements[i], elements[min_idx]);
+		}
+
+#if defined(DEBUG)
+		cout << "iteration = " << i + 1 << " : " <<  elements <<
+			", comparisons = " << ncmp << ", swap = " << nswap << endl;
 #endif // DEBUG
 	}
 }
@@ -471,6 +511,13 @@ main(int argc, const char **argv)
 				bubble_sort(svalues);
 			else
 				bubble_sort(ivalues);
+			break;
+
+		case SELECTION:
+			if (is_string)
+				selection_sort(svalues);
+			else
+				selection_sort(ivalues);
 			break;
 
 		default:

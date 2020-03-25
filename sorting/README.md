@@ -366,47 +366,136 @@ bubble_sort(vector<T> &elements)
 	}
 }
 ```
+
 ### Bubble sort statistics
 Sequence already sorted:
 ```
 input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-iteration = 1 : comparisons = 9, swap = 0
-iteration = 2 : comparisons = 8, swap = 0
-iteration = 3 : comparisons = 7, swap = 0
-iteration = 4 : comparisons = 6, swap = 0
-iteration = 5 : comparisons = 5, swap = 0
-iteration = 6 : comparisons = 4, swap = 0
-iteration = 7 : comparisons = 3, swap = 0
-iteration = 8 : comparisons = 2, swap = 0
-iteration = 9 : comparisons = 1, swap = 0
+iteration = 1 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 9, swap = 0
+iteration = 2 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 8, swap = 0
+iteration = 3 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 7, swap = 0
+iteration = 4 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 6, swap = 0
+iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 0
+iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
+iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
+iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence in completely reverse order:
 ```
 input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-iteration = 1 : comparisons = 9, swap = 9
-iteration = 2 : comparisons = 8, swap = 8
-iteration = 3 : comparisons = 7, swap = 7
-iteration = 4 : comparisons = 6, swap = 6
-iteration = 5 : comparisons = 5, swap = 5
-iteration = 6 : comparisons = 4, swap = 4
-iteration = 7 : comparisons = 3, swap = 3
-iteration = 8 : comparisons = 2, swap = 2
-iteration = 9 : comparisons = 1, swap = 1
+iteration = 1 : 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, comparisons = 9, swap = 9
+iteration = 2 : 7, 6, 5, 4, 3, 2, 1, 0, 8, 9, comparisons = 8, swap = 8
+iteration = 3 : 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, comparisons = 7, swap = 7
+iteration = 4 : 5, 4, 3, 2, 1, 0, 6, 7, 8, 9, comparisons = 6, swap = 6
+iteration = 5 : 4, 3, 2, 1, 0, 5, 6, 7, 8, 9, comparisons = 5, swap = 5
+iteration = 6 : 3, 2, 1, 0, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 4
+iteration = 7 : 2, 1, 0, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 3
+iteration = 8 : 1, 0, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 2
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 1
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence with random distribution:
 ```
 input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
-iteration = 1 : comparisons = 9, swap = 8
-iteration = 2 : comparisons = 8, swap = 6
-iteration = 3 : comparisons = 7, swap = 3
-iteration = 4 : comparisons = 6, swap = 2
-iteration = 5 : comparisons = 5, swap = 2
-iteration = 6 : comparisons = 4, swap = 2
-iteration = 7 : comparisons = 3, swap = 1
-iteration = 8 : comparisons = 2, swap = 0
-iteration = 9 : comparisons = 1, swap = 0
+iteration = 1 : 0, 7, 2, 4, 6, 5, 8, 1, 3, 9, comparisons = 9, swap = 8
+iteration = 2 : 0, 2, 4, 6, 5, 7, 1, 3, 8, 9, comparisons = 8, swap = 6
+iteration = 3 : 0, 2, 4, 5, 6, 1, 3, 7, 8, 9, comparisons = 7, swap = 3
+iteration = 4 : 0, 2, 4, 5, 1, 3, 6, 7, 8, 9, comparisons = 6, swap = 2
+iteration = 5 : 0, 2, 4, 1, 3, 5, 6, 7, 8, 9, comparisons = 5, swap = 2
+iteration = 6 : 0, 2, 1, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 2
+iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 1
+iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 As can be seen the number of comparisons in all the cases are *n * (n - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, *n * (n - 1) / 2* if the sequence is reverse sorted, and *n * (n - 1) / 4* if the sequence is initially randomly distributed. Bubble sort is stable and complexity of the algorith is *n * n* for both comparisons and swaps.
+
+## Selection Sort
+Find the smallest element in the sequence and swap it with the first element. Item 1 in the sequence is in its final place. Find the next smallest element and replace it with the second element. Item 2 in the sequence is ints final place. Repeat until the whole sequence is sorted.
+```C++
+/*
+ * Perform selection sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+selection_sort(vector<T> &elements)
+{
+	size_t ncmp;
+	size_t nswap;
+
+	for (size_t i = 0; i < elements.size() - 1; ++i) {
+		size_t min_idx = i;
+
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = i + 1; j < elements.size(); ++j) {
+			ncmp++;
+			if (elements[j] < elements[min_idx]) {
+				min_idx = j;
+			}
+		}
+
+		if (min_idx != i) {
+			nswap++;
+			swap(elements[i], elements[min_idx]);
+		}
+
+#if defined(DEBUG)
+		cout << "iteration = " << i + 1 << " : " <<  elements <<
+			", comparisons = " << ncmp << ", swap = " << nswap << endl;
+#endif // DEBUG
+	}
+}
+```
+
+### Selection sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+iteration = 1 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 9, swap = 0
+iteration = 2 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 8, swap = 0
+iteration = 3 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 7, swap = 0
+iteration = 4 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 6, swap = 0
+iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 0
+iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
+iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
+iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+iteration = 1 : 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, comparisons = 9, swap = 1
+iteration = 2 : 0, 1, 7, 6, 5, 4, 3, 2, 8, 9, comparisons = 8, swap = 1
+iteration = 3 : 0, 1, 2, 6, 5, 4, 3, 7, 8, 9, comparisons = 7, swap = 1
+iteration = 4 : 0, 1, 2, 3, 5, 4, 6, 7, 8, 9, comparisons = 6, swap = 1
+iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 1
+iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
+iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
+iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+iteration = 1 : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3, comparisons = 9, swap = 0
+iteration = 2 : 0, 1, 7, 2, 4, 6, 5, 8, 9, 3, comparisons = 8, swap = 1
+iteration = 3 : 0, 1, 2, 7, 4, 6, 5, 8, 9, 3, comparisons = 7, swap = 1
+iteration = 4 : 0, 1, 2, 3, 4, 6, 5, 8, 9, 7, comparisons = 6, swap = 1
+iteration = 5 : 0, 1, 2, 3, 4, 6, 5, 8, 9, 7, comparisons = 5, swap = 0
+iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 8, 9, 7, comparisons = 4, swap = 1
+iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 8, 9, 7, comparisons = 3, swap = 0
+iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 9, 8, comparisons = 2, swap = 1
+iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+As can be seen the number of comparisons in all the cases are *n * (n - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, roughly *n / 2* if the sequence is reverse sorted or sequence is initially randomly distributed. Selection sort is not stable and complexity of the algorith is *n * n* for both comparisons and *n / 2* swaps.
