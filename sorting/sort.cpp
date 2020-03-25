@@ -226,10 +226,6 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	if ((lo == hi) || ((lo + 1) == hi))
 		return;
 
-#if defined(DEBUG)
-	cout << "lo = " << lo << ", hi = " << hi << endl;
-#endif // DEBUG
-
 	// copy all elements to the auxiliary vector.
 	for (size_t i = lo; i < hi; ++i)
 		aux.push_back(elements[i]);
@@ -268,7 +264,7 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	aux.clear();
 
 #if defined(DEBUG)
-	cout << "w = " << w + 1 << " : ";
+	cout << "w = " << w + 1 << ", lo = " << lo << ", hi = " << hi << " : ";
 	for (size_t i = 0; i < elements.size(); ++i) {
 		if (i != 0)
 			cout << ", ";

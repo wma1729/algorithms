@@ -220,9 +220,10 @@ lsd_radix_sort_v2(vector<string> &elements, size_t max_width)
 The digits of items are scanned from the least significant digit (LSD) to the most significant digit (MSD).
 ```
 input : ram, mad, she, him, the, cat, car, bar, sky, all
-w = 1 : all, bar, cat, car, him, mad, ram, she, sky, the
-w = 2 : all, bar, cat, car, him, mad, ram, she, sky, the
-w = 3 : all, bar, car, cat, him, mad, ram, she, sky, the
+w = 1, lo = 0, hi = 10 : all, bar, cat, car, him, mad, ram, she, sky, the
+w = 2, lo = 2, hi = 4 : -, -, cat, car, -, -, -, -, -, -
+w = 3, lo = 2, hi = 4 : -, -, car, cat, -, -, -, -, -, -
+w = 2, lo = 7, hi = 9 : -, -, -, -, -, -, -, she, sky, -
 output: all, bar, car, cat, him, mad, ram, she, sky, the
 ```
 The algorithm implementation is recursive and messy. The complexity is between *n* and *nw* or *n(1 + w) / 2*.
@@ -253,10 +254,6 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	// check if there is no elements or a single element to process.
 	if ((lo == hi) || ((lo + 1) == hi))
 		return;
-
-#if defined(DEBUG)
-	// cout << "lo = " << lo << ", hi = " << hi << endl;
-#endif // DEBUG
 
 	// copy all elements to the auxiliary vector.
 	for (size_t i = lo; i < hi; ++i)
@@ -296,7 +293,16 @@ msd_radix_sort(vector<string> &elements, vector<string> &aux, size_t lo, size_t 
 	aux.clear();
 
 #if defined(DEBUG)
-	cout << "w = " << w + 1 << " : " << elements << endl;
+	cout << "w = " << w + 1 << ", lo = " << lo << ", hi = " << hi << " : ";
+	for (size_t i = 0; i < elements.size(); ++i) {
+		if (i != 0)
+			cout << ", ";
+		if ((i < lo) || (i >= hi))
+			cout << "-";
+		else
+			cout << elements[i];
+	}
+	cout << endl;
 #endif // DEBUG
 
 	/*
