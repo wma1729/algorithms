@@ -2,6 +2,7 @@
 #include <ostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 #include <vector>
 #include <queue>
 #include <array>
@@ -307,6 +308,19 @@ msd_radix_sort(vector<string> &elements, size_t max_width)
 }
 
 /*
+ * Print statistics.
+ */
+template<typename T>
+void
+print_stats(size_t iter, size_t ncmp, size_t nswap, const vector<T> &elements)
+{
+#if defined(DEBUG)
+	cout << "iteration = " << setw(2) << iter << " ( " <<  elements <<
+		" ) comparisons = " << setw(2) << ncmp << ", swap = " << setw(2) << nswap << endl;
+#endif
+}
+
+/*
  * Perform bubble sort.
  *
  * @param [inout] elements  - the vector to sort.
@@ -333,10 +347,7 @@ bubble_sort(vector<T> &elements)
 			}
 		}
 
-#if defined(DEBUG)
-		cout << "iteration = " << i + 1 << " : " <<  elements <<
-			", comparisons = " << ncmp << ", swap = " << nswap << endl;
-#endif // DEBUG
+		print_stats(i + 1, ncmp, nswap, elements);
 	}
 }
 
@@ -372,10 +383,47 @@ selection_sort(vector<T> &elements)
 			swap(elements[i], elements[min_idx]);
 		}
 
-#if defined(DEBUG)
-		cout << "iteration = " << i + 1 << " : " <<  elements <<
-			", comparisons = " << ncmp << ", swap = " << nswap << endl;
-#endif // DEBUG
+		print_stats(i + 1, ncmp, nswap, elements);
+	}
+}
+
+/*
+ * Perform insertion sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+insertion_sort(vector<T> &elements)
+{
+	size_t ncmp;
+	size_t nswap;
+
+	/*
+	 * All items to the left of i are sorted and items
+	 * to the right of i, including i, are unsorted.
+	 */
+	for (size_t i = 1; i < elements.size(); ++i) {
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = i; j > 0; --j) {
+			ncmp++;
+			if (elements[j] < elements[j - 1]) {
+				nswap++;
+				swap(elements[j], elements[j - 1]);
+			} else {
+				/*
+				 * No point in proceeding further as the elements
+				 * to the left of index i are already sorted.
+				 */
+				break;
+			}
+		}
+
+		print_stats(i, ncmp, nswap, elements);
 	}
 }
 
@@ -515,6 +563,14 @@ main(int argc, const char **argv)
 			else
 				selection_sort(ivalues);
 			break;
+
+		case INSERTION:
+			if (is_string)
+				insertion_sort(svalues);
+			else
+				insertion_sort(ivalues);
+			break;
+
 
 		default:
 			break;

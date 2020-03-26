@@ -366,9 +366,7 @@ bubble_sort(vector<T> &elements)
 			}
 		}
 
-#if defined(DEBUG)
-		cout << "iteration = " << i + 1 << " : comparisons = " << ncmp << ", swap = " << nswap << endl;
-#endif // DEBUG
+		print_stats(i + 1, ncmp, nswap, elements);
 	}
 }
 ```
@@ -377,43 +375,43 @@ bubble_sort(vector<T> &elements)
 Sequence already sorted:
 ```
 input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-iteration = 1 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 9, swap = 0
-iteration = 2 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 8, swap = 0
-iteration = 3 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 7, swap = 0
-iteration = 4 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 6, swap = 0
-iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 0
-iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
-iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
-iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+iteration =  1 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, swap =  0
+iteration =  2 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  8, swap =  0
+iteration =  3 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swap =  0
+iteration =  4 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  6, swap =  0
+iteration =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  5, swap =  0
+iteration =  6 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  0
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  0
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  0
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence in completely reverse order:
 ```
 input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-iteration = 1 : 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, comparisons = 9, swap = 9
-iteration = 2 : 7, 6, 5, 4, 3, 2, 1, 0, 8, 9, comparisons = 8, swap = 8
-iteration = 3 : 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, comparisons = 7, swap = 7
-iteration = 4 : 5, 4, 3, 2, 1, 0, 6, 7, 8, 9, comparisons = 6, swap = 6
-iteration = 5 : 4, 3, 2, 1, 0, 5, 6, 7, 8, 9, comparisons = 5, swap = 5
-iteration = 6 : 3, 2, 1, 0, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 4
-iteration = 7 : 2, 1, 0, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 3
-iteration = 8 : 1, 0, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 2
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 1
+iteration =  1 ( 8, 7, 6, 5, 4, 3, 2, 1, 0, 9 ) comparisons =  9, swap =  9
+iteration =  2 ( 7, 6, 5, 4, 3, 2, 1, 0, 8, 9 ) comparisons =  8, swap =  8
+iteration =  3 ( 6, 5, 4, 3, 2, 1, 0, 7, 8, 9 ) comparisons =  7, swap =  7
+iteration =  4 ( 5, 4, 3, 2, 1, 0, 6, 7, 8, 9 ) comparisons =  6, swap =  6
+iteration =  5 ( 4, 3, 2, 1, 0, 5, 6, 7, 8, 9 ) comparisons =  5, swap =  5
+iteration =  6 ( 3, 2, 1, 0, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  4
+iteration =  7 ( 2, 1, 0, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  3
+iteration =  8 ( 1, 0, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  1
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence with random distribution:
 ```
 input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
-iteration = 1 : 0, 7, 2, 4, 6, 5, 8, 1, 3, 9, comparisons = 9, swap = 8
-iteration = 2 : 0, 2, 4, 6, 5, 7, 1, 3, 8, 9, comparisons = 8, swap = 6
-iteration = 3 : 0, 2, 4, 5, 6, 1, 3, 7, 8, 9, comparisons = 7, swap = 3
-iteration = 4 : 0, 2, 4, 5, 1, 3, 6, 7, 8, 9, comparisons = 6, swap = 2
-iteration = 5 : 0, 2, 4, 1, 3, 5, 6, 7, 8, 9, comparisons = 5, swap = 2
-iteration = 6 : 0, 2, 1, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 2
-iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 1
-iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+iteration =  1 ( 0, 7, 2, 4, 6, 5, 8, 1, 3, 9 ) comparisons =  9, swap =  8
+iteration =  2 ( 0, 2, 4, 6, 5, 7, 1, 3, 8, 9 ) comparisons =  8, swap =  6
+iteration =  3 ( 0, 2, 4, 5, 6, 1, 3, 7, 8, 9 ) comparisons =  7, swap =  3
+iteration =  4 ( 0, 2, 4, 5, 1, 3, 6, 7, 8, 9 ) comparisons =  6, swap =  2
+iteration =  5 ( 0, 2, 4, 1, 3, 5, 6, 7, 8, 9 ) comparisons =  5, swap =  2
+iteration =  6 ( 0, 2, 1, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  2
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  1
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  0
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 As can be seen the number of comparisons in all the cases are *n * (n - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, *n * (n - 1) / 2* if the sequence is reverse sorted, and *n * (n - 1) / 4* if the sequence is initially randomly distributed. Bubble sort is stable and complexity of the algorith is *n * n* for both comparisons and swaps.
@@ -453,10 +451,7 @@ selection_sort(vector<T> &elements)
 			swap(elements[i], elements[min_idx]);
 		}
 
-#if defined(DEBUG)
-		cout << "iteration = " << i + 1 << " : " <<  elements <<
-			", comparisons = " << ncmp << ", swap = " << nswap << endl;
-#endif // DEBUG
+		print_stats(i + 1, ncmp, nswap, elements);
 	}
 }
 ```
@@ -465,43 +460,132 @@ selection_sort(vector<T> &elements)
 Sequence already sorted:
 ```
 input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-iteration = 1 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 9, swap = 0
-iteration = 2 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 8, swap = 0
-iteration = 3 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 7, swap = 0
-iteration = 4 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 6, swap = 0
-iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 0
-iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
-iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
-iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+iteration =  1 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, swap =  0
+iteration =  2 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  8, swap =  0
+iteration =  3 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swap =  0
+iteration =  4 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  6, swap =  0
+iteration =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  5, swap =  0
+iteration =  6 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  0
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  0
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  0
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence in completely reverse order:
 ```
 input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-iteration = 1 : 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, comparisons = 9, swap = 1
-iteration = 2 : 0, 1, 7, 6, 5, 4, 3, 2, 8, 9, comparisons = 8, swap = 1
-iteration = 3 : 0, 1, 2, 6, 5, 4, 3, 7, 8, 9, comparisons = 7, swap = 1
-iteration = 4 : 0, 1, 2, 3, 5, 4, 6, 7, 8, 9, comparisons = 6, swap = 1
-iteration = 5 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 5, swap = 1
-iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 4, swap = 0
-iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 3, swap = 0
-iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 2, swap = 0
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 0
+iteration =  1 ( 0, 8, 7, 6, 5, 4, 3, 2, 1, 9 ) comparisons =  9, swap =  1
+iteration =  2 ( 0, 1, 7, 6, 5, 4, 3, 2, 8, 9 ) comparisons =  8, swap =  1
+iteration =  3 ( 0, 1, 2, 6, 5, 4, 3, 7, 8, 9 ) comparisons =  7, swap =  1
+iteration =  4 ( 0, 1, 2, 3, 5, 4, 6, 7, 8, 9 ) comparisons =  6, swap =  1
+iteration =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  5, swap =  1
+iteration =  6 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  0
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  0
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  0
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Sequence with random distribution:
 ```
 input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
-iteration = 1 : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3, comparisons = 9, swap = 0
-iteration = 2 : 0, 1, 7, 2, 4, 6, 5, 8, 9, 3, comparisons = 8, swap = 1
-iteration = 3 : 0, 1, 2, 7, 4, 6, 5, 8, 9, 3, comparisons = 7, swap = 1
-iteration = 4 : 0, 1, 2, 3, 4, 6, 5, 8, 9, 7, comparisons = 6, swap = 1
-iteration = 5 : 0, 1, 2, 3, 4, 6, 5, 8, 9, 7, comparisons = 5, swap = 0
-iteration = 6 : 0, 1, 2, 3, 4, 5, 6, 8, 9, 7, comparisons = 4, swap = 1
-iteration = 7 : 0, 1, 2, 3, 4, 5, 6, 8, 9, 7, comparisons = 3, swap = 0
-iteration = 8 : 0, 1, 2, 3, 4, 5, 6, 7, 9, 8, comparisons = 2, swap = 1
-iteration = 9 : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, comparisons = 1, swap = 1
+iteration =  1 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  9, swap =  0
+iteration =  2 ( 0, 1, 7, 2, 4, 6, 5, 8, 9, 3 ) comparisons =  8, swap =  1
+iteration =  3 ( 0, 1, 2, 7, 4, 6, 5, 8, 9, 3 ) comparisons =  7, swap =  1
+iteration =  4 ( 0, 1, 2, 3, 4, 6, 5, 8, 9, 7 ) comparisons =  6, swap =  1
+iteration =  5 ( 0, 1, 2, 3, 4, 6, 5, 8, 9, 7 ) comparisons =  5, swap =  0
+iteration =  6 ( 0, 1, 2, 3, 4, 5, 6, 8, 9, 7 ) comparisons =  4, swap =  1
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 8, 9, 7 ) comparisons =  3, swap =  0
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 9, 8 ) comparisons =  2, swap =  1
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  1
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 As can be seen the number of comparisons in all the cases are *n * (n - 1) / 2*. The number of swaps are 0 if the sequence is already sorted, roughly *n / 2* if the sequence is reverse sorted or sequence is initially randomly distributed. Selection sort is not stable and complexity of the algorith is *n * n* for both comparisons and *n / 2* swaps.
+
+## Insertion Sort
+Assumes that the sequence consists of two sub-sequences: *sorted* and *unsorted*. Initially the sorted sub-sequence has 0 elements and the unsorted sub-sequence has all the elements. At each step, one item is moved from the unsorted sub-sequence to the correct location in the sorted sub-sequence until the unsorted sub-sequence is empty and the sorted sub-sequence is fully sorted. 
+```C++
+/*
+ * Perform insertion sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+insertion_sort(vector<T> &elements)
+{
+	size_t ncmp;
+	size_t nswap;
+
+	/*
+	 * All items to the left of i are sorted and items
+	 * to the right of i, including i, are unsorted.
+	 */
+	for (size_t i = 1; i < elements.size(); ++i) {
+		ncmp = 0;
+		nswap = 0;
+
+		for (size_t j = i; j > 0; --j) {
+			ncmp++;
+			if (elements[j] < elements[j - 1]) {
+				nswap++;
+				swap(elements[j], elements[j - 1]);
+			} else {
+				/*
+				 * No point in proceeding further as the elements
+				 * to the left of index i are already sorted.
+				 */
+				break;
+			}
+		}
+
+		print_stats(i, ncmp, nswap, elements);
+	}
+}
+```
+
+### Insertion sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+iteration =  1 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  2 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  3 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  4 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  6 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+iteration =  1 ( 8, 9, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, swap =  1
+iteration =  2 ( 7, 8, 9, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  2, swap =  2
+iteration =  3 ( 6, 7, 8, 9, 5, 4, 3, 2, 1, 0 ) comparisons =  3, swap =  3
+iteration =  4 ( 5, 6, 7, 8, 9, 4, 3, 2, 1, 0 ) comparisons =  4, swap =  4
+iteration =  5 ( 4, 5, 6, 7, 8, 9, 3, 2, 1, 0 ) comparisons =  5, swap =  5
+iteration =  6 ( 3, 4, 5, 6, 7, 8, 9, 2, 1, 0 ) comparisons =  6, swap =  6
+iteration =  7 ( 2, 3, 4, 5, 6, 7, 8, 9, 1, 0 ) comparisons =  7, swap =  7
+iteration =  8 ( 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 ) comparisons =  8, swap =  8
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, swap =  9
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+iteration =  1 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  1, swap =  0
+iteration =  2 ( 0, 7, 9, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  2, swap =  1
+iteration =  3 ( 0, 2, 7, 9, 4, 6, 5, 8, 1, 3 ) comparisons =  3, swap =  2
+iteration =  4 ( 0, 2, 4, 7, 9, 6, 5, 8, 1, 3 ) comparisons =  3, swap =  2
+iteration =  5 ( 0, 2, 4, 6, 7, 9, 5, 8, 1, 3 ) comparisons =  3, swap =  2
+iteration =  6 ( 0, 2, 4, 5, 6, 7, 9, 8, 1, 3 ) comparisons =  4, swap =  3
+iteration =  7 ( 0, 2, 4, 5, 6, 7, 8, 9, 1, 3 ) comparisons =  2, swap =  1
+iteration =  8 ( 0, 1, 2, 4, 5, 6, 7, 8, 9, 3 ) comparisons =  8, swap =  7
+iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swap =  6
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+The critical thing here is that number of comparisons vary if the items in the sequence are already sorted. If the sequence is fully sorted, there are *n* comparisons and *0* swaps. If the sequence is exactly in the reverse order, there are *n * (n - 1) / 2* comparisons and swaps. If the sequence is initially randomly distributed, the are *n * (n - 1) / 4* comparisons and swaps on average.
