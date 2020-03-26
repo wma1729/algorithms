@@ -588,4 +588,4 @@ iteration =  8 ( 0, 1, 2, 4, 5, 6, 7, 8, 9, 3 ) comparisons =  8, swap =  7
 iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swap =  6
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
-The critical thing here is that number of comparisons vary if the items in the sequence are already sorted. If the sequence is fully sorted, there are *n* comparisons and *0* swaps. If the sequence is exactly in the reverse order, there are *n * (n - 1) / 2* comparisons and swaps. If the sequence is initially randomly distributed, the are *n * (n - 1) / 4* comparisons and swaps on average.
+The critical thing here is that number of comparisons vary if the items in the sequence are already sorted. If the sequence is fully sorted, there are *n* comparisons and *0* swaps. If the sequence is exactly in the reverse order, there are *n * (n - 1) / 2* comparisons and swaps. If the sequence is initially randomly distributed, there are *n * (n - 1) / 4* comparisons and swaps on average.
