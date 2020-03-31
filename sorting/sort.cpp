@@ -427,6 +427,193 @@ insertion_sort(vector<T> &elements)
 	}
 }
 
+/*
+ * Print statistics.
+ */
+template<typename T>
+void
+print_stats(size_t iter, size_t lo, size_t hi, size_t ncmp, size_t ncopy, const vector<T> &elements)
+{
+#if defined(DEBUG)
+	cout << "iteration = " << setw(2) << iter <<
+		", lo = " << setw(2) << lo << ", hi = " << setw(2) << hi <<
+		" ( " <<  elements << " ) comparisons = " << setw(2) << ncmp <<
+		", copies = " << setw(2) << ncopy << endl;
+#endif
+}
+
+/*
+ * Merge two sorted arrays: elements[lo, mid) and elements[mid, hi).
+ * Items from elements[lo, hi) are first copied into an auxiliary array.
+ * Items from auxiliary[lo, mid) and auxiliary[mid, hi) are then
+ * merged back into the elements[lo, hi).
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [inout] auxiliary - the auxiliary vector to aid sorting.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    mid       - the middle index.
+ * @param [in]    hi        - the ending index (1 past the last item).
+ *
+ * @return elements[lo, hi) are merged correctly on return.
+ */
+template<typename T>
+static void
+merge(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t mid, size_t hi, size_t iter)
+{
+	if ((lo == mid) || (mid == hi)) {
+		// at least one of the sub-sequence is empty
+		return;
+	}
+
+	for (size_t k = lo; k < hi; ++k) {
+		// copy concerned elements to auxiliary vector
+		auxiliary[k] = elements[k];
+	}
+
+	size_t ncmp = 0;
+	size_t ncopy = 0;
+
+	size_t i = lo;
+	size_t j = mid;
+
+	if (auxiliary[mid - 1] < auxiliary[mid]) {
+		/*
+		 * Special case:
+		 * auxiliary[lo, mid) = ( 2, 3, 4, 5 )
+		 * auxiliary[mid, hi) = ( 7, 9, 10, 11 )
+		 * Nothing to do.
+		 */
+		ncmp++;
+	} else if (auxiliary[lo] > auxiliary[hi - 1]) {
+		/*
+		 * Special case:
+		 * auxiliary[lo, mid) = ( 7, 9, 10, 11 )
+		 * auxiliary[mid, hi) = ( 2, 3, 4, 5 )
+		 * First copy auxiliary[mid, hi), then copy auxiliary[lo, mid).
+		 */
+		ncmp++;
+		for (size_t k = mid; k < hi; ++k) {
+			ncopy++;
+			elements[i++] = auxiliary[k];
+		}
+		for (size_t k = lo; k < mid; ++k) {
+			ncopy++;
+			elements[i++] = auxiliary[k];
+		}
+	} else {
+		/*
+		 * Normal case:
+		 * Do normal comparison and pick element either from
+		 * auxiliary[lo, mid) or auxiliary[mid, hi).
+		 */
+		for (size_t k = lo; k < hi; ++k) {
+			ncopy++;
+			if (i >= mid) {
+				// all elements from auxiliary[lo, mid) are consumed
+				elements[k] = auxiliary[j++];
+			} else if (j >= hi) {
+				// all elements from auxiliary[mid, hi) are consumed
+				elements[k] = auxiliary[i++];
+			} else if (auxiliary[i] < auxiliary[j]) {
+				elements[k] = auxiliary[i++];
+				ncmp++;
+			} else {
+				elements[k] = auxiliary[j++];
+				ncmp++;
+			}
+		}
+	}
+
+	print_stats(iter, lo, hi, ncmp, ncopy, elements);
+}
+
+/*
+ * Perform merge sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [inout] auxiliary - the auxiliary vector to aid sorting.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    ho        - the ending index (1 past the last item).
+ * @param [in]    iter      - the iteration number.
+ *
+ * @return elements[lo, hi) are storted on return.
+ */
+template<typename T>
+static void
+merge_sort_v1(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t hi, size_t &iter)
+{
+	if ((hi - lo) <= 1) {
+		// there is only one element left
+		return;
+	}
+
+	// get the partition point
+	size_t mid = (lo + hi) / 2;
+
+	// sort the lhs sequence
+	merge_sort_v1(elements, auxiliary, lo, mid, iter);
+
+	// sort the rhs sequence
+	merge_sort_v1(elements, auxiliary, mid, hi, iter);
+
+	// merge lhs & rhs
+	merge(elements, auxiliary, lo, mid, hi, iter++);
+}
+
+/*
+ * Perform merge sort using recursion.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+merge_sort_v1(vector<T> &elements)
+{
+	// create an auxiliary sequence
+	vector<T> auxiliary(elements.size());
+
+	size_t iter = 1;
+
+	// make the recursive call
+	merge_sort_v1(elements, auxiliary, 0, elements.size(), iter);
+}
+
+/*
+ * Perform merge sort without using recursion.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+merge_sort_v2(vector<T> &elements)
+{
+	// create an auxiliary sequence
+	vector<T> auxiliary(elements.size());
+
+	size_t iter = 0;
+
+	/*
+	 * Keep doubling the merge size, starting with 1.
+	 * Do not use the stop condition as sz < elements.size() / 2.
+	 * This will work only if the number of elements are 2 * power(n).
+	 */
+	for (size_t sz = 1; sz < elements.size(); sz *= 2) {
+		size_t n = 2 * sz;
+
+		for (size_t lo = 0; lo < elements.size() - sz; lo += n) {
+			size_t mid = lo + sz;
+			size_t hi = lo + n;
+			if (hi > elements.size())
+				hi = elements.size();
+			merge(elements, auxiliary, lo, mid, hi, ++iter);
+		}
+	}
+}
+
 static int
 usage(const char *progname)
 {
@@ -436,7 +623,9 @@ usage(const char *progname)
 		<< "    -msd_radix                  Perform MSD radix sort." << endl
 		<< "    -bubble                     Perform bubble sort." << endl
 		<< "    -selection                  Perform selection sort." << endl
-		<< "    -insertion                  Perform insertion sort." << endl;
+		<< "    -insertion                  Perform insertion sort." << endl
+		<< "    -merge_v1                   Perform merge sort recursively." << endl
+		<< "    -merge_v2                   Perform merge sort non-recursively." << endl;
 	return 1;
 }
 
@@ -448,7 +637,9 @@ enum sort_algo
 	MSD_RADIX,
 	BUBBLE,
 	SELECTION,
-	INSERTION
+	INSERTION,
+	MERGE_V1,
+	MERGE_V2
 };
 
 int
@@ -485,6 +676,10 @@ main(int argc, const char **argv)
 			algo = SELECTION;
 		} else if (strcmp(argv[i], "-insertion") == 0) {
 			algo = INSERTION;
+		} else if (strcmp(argv[i], "-merge_v1") == 0) {
+			algo = MERGE_V1;
+		} else if (strcmp(argv[i], "-merge_v2") == 0) {
+			algo = MERGE_V2;
 		} else {
 			return usage(argv[0]);
 		}
@@ -571,6 +766,19 @@ main(int argc, const char **argv)
 				insertion_sort(ivalues);
 			break;
 
+		case MERGE_V1:
+			if (is_string)
+				merge_sort_v1(svalues);
+			else
+				merge_sort_v1(ivalues);
+			break;
+
+		case MERGE_V2:
+			if (is_string)
+				merge_sort_v2(svalues);
+			else
+				merge_sort_v2(ivalues);
+			break;
 
 		default:
 			break;

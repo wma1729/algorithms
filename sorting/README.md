@@ -588,4 +588,236 @@ iteration =  8 ( 0, 1, 2, 4, 5, 6, 7, 8, 9, 3 ) comparisons =  8, swap =  7
 iteration =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swap =  6
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
-The critical thing here is that number of comparisons vary if the items in the sequence are already sorted. If the sequence is fully sorted, there are *n* comparisons and *0* swaps. If the sequence is exactly in the reverse order, there are *n * (n - 1) / 2* comparisons and swaps. If the sequence is initially randomly distributed, there are *n * (n - 1) / 4* comparisons and swaps on average.
+The critical thing here is that number of comparisons are few if the items in the sequence are already partially sorted. If the sequence is fully sorted, there are *n* comparisons and *0* swaps. If the sequence is exactly in the reverse order, there are *n * (n - 1) / 2* comparisons and swaps. If the sequence is initially randomly distributed, there are *n * (n - 1) / 4* comparisons and swaps on average and it is a stable sort.
+
+## Merge Sort
+**Merging** is an operation that merges two already sorted sequences. Give two sequences *S1 = (2, 5, 7)* and *S2 = (3, 6, 9)*, then *Merge(S1, S2) = (2, 3, 5, 6, 7, 9)*. It is really simple to implement:
+- Keep comparing the *top* item of the two sequences.
+- Pick up the smaller of the two and adjust the *top* of the sequence from where the item is chosen. The picked up item can
+  go into an auxiliary sequence.
+- Repeat until all the items are checked and inserted in the sorted order into the auxiliary sequence.
+
+There are two interesting cases here:
+- S1 = (2, 3, 5), S2 = (6, 8, 10)
+  The last item of S1 is smaller than the first item of S2. We can do one comparison and copy items from two sequences.
+- S1 = (4, 6), S2 = (2, 3, 5, 7, 9, 10, 11, 13)
+  Once the items froms S1 are consumed, all the items from S2 could be simply copied.
+```C++
+/*
+ * Merge two sorted arrays: elements[lo, mid) and elements[mid, hi).
+ * Items from elements[lo, hi) are first copied into an auxiliary array.
+ * Items from auxiliary[lo, mid) and auxiliary[mid, hi) are then
+ * merged back into the elements[lo, hi).
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [inout] auxiliary - the auxiliary vector to aid sorting.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    mid       - the middle index.
+ * @param [in]    hi        - the ending index (1 past the last item).
+ *
+ * @return elements[lo, hi) are merged correctly on return.
+ */
+template<typename T>
+static void
+merge(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t mid, size_t hi, size_t iter)
+{
+	if ((lo == mid) || (mid == hi)) {
+		// at least one of the sub-sequence is empty
+		return;
+	}
+
+	for (size_t k = lo; k < hi; ++k) {
+		// copy concerned elements to auxiliary vector
+		auxiliary[k] = elements[k];
+	}
+
+	size_t ncmp = 0;
+	size_t ncopy = 0;
+
+	size_t i = lo;
+	size_t j = mid;
+
+	if (auxiliary[mid - 1] < auxiliary[mid]) {
+		/*
+		 * Special case:
+		 * auxiliary[lo, mid) = ( 2, 3, 4, 5 )
+		 * auxiliary[mid, hi) = ( 7, 9, 10, 11 )
+		 * Nothing to do.
+		 */
+		ncmp++;
+	} else if (auxiliary[lo] > auxiliary[hi - 1]) {
+		/*
+		 * Special case:
+		 * auxiliary[lo, mid) = ( 7, 9, 10, 11 )
+		 * auxiliary[mid, hi) = ( 2, 3, 4, 5 )
+		 * First copy auxiliary[mid, hi), then copy auxiliary[lo, mid).
+		 */
+		ncmp++;
+		for (size_t k = mid; k < hi; ++k) {
+			ncopy++;
+			elements[i++] = auxiliary[k];
+		}
+		for (size_t k = lo; k < mid; ++k) {
+			ncopy++;
+			elements[i++] = auxiliary[k];
+		}
+	} else {
+		/*
+		 * Normal case:
+		 * Do normal comparison and pick element either from
+		 * auxiliary[lo, mid) or auxiliary[mid, hi).
+		 */
+		for (size_t k = lo; k < hi; ++k) {
+			ncopy++;
+			if (i >= mid) {
+				// all elements from auxiliary[lo, mid) are consumed
+				elements[k] = auxiliary[j++];
+			} else if (j >= hi) {
+				// all elements from auxiliary[mid, hi) are consumed
+				elements[k] = auxiliary[i++];
+			} else if (auxiliary[i] < auxiliary[j]) {
+				elements[k] = auxiliary[i++];
+				ncmp++;
+			} else {
+				elements[k] = auxiliary[j++];
+				ncmp++;
+			}
+		}
+	}
+
+	print_stats(iter, lo, hi, ncmp, ncopy, elements);
+}
+```
+Merge sort divides the sequence in to smaller sub-sequences and sort them. This can be done either recursively or iteratively.
+```C++
+/*
+ * Perform merge sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [inout] auxiliary - the auxiliary vector to aid sorting.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    ho        - the ending index (1 past the last item).
+ * @param [in]    iter      - the iteration number.
+ *
+ * @return elements[lo, hi) are storted on return.
+ */
+template<typename T>
+static void
+merge_sort_v1(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t hi, size_t &iter)
+{
+	if ((hi - lo) <= 1) {
+		// there is only one element left
+		return;
+	}
+
+	// get the partition point
+	size_t mid = (lo + hi) / 2;
+
+	// sort the lhs sequence
+	merge_sort_v1(elements, auxiliary, lo, mid, iter);
+
+	// sort the rhs sequence
+	merge_sort_v1(elements, auxiliary, mid, hi, iter);
+
+	// merge lhs & rhs
+	merge(elements, auxiliary, lo, mid, hi, iter++);
+}
+
+/*
+ * Perform merge sort using recursion.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+merge_sort_v1(vector<T> &elements)
+{
+	// create an auxiliary sequence
+	vector<T> auxiliary(elements.size());
+
+	size_t iter = 1;
+
+	// make the recursive call
+	merge_sort_v1(elements, auxiliary, 0, elements.size(), iter);
+}
+
+/*
+ * Perform merge sort without using recursion.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+merge_sort_v2(vector<T> &elements)
+{
+	// create an auxiliary sequence
+	vector<T> auxiliary(elements.size());
+
+	size_t iter = 0;
+
+	/*
+	 * Keep doubling the merge size, starting with 1.
+	 * Do not use the stop condition as sz < elements.size() / 2.
+	 * This will work only if the number of elements are 2 * power(n).
+	 */
+	for (size_t sz = 1; sz < elements.size(); sz *= 2) {
+		size_t n = 2 * sz;
+
+		for (size_t lo = 0; lo < elements.size() - sz; lo += n) {
+			size_t mid = lo + sz;
+			size_t hi = lo + n;
+			if (hi > elements.size())
+				hi = elements.size();
+			merge(elements, auxiliary, lo, mid, hi, ++iter);
+		}
+	}
+}
+```
+### Merge sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+iteration =  1, lo =  0, hi =  2 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  2, lo =  3, hi =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  3, lo =  2, hi =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  4, lo =  0, hi =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  5, lo =  5, hi =  7 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  6, lo =  8, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  7, lo =  7, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  8, lo =  5, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+iteration =  9, lo =  0, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies =  0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+iteration =  1, lo =  0, hi =  2 ( 8, 9, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, copies =  2
+iteration =  2, lo =  3, hi =  5 ( 8, 9, 7, 5, 6, 4, 3, 2, 1, 0 ) comparisons =  1, copies =  2
+iteration =  3, lo =  2, hi =  5 ( 8, 9, 5, 6, 7, 4, 3, 2, 1, 0 ) comparisons =  1, copies =  3
+iteration =  4, lo =  0, hi =  5 ( 5, 6, 7, 8, 9, 4, 3, 2, 1, 0 ) comparisons =  1, copies =  5
+iteration =  5, lo =  5, hi =  7 ( 5, 6, 7, 8, 9, 3, 4, 2, 1, 0 ) comparisons =  1, copies =  2
+iteration =  6, lo =  8, hi = 10 ( 5, 6, 7, 8, 9, 3, 4, 2, 0, 1 ) comparisons =  1, copies =  2
+iteration =  7, lo =  7, hi = 10 ( 5, 6, 7, 8, 9, 3, 4, 0, 1, 2 ) comparisons =  1, copies =  3
+iteration =  8, lo =  5, hi = 10 ( 5, 6, 7, 8, 9, 0, 1, 2, 3, 4 ) comparisons =  1, copies =  5
+iteration =  9, lo =  0, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, copies = 10
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+iteration =  1, lo =  0, hi =  2 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  1, copies =  0
+iteration =  2, lo =  3, hi =  5 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  1, copies =  0
+iteration =  3, lo =  2, hi =  5 ( 0, 9, 2, 4, 7, 6, 5, 8, 1, 3 ) comparisons =  1, copies =  3
+iteration =  4, lo =  0, hi =  5 ( 0, 2, 4, 7, 9, 6, 5, 8, 1, 3 ) comparisons =  4, copies =  5
+iteration =  5, lo =  5, hi =  7 ( 0, 2, 4, 7, 9, 5, 6, 8, 1, 3 ) comparisons =  1, copies =  2
+iteration =  6, lo =  8, hi = 10 ( 0, 2, 4, 7, 9, 5, 6, 8, 1, 3 ) comparisons =  1, copies =  0
+iteration =  7, lo =  7, hi = 10 ( 0, 2, 4, 7, 9, 5, 6, 1, 3, 8 ) comparisons =  1, copies =  3
+iteration =  8, lo =  5, hi = 10 ( 0, 2, 4, 7, 9, 1, 3, 5, 6, 8 ) comparisons =  4, copies =  5
+iteration =  9, lo =  0, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, copies = 10
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Merge sort is a stable sort and the maximum number of comparisons are *n * log(n)*. Like insertion sort, it too benefits if the sequence is already partially sorted.
