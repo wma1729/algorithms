@@ -5,7 +5,7 @@ A **stable** sort preserves the original ordering of identical items.
 
 ```
 Input     : [(a, 10), (b, 7), (c, 8), (d, 7), (e, 6), (f, 10), (g, 3)]
-Operation : Sort by the second numberic field.
+Operation : Sort by the second numeric field.
 Output    : [(g, 3), (e, 6), (b, 7), (d, 7), (c, 8), (a, 10), (f, 10)]
 ```
 
