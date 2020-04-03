@@ -614,6 +614,187 @@ merge_sort_v2(vector<T> &elements)
 	}
 }
 
+/*
+ * Partitions the vector into two. The first element elements[lo] is the pivot element.
+ * After partition, array[lo] is moved to its correct position. All the elements to
+ * left of the pivot are less than array[lo] and all the elements to the right of
+ * the pivot are greater than array[lo]. Returns the index of the pivot element position.
+ *
+ * @param [inout] elements  - the input vector to partition.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return the index of the pivot element after the vector is partitioned.
+ */
+template<typename T>
+size_t
+partition(vector<T> &elements, size_t lo, size_t hi, size_t iter)
+{
+	size_t i = lo + 1;
+	size_t j = hi;
+
+	size_t ncmp = 0;
+	size_t nswap = 0;
+
+	while (i <= j) {
+		ncmp++;
+		if (elements[i] < elements[lo]) {
+			i++;
+		} else if (elements[j] > elements[lo]) {
+			j--;
+		} else {
+			swap(elements[i], elements[j]);
+			i++;
+			j--;
+			nswap++;
+		}
+	}
+
+	if (lo != j) {
+		swap(elements[lo], elements[j]);
+		nswap++;
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+
+	return j;
+}
+
+/*
+ * Select kth smallest element.
+ *
+ * @param [inout] elements - the input sequence.
+ * @param [in]    k        - the kth smallest element to find.
+ *
+ * @return the kth smallest element.
+ */
+template<typename T>
+T
+select_kth(vector<T> &elements, size_t k)
+{
+	size_t lo = 0;
+	size_t hi = elements.size() - 1;
+	size_t iter = 0;
+
+	while (lo <= hi) {
+		size_t p = partition(elements, lo, hi, ++iter);
+		if (p == k)
+			break;
+		else if (p < k)
+			lo = p + 1;
+		else
+			hi = p - 1;
+	}
+
+	return elements[k];
+}
+
+/**
+ * Quick Sort. Consider shuffling the items if the sequence is not randomly
+ * distributed. Find a pivot element and move it to its correct location
+ * using partition(). Recursively sort the first half and the second half.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v1(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
+{
+	if (lo >= hi)
+		return;
+
+	size_t p = partition(elements, lo, hi, ++iter);
+
+	if (p > lo)
+		quick_sort_v1(elements, lo, p - 1, iter);
+
+	if (p < hi)
+		quick_sort_v1(elements, p + 1, hi, iter);
+}
+
+/*
+ * Perform quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v1(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+	quick_sort_v1(elements, 0, elements.size() - 1, iter);
+}
+
+template<typename T>
+void
+quick_sort_v2(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
+{
+	if (lo >= hi)
+		return;
+
+	size_t p = lo;
+	size_t i = lo + 1;
+	size_t j = hi;
+
+	size_t ncmp = 0;
+	size_t nswap = 0;
+
+	while (i <= j) {
+		ncmp++;
+		if (elements[i] < elements[p]) {
+			swap(elements[i], elements[p]);
+			i++;
+			p++;
+			nswap++;
+		} else if (elements[i] == elements[p]) {
+			i++;
+		} else /* if (elements[i] > elements[p]) */ {
+			swap(elements[i], elements[j]);
+			j--;
+			nswap++;
+		}
+	}
+
+	print_stats(++iter, ncmp, nswap, elements);
+
+	if (p > lo)
+		quick_sort_v2(elements, lo, p - 1, iter);
+
+	if (j < hi)
+		quick_sort_v2(elements, j + 1, hi, iter);
+}
+
+/*
+ * Perform quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v2(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+	quick_sort_v2(elements, 0, elements.size() - 1, iter);
+}
+
 static int
 usage(const char *progname)
 {
@@ -625,7 +806,10 @@ usage(const char *progname)
 		<< "    -selection                  Perform selection sort." << endl
 		<< "    -insertion                  Perform insertion sort." << endl
 		<< "    -merge_v1                   Perform merge sort recursively." << endl
-		<< "    -merge_v2                   Perform merge sort non-recursively." << endl;
+		<< "    -merge_v2                   Perform merge sort non-recursively." << endl
+		<< "    -kth <item>                 Find k-th smallest item." << endl
+		<< "    -qsort_v1                   Perform basic quick sort." << endl
+		<< "    -qsort_v2                   Perform 3-way quick sort." << endl;
 	return 1;
 }
 
@@ -639,7 +823,10 @@ enum sort_algo
 	SELECTION,
 	INSERTION,
 	MERGE_V1,
-	MERGE_V2
+	MERGE_V2,
+	KTH,
+	QSORT_V1,
+	QSORT_V2
 };
 
 int
@@ -649,6 +836,8 @@ main(int argc, const char **argv)
 	string          file;
 	string          tmpstr;
 	int             tmpval = -1;
+	size_t          k = -1;
+	size_t          len = 0;
 	bool            is_string = false;
 	vector<int>     ivalues;
 	vector<string>  svalues;
@@ -659,7 +848,7 @@ main(int argc, const char **argv)
 			if (argv[i]) {
 				file = argv[i];
 			} else {
-				cerr << "missing argument for " << argv[i] << endl;
+				cerr << "missing argument for " << argv[i - 1] << endl;
 				return 1;
 			}
 		} else if (strcmp(argv[i], "-string") == 0) {
@@ -680,6 +869,24 @@ main(int argc, const char **argv)
 			algo = MERGE_V1;
 		} else if (strcmp(argv[i], "-merge_v2") == 0) {
 			algo = MERGE_V2;
+		} else if (strcmp(argv[i], "-kth") == 0) {
+			algo = KTH;
+			i++;
+			if (argv[i]) {
+				int n = atoi(argv[i]);
+				if (n < 0) {
+					cerr << "invalid argument for " << argv[i - 1] << endl;
+					return 1;
+				}
+				k = n;
+			} else {
+				cerr << "missing argument for " << argv[i - 1] << endl;
+				return 1;
+			}
+		} else if (strcmp(argv[i], "-qsort_v1") == 0) {
+			algo = QSORT_V1;
+		} else if (strcmp(argv[i], "-qsort_v2") == 0) {
+			algo = QSORT_V2;
 		} else {
 			return usage(argv[0]);
 		}
@@ -717,11 +924,35 @@ main(int argc, const char **argv)
 	fin.close();
 
 	cout << "input : ";
-	if (is_string)
+	if (is_string) {
+		len = svalues.size();
 		cout << svalues;
-	else
+	} else {
+		len = ivalues.size();
 		cout << ivalues;
+	}
+
 	cout << endl;
+
+
+	if (algo == KTH) {
+		if (k >= len) {
+			cerr << "kth value, " << k << ", is beyond range, " << len << endl;
+			return 1;
+		}
+
+		if (len == 0) {
+			cerr << "empty sequence" << endl;
+			return 1;
+		}
+
+		if (is_string)
+			cout << select_kth(svalues, k) << endl;
+		else
+			cout << select_kth(ivalues, k) << endl;
+
+		return 0;
+	}
 
 	switch (algo) {
 		case LSD_RADIX_V1:
@@ -778,6 +1009,21 @@ main(int argc, const char **argv)
 				merge_sort_v2(svalues);
 			else
 				merge_sort_v2(ivalues);
+			break;
+
+		case QSORT_V1:
+			if (is_string)
+				quick_sort_v1(svalues);
+			else
+				quick_sort_v1(ivalues);
+			break;
+
+		case QSORT_V2:
+			if (is_string)
+				quick_sort_v2(svalues);
+			else
+				quick_sort_v2(ivalues);
+			break;
 			break;
 
 		default:

@@ -821,3 +821,100 @@ iteration =  9, lo =  0, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons = 
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
 Merge sort is a stable sort and the maximum number of comparisons are *n * log(n)*. Like insertion sort, it too benefits if the sequence is already partially sorted.
+
+## Partition
+Partition is an important algorithm. It is often the basis of some important algorithms including quick sort. What does it do?
+
+- Given a sequence of *n* items, it picks up a *pivot* item (usually the first item).
+- Reorders (or partitions) the sequence in a way that
+  - all elements to left of the *pivot* are less than the *pivot*.
+  - all elements to the right of the *pivot* are greater than the *pivot*.
+
+If the ultimate goal is to sort the sequence, than it means that the pivot item has reached its final location.
+```C++
+/*
+ * Partitions the vector into two. The first element elements[lo] is the pivot element.
+ * After partition, array[lo] is moved to its correct position. All the elements to
+ * left of the pivot are less than array[lo] and all the elements to the right of
+ * the pivot are greater than array[lo]. Returns the index of the pivot element position.
+ *
+ * @param [inout] elements  - the input vector to partition.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return the index of the pivot element after the vector is partitioned.
+ */
+template<typename T>
+size_t
+partition(vector<T> &elements, size_t lo, size_t hi, size_t iter)
+{
+	size_t i = lo + 1;
+	size_t j = hi;
+
+	size_t ncmp = 0;
+	size_t nswap = 0;
+
+	while (i <= j) {
+		ncmp++;
+		if (elements[i] < elements[lo]) {
+			i++;
+		} else if (elements[j] > elements[lo]) {
+			j--;
+		} else {
+			swap(elements[i], elements[j]);
+			i++;
+			j--;
+			nswap++;
+		}
+	}
+
+	if (lo != j) {
+		swap(elements[lo], elements[j]);
+		nswap++;
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+
+	return j;
+}
+```
+
+### Select k<super>th</super> smallest element in a sequence
+This problem can be solved easily using the partition algorithm.
+- Parition the sequence.
+- While index of *pivot* is not equal to *k*
+  - If the index of *pivot* is less than *k*, partition the right sub-sequence.
+  - If the index of *pivot* is greater than *k*, partition the left sub-sequence.
+
+To find the smallest, largest, and median elements, use k = 0, k = sequence-length - 1, k = sequence-length / 2 respectively.
+```C++
+/*
+ * Select kth smallest element.
+ *
+ * @param [inout] elements - the input sequence.
+ * @param [in]    k        - the kth smallest element to find.
+ *
+ * @return the kth smallest element.
+ */
+template<typename T>
+T
+select_kth(vector<T> &elements, size_t k)
+{
+	size_t lo = 0;
+	size_t hi = elements.size() - 1;
+	size_t iter = 0;
+
+	while (lo <= hi) {
+		size_t p = partition(elements, lo, hi, ++iter);
+		if (p == k)
+			break;
+		else if (p < k)
+			lo = p + 1;
+		else
+			hi = p - 1;
+	}
+
+	return elements[k];
+}
+```
