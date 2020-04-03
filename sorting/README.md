@@ -830,7 +830,7 @@ Partition is an important algorithm. It is often the basis of some important alg
   - all elements to left of the *pivot* are less than the *pivot*.
   - all elements to the right of the *pivot* are greater than the *pivot*.
 
-If the ultimate goal is to sort the sequence, than it means that the pivot item has reached its final location.
+If the ultimate goal is to sort the sequence, than it means that the *pivot* item has reached its final location.
 ```C++
 /*
  * Partitions the vector into two. The first element elements[lo] is the pivot element.
@@ -880,7 +880,7 @@ partition(vector<T> &elements, size_t lo, size_t hi, size_t iter)
 }
 ```
 
-### Select k<super>th</super> smallest element in a sequence
+### Select k<sup>th</sup> smallest element in a sequence
 This problem can be solved easily using the partition algorithm.
 - Parition the sequence.
 - While index of *pivot* is not equal to *k*
