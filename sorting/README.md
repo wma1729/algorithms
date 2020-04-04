@@ -831,6 +831,7 @@ Partition is an important algorithm. It is often the basis of some important alg
   - all elements to the right of the *pivot* are greater than the *pivot*.
 
 If the ultimate goal is to sort the sequence, than it means that the *pivot* item has reached its final location.
+![Basic partition](partition1.jpeg)
 ```C++
 /*
  * Partitions the vector into two. The first element elements[lo] is the pivot element.
