@@ -690,6 +690,53 @@ select_kth(vector<T> &elements, size_t k)
 	return elements[k];
 }
 
+/*
+ * Partitions the vector into three. The first element elements[lo] is the pivot element.
+ * There may be multiple occurrence of the pivot element. After partition, the vector
+ * is divided into 3 segments: 1st segment with elements less than pivot element,
+ * 2nd segement with all pivot elements(s), and 3rd segment with all elements greater
+ * than pivot element.
+ *
+ * @param [inout] elements  - the input vector to partition.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [out]   p1        - the stating index of the pivot element.
+ * @param [out]   p2        - the ending index of the pivot element.
+ * @param [in]    iter      - the current iteration.
+ *
+ */
+template<typename T>
+void
+partition(vector<T> &elements, size_t lo, size_t hi, size_t &p1, size_t &p2, size_t iter)
+{
+	size_t ncmp = 0;
+	size_t nswap = 0;
+
+	size_t i = lo + 1;
+
+	p1 = lo;
+	p2 = hi;
+
+	while (i <= p2) {
+		ncmp++;
+		if (elements[i] < elements[p1]) {
+			swap(elements[i], elements[p1]);
+			i++;
+			p1++;
+			nswap++;
+		} else if (elements[i] == elements[p1]) {
+			i++;
+		} else /* if (elements[i] > elements[p1]) */ {
+			swap(elements[i], elements[p2]);
+			// Do not increment i, the new element at i could still be greater than pivot
+			p2--;
+			nswap++;
+		}
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+}
+
 /**
  * Quick Sort. Consider shuffling the items if the sequence is not randomly
  * distributed. Find a pivot element and move it to its correct location
@@ -741,39 +788,18 @@ template<typename T>
 void
 quick_sort_v2(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
 {
+	size_t p1, p2;
+
 	if (lo >= hi)
 		return;
 
-	size_t p = lo;
-	size_t i = lo + 1;
-	size_t j = hi;
+	partition(elements, lo, hi, p1, p2, ++iter);
 
-	size_t ncmp = 0;
-	size_t nswap = 0;
+	if (p1 > lo)
+		quick_sort_v2(elements, lo, p1 - 1, iter);
 
-	while (i <= j) {
-		ncmp++;
-		if (elements[i] < elements[p]) {
-			swap(elements[i], elements[p]);
-			i++;
-			p++;
-			nswap++;
-		} else if (elements[i] == elements[p]) {
-			i++;
-		} else /* if (elements[i] > elements[p]) */ {
-			swap(elements[i], elements[j]);
-			j--;
-			nswap++;
-		}
-	}
-
-	print_stats(++iter, ncmp, nswap, elements);
-
-	if (p > lo)
-		quick_sort_v2(elements, lo, p - 1, iter);
-
-	if (j < hi)
-		quick_sort_v2(elements, j + 1, hi, iter);
+	if (p2 < hi)
+		quick_sort_v2(elements, p2 + 1, hi, iter);
 }
 
 /*
@@ -808,8 +834,8 @@ usage(const char *progname)
 		<< "    -merge_v1                   Perform merge sort recursively." << endl
 		<< "    -merge_v2                   Perform merge sort non-recursively." << endl
 		<< "    -kth <item>                 Find k-th smallest item." << endl
-		<< "    -qsort_v1                   Perform basic quick sort." << endl
-		<< "    -qsort_v2                   Perform 3-way quick sort." << endl;
+		<< "    -quick_v1                   Perform basic quick sort." << endl
+		<< "    -quick_v2                   Perform 3-way quick sort." << endl;
 	return 1;
 }
 
@@ -825,8 +851,8 @@ enum sort_algo
 	MERGE_V1,
 	MERGE_V2,
 	KTH,
-	QSORT_V1,
-	QSORT_V2
+	QUICK_V1,
+	QUICK_V2
 };
 
 int
@@ -883,10 +909,10 @@ main(int argc, const char **argv)
 				cerr << "missing argument for " << argv[i - 1] << endl;
 				return 1;
 			}
-		} else if (strcmp(argv[i], "-qsort_v1") == 0) {
-			algo = QSORT_V1;
-		} else if (strcmp(argv[i], "-qsort_v2") == 0) {
-			algo = QSORT_V2;
+		} else if (strcmp(argv[i], "-quick_v1") == 0) {
+			algo = QUICK_V1;
+		} else if (strcmp(argv[i], "-quick_v2") == 0) {
+			algo = QUICK_V2;
 		} else {
 			return usage(argv[0]);
 		}
@@ -1011,14 +1037,14 @@ main(int argc, const char **argv)
 				merge_sort_v2(ivalues);
 			break;
 
-		case QSORT_V1:
+		case QUICK_V1:
 			if (is_string)
 				quick_sort_v1(svalues);
 			else
 				quick_sort_v1(ivalues);
 			break;
 
-		case QSORT_V2:
+		case QUICK_V2:
 			if (is_string)
 				quick_sort_v2(svalues);
 			else

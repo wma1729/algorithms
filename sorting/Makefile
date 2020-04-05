@@ -1,14 +1,17 @@
-DBG     = -O -Wall
+DBG     = -g -Wall
 CFLAGS  = -c
-DEFINES = -DDEBUG
+DEFINES =
 
-OBJS   = sort.o
+OBJS   = sort.o dutchflag.o
 
-EXES   = sort
+EXES   = sort dutchflag
 
 all: ${EXES}
 
 sort: sort.o
+	g++ ${DBG} $^ -o $@
+
+dutchflag: dutchflag.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp

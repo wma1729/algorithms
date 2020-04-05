@@ -919,3 +919,55 @@ select_kth(vector<T> &elements, size_t k)
 	return elements[k];
 }
 ```
+
+### Partition again
+There is another flavor of partition. This is useful when there are lots of duplicates in the input sequence. This algorithm is inspired by the **Dutch National Flag Problem**.
+![3-way partition](partition2.jpeg)
+```C++
+/*
+ * Partitions the vector into three. The first element elements[lo] is the pivot element.
+ * There may be multiple occurrence of the pivot element. After partition, the vector
+ * is divided into 3 segments: 1st segment with elements less than pivot element,
+ * 2nd segement with all pivot elements(s), and 3rd segment with all elements greater
+ * than pivot element.
+ *
+ * @param [inout] elements  - the input vector to partition.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [out]   p1        - the stating index of the pivot element.
+ * @param [out]   p2        - the ending index of the pivot element.
+ * @param [in]    iter      - the current iteration.
+ *
+ */
+template<typename T>
+void
+partition(vector<T> &elements, size_t lo, size_t hi, size_t &p1, size_t &p2, size_t iter)
+{
+	size_t ncmp = 0;
+	size_t nswap = 0;
+
+	size_t i = lo + 1;
+
+	p1 = lo;
+	p2 = hi;
+
+	while (i <= p2) {
+		ncmp++;
+		if (elements[i] < elements[p1]) {
+			swap(elements[i], elements[p1]);
+			i++;
+			p1++;
+			nswap++;
+		} else if (elements[i] == elements[p1]) {
+			i++;
+		} else /* if (elements[i] > elements[p1]) */ {
+			swap(elements[i], elements[p2]);
+			// Do not increment i, the new element at i could still be greater than pivot
+			p2--;
+			nswap++;
+		}
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+}
+```
