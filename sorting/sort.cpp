@@ -432,13 +432,16 @@ insertion_sort(vector<T> &elements)
  */
 template<typename T>
 void
-print_stats(size_t iter, size_t lo, size_t hi, size_t ncmp, size_t ncopy, const vector<T> &elements)
+print_stats(size_t iter, size_t lo, size_t hi, size_t ncmp, size_t nmoves, const vector<T> &elements, bool copies = false)
 {
 #if defined(DEBUG)
 	cout << "iteration = " << setw(2) << iter <<
 		", lo = " << setw(2) << lo << ", hi = " << setw(2) << hi <<
-		" ( " <<  elements << " ) comparisons = " << setw(2) << ncmp <<
-		", copies = " << setw(2) << ncopy << endl;
+		" ( " <<  elements << " ) comparisons = " << setw(2) << ncmp;
+	if (copies)
+		cout << ", copies = " << setw(2) << nmoves << endl;
+	else
+		cout << ", swaps = " << setw(2) << nmoves << endl;
 #endif
 }
 
@@ -524,7 +527,7 @@ merge(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t mid, size_t h
 		}
 	}
 
-	print_stats(iter, lo, hi, ncmp, ncopy, elements);
+	print_stats(iter, lo, hi, ncmp, ncopy, elements, true);
 }
 
 /*
@@ -656,7 +659,7 @@ partition(vector<T> &elements, size_t lo, size_t hi, size_t iter)
 		nswap++;
 	}
 
-	print_stats(iter, ncmp, nswap, elements);
+	print_stats(iter, lo, hi, ncmp, nswap, elements);
 
 	return j;
 }
@@ -734,7 +737,7 @@ partition(vector<T> &elements, size_t lo, size_t hi, size_t &p1, size_t &p2, siz
 		}
 	}
 
-	print_stats(iter, ncmp, nswap, elements);
+	print_stats(iter, lo, hi, ncmp, nswap, elements);
 }
 
 /**
@@ -784,6 +787,16 @@ quick_sort_v1(vector<T> &elements)
 	quick_sort_v1(elements, 0, elements.size() - 1, iter);
 }
 
+/**
+ * 3-way quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return elements are sorted on return.
+ */
 template<typename T>
 void
 quick_sort_v2(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
@@ -1049,7 +1062,6 @@ main(int argc, const char **argv)
 				quick_sort_v2(svalues);
 			else
 				quick_sort_v2(ivalues);
-			break;
 			break;
 
 		default:

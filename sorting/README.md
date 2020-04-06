@@ -685,10 +685,10 @@ merge(vector<T> &elements, vector<T> &auxiliary, size_t lo, size_t mid, size_t h
 		}
 	}
 
-	print_stats(iter, lo, hi, ncmp, ncopy, elements);
+	print_stats(iter, lo, hi, ncmp, ncopy, elements, true);
 }
 ```
-Merge sort divides the sequence in to smaller sub-sequences and sort them. This can be done either recursively or iteratively.
+Merge sort is a *divide-and-conquer* algorithm. It divides the sequence in to smaller sub-sequences and sort them. This can be done either recursively or iteratively.
 ```C++
 /*
  * Perform merge sort.
@@ -875,7 +875,7 @@ partition(vector<T> &elements, size_t lo, size_t hi, size_t iter)
 		nswap++;
 	}
 
-	print_stats(iter, ncmp, nswap, elements);
+	print_stats(iter, lo, hi, ncmp, nswap, elements);
 
 	return j;
 }
@@ -920,7 +920,7 @@ select_kth(vector<T> &elements, size_t k)
 }
 ```
 
-### Partition again
+### 3-way partition 
 There is another flavor of partition. This is useful when there are lots of duplicates in the input sequence. This algorithm is inspired by the **Dutch National Flag Problem**.
 ![3-way partition](partition2.jpeg)
 ```C++
@@ -968,6 +968,177 @@ partition(vector<T> &elements, size_t lo, size_t hi, size_t &p1, size_t &p2, siz
 		}
 	}
 
-	print_stats(iter, ncmp, nswap, elements);
+	print_stats(iter, lo, hi, ncmp, nswap, elements);
 }
 ```
+
+## Quick sort
+Quick sort, like merge sort, is a *divide-and-conquer* algorithm. It uses partition algorithm to move a pivot item to its final location. The left and the right sequences are then sorted recursively.
+```C++
+/**
+ * Quick Sort. Consider shuffling the items if the sequence is not randomly
+ * distributed. Find a pivot element and move it to its correct location
+ * using partition(). Recursively sort the first half and the second half.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v1(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
+{
+	if (lo >= hi)
+		return;
+
+	size_t p = partition(elements, lo, hi, ++iter);
+
+	if (p > lo)
+		quick_sort_v1(elements, lo, p - 1, iter);
+
+	if (p < hi)
+		quick_sort_v1(elements, p + 1, hi, iter);
+}
+
+/*
+ * Perform quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v1(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+	quick_sort_v1(elements, 0, elements.size() - 1, iter);
+}
+```
+### Quick sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+iteration =  1, lo =  0, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, swaps =  0
+iteration =  2, lo =  1, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  8, swaps =  0
+iteration =  3, lo =  2, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  7, swaps =  0
+iteration =  4, lo =  3, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  6, swaps =  0
+iteration =  5, lo =  4, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  5, swaps =  0
+iteration =  6, lo =  5, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  4, swaps =  0
+iteration =  7, lo =  6, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swaps =  0
+iteration =  8, lo =  7, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swaps =  0
+iteration =  9, lo =  8, hi =  9 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swaps =  0
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+iteration =  1, lo =  0, hi =  9 ( 0, 8, 7, 6, 5, 4, 3, 2, 1, 9 ) comparisons =  9, swaps =  1
+iteration =  2, lo =  0, hi =  8 ( 0, 8, 7, 6, 5, 4, 3, 2, 1, 9 ) comparisons =  8, swaps =  0
+iteration =  3, lo =  1, hi =  8 ( 0, 1, 7, 6, 5, 4, 3, 2, 8, 9 ) comparisons =  7, swaps =  1
+iteration =  4, lo =  1, hi =  7 ( 0, 1, 7, 6, 5, 4, 3, 2, 8, 9 ) comparisons =  6, swaps =  0
+iteration =  5, lo =  2, hi =  7 ( 0, 1, 2, 6, 5, 4, 3, 7, 8, 9 ) comparisons =  5, swaps =  1
+iteration =  6, lo =  2, hi =  6 ( 0, 1, 2, 6, 5, 4, 3, 7, 8, 9 ) comparisons =  4, swaps =  0
+iteration =  7, lo =  3, hi =  6 ( 0, 1, 2, 3, 5, 4, 6, 7, 8, 9 ) comparisons =  3, swaps =  1
+iteration =  8, lo =  3, hi =  5 ( 0, 1, 2, 3, 5, 4, 6, 7, 8, 9 ) comparisons =  2, swaps =  0
+iteration =  9, lo =  4, hi =  5 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swaps =  1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+iteration =  1, lo =  0, hi =  9 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  9, swaps =  0
+iteration =  2, lo =  1, hi =  9 ( 0, 3, 7, 2, 4, 6, 5, 8, 1, 9 ) comparisons =  8, swaps =  1
+iteration =  3, lo =  1, hi =  8 ( 0, 2, 1, 3, 4, 6, 5, 8, 7, 9 ) comparisons =  6, swaps =  2
+iteration =  4, lo =  1, hi =  2 ( 0, 1, 2, 3, 4, 6, 5, 8, 7, 9 ) comparisons =  1, swaps =  1
+iteration =  5, lo =  4, hi =  8 ( 0, 1, 2, 3, 4, 6, 5, 8, 7, 9 ) comparisons =  4, swaps =  0
+iteration =  6, lo =  5, hi =  8 ( 0, 1, 2, 3, 4, 5, 6, 8, 7, 9 ) comparisons =  3, swaps =  1
+iteration =  7, lo =  7, hi =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swaps =  1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Quick sort is not a stable sort and the average number of comparisons are *n * log(n)*. If the sequence is already sorted, there could be *n * n* comparisons. Because of this, it is recommended to shuffle the sequence before running the quick sort.
+
+### 3-way Quick sort
+Many implementations today use 3-way partitions.
+```C++
+/**
+ * 3-way quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ * @param [in]    lo        - the starting index.
+ * @param [in]    hi        - the ending index.
+ * @param [in]    iter      - the current iteration.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v2(vector<T> &elements, size_t lo, size_t hi, size_t &iter)
+{
+	size_t p1, p2;
+
+	if (lo >= hi)
+		return;
+
+	partition(elements, lo, hi, p1, p2, ++iter);
+
+	if (p1 > lo)
+		quick_sort_v2(elements, lo, p1 - 1, iter);
+
+	if (p2 < hi)
+		quick_sort_v2(elements, p2 + 1, hi, iter);
+}
+
+/*
+ * Perform quick sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+void
+quick_sort_v2(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+	quick_sort_v2(elements, 0, elements.size() - 1, iter);
+}
+```
+### 3-way quick sort comparison with normal quick sort in case of duplicates
+Normal quick sort
+```
+input : 4, 2, 3, 3, 2, 4, 1, 3, 4, 1, 2, 3, 2, 1, 4, 4, 3, 2, 1, 1
+iteration =  1, lo =  0, hi = 19 ( 3, 2, 3, 3, 2, 1, 1, 3, 1, 1, 2, 3, 2, 1, 2, 4, 4, 4, 4, 4 ) comparisons = 15, swaps =  5
+iteration =  2, lo =  0, hi = 14 ( 2, 2, 2, 1, 2, 1, 1, 2, 1, 1, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons = 11, swaps =  5
+iteration =  3, lo =  0, hi =  9 ( 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  6, swaps =  4
+iteration =  4, lo =  0, hi =  5 ( 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  3, swaps =  3
+iteration =  5, lo =  0, hi =  1 ( 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  1, swaps =  1
+iteration =  6, lo =  3, hi =  5 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  1, swaps =  2
+iteration =  7, lo =  7, hi =  9 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  1, swaps =  2
+iteration =  8, lo = 11, hi = 14 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  2, swaps =  3
+iteration =  9, lo = 13, hi = 14 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  1, swaps =  1
+iteration = 10, lo = 16, hi = 19 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  2, swaps =  3
+iteration = 11, lo = 18, hi = 19 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  1, swaps =  1
+output: 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+```
+3-way quick sort
+```
+input : 4, 2, 3, 3, 2, 4, 1, 3, 4, 1, 2, 3, 2, 1, 4, 4, 3, 2, 1, 1
+iteration =  1, lo =  0, hi = 19 ( 2, 3, 3, 2, 1, 3, 1, 2, 3, 2, 1, 3, 2, 1, 1, 4, 4, 4, 4, 4 ) comparisons = 19, swaps = 15
+iteration =  2, lo =  0, hi = 14 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons = 14, swaps = 10
+iteration =  3, lo =  0, hi =  4 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  4, swaps =  0
+iteration =  4, lo = 10, hi = 14 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 ) comparisons =  4, swaps =  0
+output: 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4
+```
+The difference is not huge in this case. But it can vary based on the input sequence.
