@@ -2,23 +2,13 @@ DBG     = -O
 CFLAGS  = -c
 DEFINES = -DDEBUG
 
-OBJS   = towersofhanoi.o \
-         bst.o \
-         linkedlist.o
+OBJS   = towersofhanoi.o
 
-EXES   = towersofhanoi \
-         bst \
-         linkedlist
+EXES   = towersofhanoi
 
 all: ${EXES}
 
 towersofhanoi: towersofhanoi.o
-	g++ ${DBG} $^ -o $@
-
-bst: bst.o
-	g++ ${DBG} $^ -o $@
-
-linkedlist: linkedlist.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
