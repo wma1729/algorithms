@@ -7,6 +7,8 @@ A heap is a binary tree that follows the following rules:
   - the key of every node is smaller than or equal to the key of its children, called *minheap*.
 - **Shape**
   - the tree is perfectly balanced: the leaf nodes are at most at the two lowest levels and those on the bottom level are as far left as possible.
+  
+Because heap is a binary tree, the height of the heap is never more than log<sub>2</sub>(n) for *n* elements.
 
 ![Heap Shape](heap-shape.jpeg)
 
@@ -25,5 +27,9 @@ A[9], A[10] | Left and right children of A[4].
 Use of array allows easy access to nodes while managing the tree. For a given node at index *i*,
 - left and right children are located at indices *2i + 1* and *2i + 2* respectively.
 - the parent node is located at index *(i - 1) / 2*.
+- the elements at the bottom level starts at index *(n / 2)* in the array representation.
 
+Here is a sample heap<br>
 ![Sample Heap](heap.jpeg)
+
+Its implicit representation is *A[] = { 15, 27, 19, 33, 47, 23 }*.
