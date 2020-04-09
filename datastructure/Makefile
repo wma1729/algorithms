@@ -4,11 +4,11 @@ DEFINES = -DDEBUG
 
 OBJS   = bst.o \
          linkedlist.o \
-         pq.o
+         heap.o
 
 EXES   = bst \
          linkedlist \
-         pq
+         heap
 
 all: ${EXES}
 
@@ -18,7 +18,7 @@ bst: bst.o
 linkedlist: linkedlist.o
 	g++ ${DBG} $^ -o $@
 
-pq: pq.o
+heap: heap.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
