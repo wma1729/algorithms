@@ -53,7 +53,7 @@ private:
 ```
 
 ### Heap Operations
-*Put* Inserts an element into the heap.<br>
+**Put** Inserts an element into the heap.<br>
 The new element is first inserted at the end of the vector. In the above heap, if we try to insert *7*, the heap will become:
 > A[] = { 15, 27, 19, 33, 47, 23, 7 }; i.e. A[6] = 7
 
@@ -91,4 +91,63 @@ We have a heap again!
 	}
 
 	... pary of heap class ...
+```
+
+**Get** Removes the element from the top of the heap.<br>
+The top element of the heap is saved. The last element of the heap is moved in the position of the top element. Then the last element is deleted. In the above heap,
+
+> TopElement = A[0] = 15; A[] = { 23, 27, 19, 33, 47 }; // the last element is moved at A[0] and the vector is shrinked by 1.
+
+*A[0]* is not in the correct position. Swap *A[0]* with *min(A[1], A[2])*.
+> A[] = { 19, 27, 23, 33, 47 };
+
+We have a heap again! The *TopElement* is returned.
+
+```C++
+	... part of heap class ...
+
+	/*
+	 * Sink (percolate) down. The element at index i is
+	 * moved down to its correct lacation in the heap.
+	 */
+	void sink(size_t i)
+	{
+		size_t c, l, r;
+
+		while (i < data.size()) {
+			l = left_child(i);
+			r = right_child(i);
+
+			if (l >= data.size())
+				c = r;
+			else if (r >= data.size())
+				c = l;
+			else if (data[l] < data[r])
+				c = l;
+			else
+				c = r;
+
+			if ((c < data.size()) && (data[c] < data[i])) {
+				swap(data[c], data[i]);
+				i = c;
+			} else {
+				break;
+			}
+		}
+	}
+
+	/*
+	 * Get an element from the the heap.
+	 * The element from the top of the heap is returned.
+	 */
+	T get()
+	{
+		T top = data[0];
+		data[0] = data.back();
+		data.pop_back();
+		sink(0);
+		return top;
+	}
+
+	... part of heap class ...
 ```
