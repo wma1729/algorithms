@@ -3,6 +3,9 @@
 
 using namespace std;
 
+/*
+ * A basic minimum heap implementation.
+ */
 template<typename T>
 class heap
 {
@@ -13,6 +16,10 @@ private:
 	int right_child(int i) const { return 2 * i + 2; }
 	int parent(int i) const { return (i - 1) / 2; }
 
+	/*
+	 * Swim (percolate) up. The element at index i is
+	 * moved up to its correct location in the heap.
+	 */
 	void swim(size_t i)
 	{
 		while (i > 0) {
@@ -23,6 +30,10 @@ private:
 		}
 	}
 
+	/*
+	 * Sink (percolate) down. The element at index i is
+	 * moved down to its correct lacation in the heap.
+	 */
 	void sink(size_t i)
 	{
 		size_t c, l, r;
@@ -53,12 +64,19 @@ public:
 	heap() {}
 	~heap() {}
 
+	/*
+	 * Put an element to the heap.
+	 */
 	void put(const T &val)
 	{
 		data.push_back(val);
 		swim(data.size() - 1);
 	}
 
+	/*
+	 * Get an element from the the heap.
+	 * The element from the top of the heap is returned.
+	 */
 	T get()
 	{
 		T top = data[0];
