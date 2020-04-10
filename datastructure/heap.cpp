@@ -12,20 +12,21 @@ class heap
 private:
 	vector<T> data;
 
-	int left_child(int i) const { return 2 * i + 1; }
-	int right_child(int i) const { return 2 * i + 2; }
-	int parent(int i) const { return (i - 1) / 2; }
+public:
+	static int left_child(int i) { return 2 * i + 1; }
+	static int right_child(int i) { return 2 * i + 2; }
+	static int parent(int i) { return (i - 1) / 2; }
 
 	/*
 	 * Swim (percolate) up. The element at index i is
 	 * moved up to its correct location in the heap.
 	 */
-	void swim(size_t i)
+	static void swim(vector<T> &elements, size_t i)
 	{
 		while (i > 0) {
 			size_t p = parent(i);
-			if (data[i] < data[p])
-				swap(data[i], data[p]);
+			if (elements[i] < elements[p])
+				swap(elements[i], elements[p]);
 			i = p;
 		}
 	}
@@ -34,25 +35,25 @@ private:
 	 * Sink (percolate) down. The element at index i is
 	 * moved down to its correct lacation in the heap.
 	 */
-	void sink(size_t i)
+	static void sink(vector<T> &elements, size_t i)
 	{
 		size_t c, l, r;
 
-		while (i < data.size()) {
+		while (i < elements.size()) {
 			l = left_child(i);
 			r = right_child(i);
 
-			if (l >= data.size())
+			if (l >= elements.size())
 				c = r;
-			else if (r >= data.size())
+			else if (r >= elements.size())
 				c = l;
-			else if (data[l] < data[r])
+			else if (elements[l] < elements[r])
 				c = l;
 			else
 				c = r;
 
-			if ((c < data.size()) && (data[c] < data[i])) {
-				swap(data[c], data[i]);
+			if ((c < elements.size()) && (elements[c] < elements[i])) {
+				swap(elements[c], elements[i]);
 				i = c;
 			} else {
 				break;
@@ -60,7 +61,6 @@ private:
 		}
 	}
 
-public:
 	heap() {}
 	~heap() {}
 
@@ -70,7 +70,7 @@ public:
 	void put(const T &val)
 	{
 		data.push_back(val);
-		swim(data.size() - 1);
+		swim(data, data.size() - 1);
 	}
 
 	/*
@@ -82,7 +82,7 @@ public:
 		T top = data[0];
 		data[0] = data.back();
 		data.pop_back();
-		sink(0);
+		sink(data, 0);
 		return top;
 	}
 
@@ -102,6 +102,18 @@ public:
 	}
 };
 
+/*
+ * Turn a random vector into a minimum heap.
+ */
+template<typename T>
+void
+make_heap(vector<T> &elements)
+{
+	int n = static_cast<int>(elements.size());
+	for (int i = n / 2 - 1; i >= 0; --i)
+		heap<T>::sink(elements, i);
+}
+
 int
 main()
 {
@@ -118,6 +130,12 @@ main()
 
 	while (!h.empty())
 		cout << h.get() << endl;
+
+	cout << "make heap" << endl;
+	vector<int> v({ 0, 9, 2, 4, 7, 6, 3, 5, 1, 8 });
+	make_heap(v);
+	for (auto i : v)
+		cout << i << endl;
 	
 	return 0;
 }

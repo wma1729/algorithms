@@ -44,16 +44,20 @@ class heap
 private:
 	vector<T> data;
 
-	int left_child(int i) const { return 2 * i + 1; }
-	int right_child(int i) const { return 2 * i + 2; }
-	int parent(int i) const { return (i - 1) / 2; }
+	...
+
+public:
+	static int left_child(int i) { return 2 * i + 1; }
+	static int right_child(int i) { return 2 * i + 2; }
+	static int parent(int i) { return (i - 1) / 2; }
 
 	...
 };
 ```
 
 ### Heap Operations
-**Put** Inserts an element into the heap.<br>
+**Put** Inserts an element into the heap.
+
 The new element is first inserted at the end of the vector. In the above heap, if we try to insert *7*, the heap will become:
 > A[] = { 15, 27, 19, 33, 47, 23, 7 }; i.e. A[6] = 7
 
@@ -71,12 +75,12 @@ We have a heap again!
 	 * Swim (percolate) up. The element at index i is
 	 * moved up to its correct location in the heap.
 	 */
-	void swim(size_t i)
+	static void swim(vector<T> &elements, size_t i)
 	{
 		while (i > 0) {
 			size_t p = parent(i);
-			if (data[i] < data[p])
-				swap(data[i], data[p]);
+			if (elements[i] < elements[p])
+				swap(elements[i], elements[p]);
 			i = p;
 		}
 	}
@@ -87,13 +91,14 @@ We have a heap again!
 	void put(const T &val)
 	{
 		data.push_back(val);
-		swim(data.size() - 1);
+		swim(data, data.size() - 1);
 	}
 
 	... pary of heap class ...
 ```
 
-**Get** Removes the element from the top of the heap.<br>
+**Get** Removes the element from the top of the heap.
+
 The top element of the heap is saved. The last element of the heap is moved in the position of the top element. Then the last element is deleted. In the above heap,
 
 > TopElement = A[0] = 15; A[] = { 23, 27, 19, 33, 47 }; // the last element is moved at A[0] and the vector is shrinked by 1.
@@ -110,25 +115,25 @@ We have a heap again! The *TopElement* is returned.
 	 * Sink (percolate) down. The element at index i is
 	 * moved down to its correct lacation in the heap.
 	 */
-	void sink(size_t i)
+	static void sink(vector<T> &elements, size_t i)
 	{
 		size_t c, l, r;
 
-		while (i < data.size()) {
+		while (i < elements.size()) {
 			l = left_child(i);
 			r = right_child(i);
 
-			if (l >= data.size())
+			if (l >= elements.size())
 				c = r;
-			else if (r >= data.size())
+			else if (r >= elements.size())
 				c = l;
-			else if (data[l] < data[r])
+			else if (elements[l] < elements[r])
 				c = l;
 			else
 				c = r;
 
-			if ((c < data.size()) && (data[c] < data[i])) {
-				swap(data[c], data[i]);
+			if ((c < elements.size()) && (elements[c] < elements[i])) {
+				swap(elements[c], elements[i]);
 				i = c;
 			} else {
 				break;
@@ -145,9 +150,32 @@ We have a heap again! The *TopElement* is returned.
 		T top = data[0];
 		data[0] = data.back();
 		data.pop_back();
-		sink(0);
+		sink(data, 0);
 		return top;
 	}
 
 	... part of heap class ...
+```
+
+**MakeHeap** Given a random vector, convert it into a heap.
+
+We know that half of the elements in a heap are at the bottom most level. This property of heap is used to make a heap from a random vector.
+
+Assuming that the vector, *A*, has *n* elements
+ - start at index *i = n / 2 - 1*.
+ - apply algorithm *heap::sink* to make a heap starting wih element *A[i]* as the root.
+ - *i* is decremented.
+ - repeat until *A[0]* is fixed.
+```C++
+/*
+ * Turn a random vector into a minimum heap.
+ */
+template<typename T>
+void
+make_heap(vector<T> &elements)
+{
+	int n = static_cast<int>(elements.size());
+	for (int i = n / 2 - 1; i >= 0; --j)
+		heap<T>::sink(elements, i);
+}
 ```
