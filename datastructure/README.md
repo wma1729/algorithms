@@ -56,10 +56,13 @@ private:
 *Put* Inserts an element into the heap.<br>
 The new element is first inserted at the end of the vector. In the above heap, if we try to insert *7*, the heap will become:
 > A[] = { 15, 27, 19, 33, 47, 23, 7 }; i.e. A[6] = 7
+
 *A[6]*'s parent, *A[2] = 19*, is less than *A[6]* so *A[6]* is swapped with *A[2]*. 
 > A[] = { 15, 27, 7, 22, 47, 23, 19 };
+
 *A[2]*'s parent, *A[0] = 15*, is still less than *A[2]* so *A[2]* is swapped with *A[0]*.
 > A[] = { 7, 27, 15, 22, 47, 23, 19 };
+
 We have a heap again!
 ```C++
 	... part of heap class ...
