@@ -1307,6 +1307,6 @@ Heap sort is not a stable sort. The cost of heap sink operation is *log<sub>2</s
 > *log<sub>2</sub>(n -1) + log<sub>2</sub>(n - 2) + ... + log<sub>2</sub>(1)*<br>
 > *log<sub>2</sub>((n - 1) * (n - 2) * .. * 2 * 1)*<br>
 > *log<sub>2</sub>((n - 1)!) =~ n * log<sub>2</sub>(n)<br>
-So the heap sort cost is *(n / 2) * log<sub>2</sub>(n) + n * log<sub>2</sub>(n)* or simply *n * og<sub>2</sub>(n)*.
-> 
+
+So the heap sort cost is *(n / 2) * log<sub>2</sub>(n) + n * log<sub>2</sub>(n)* or simply *n * log<sub>2</sub>(n)*. 
 
