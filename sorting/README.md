@@ -820,7 +820,7 @@ iteration =  8, lo =  5, hi = 10 ( 0, 2, 4, 7, 9, 1, 3, 5, 6, 8 ) comparisons = 
 iteration =  9, lo =  0, hi = 10 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  9, copies = 10
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
-Merge sort is a stable sort and the maximum number of comparisons are *n * log(n)*. Like insertion sort, it too benefits if the sequence is already partially sorted.
+Merge sort is a stable sort and the maximum number of comparisons are *n * log<sub>2</sub>(n)*. Like insertion sort, it too benefits if the sequence is already partially sorted.
 
 ## Partition
 Partition is an important algorithm. It is often the basis of some important algorithms including quick sort. What does it do?
@@ -1063,7 +1063,7 @@ iteration =  6, lo =  5, hi =  8 ( 0, 1, 2, 3, 4, 5, 6, 8, 7, 9 ) comparisons = 
 iteration =  7, lo =  7, hi =  8 ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swaps =  1
 output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 ```
-Quick sort is not a stable sort and the average number of comparisons are *n * log(n)*. If the sequence is already sorted, there could be *n * n* comparisons. Because of this, it is recommended to shuffle the sequence before running the quick sort.
+Quick sort is not a stable sort and the average number of comparisons are *n * log<sub>2</sub>(n)*. If the sequence is already sorted, there could be *n * n* comparisons. Because of this, it is recommended to shuffle the sequence before running the quick sort.
 
 ### 3-way Quick sort
 Many implementations today use 3-way partitions.
@@ -1142,3 +1142,171 @@ iteration =  4, lo = 10, hi = 14 ( 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 
 output: 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4
 ```
 The difference is not huge in this case. But it can vary based on the input sequence.
+
+## Heap sort
+This is an interesting sort algorithm. It first converts the input sequence, of size *n*, into a **maximum heap**.
+
+The first element is swapped with the last element. It is at its correct position now. Now the heap is fixed again assuming that the heap size is *n - 1*. The first element is now swapped with the second-last element. It is at its correct position. Now the heap is fixed again assuming that the heap size is *n - 2*. The process continues until the whole sequence is sorted.
+```C++
+/*
+ * Percolates an element down to its correct location in the heap.
+ * We are dealing with maximum heap.
+ *
+ * @param [inout] elements - the vector to fix.
+ * @param [in]    n        - the size of the vector. Do not rely on elements.size().
+ * @param [in]    i        - the element index that needs to be moved, if needed.
+ * @param [in]    iter     - the current iteration.
+ * @param [in]    incrswap - the flag to increment swap count by 1.
+ */ 
+template<typename T>
+static void
+heap_sink(vector<T> &elements, int n, int i, size_t iter, bool incrswap = false)
+{
+	size_t ncmp = 0;
+	size_t nswap = incrswap ? 1 : 0;
+
+	if (n <= 1)
+		return;
+
+	while (i < n) {
+		int l = 2 * i + 1;
+		int r = 2 * i + 2;
+		int c;
+
+		if (l >= n) {
+			c = r;
+		} else if (r >= n) {
+			c = l;
+		} else if (elements[l] > elements[r]) {
+			c = l;
+			ncmp++;
+		} else {
+			c = r;
+			ncmp++;
+		}
+
+		if ((c < n) && (elements[c] > elements[i])) {
+			swap(elements[c], elements[i]);
+			i = c;
+			ncmp++;
+			nswap++;
+		} else {
+			break;
+		}
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+}
+
+/*
+ * Perform heap sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+static void
+heap_sort(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+#if defined(DEBUG)
+	cout << "----- build heap -----" << endl;
+#endif
+
+	/*
+	 * Change the vector into a maximum heap.
+	 */
+	int n = static_cast<int>(elements.size());
+	for (int i = n / 2 - 1; i >= 0; --i)
+		heap_sink(elements, n, i, ++iter, false);
+
+#if defined(DEBUG)
+	cout << "----- heap ready -----" << endl;
+#endif
+
+	for (int i = n - 1; i > 0; --i) {
+		/* Swap the fist (largest) element with the last element */
+		swap(elements[0], elements[i]);
+
+		/*
+		 * Fix the heap again assuming the heap size is 1 less.
+		 * Notice i is passed as the heap size and not n.
+		 */
+		heap_sink(elements, i, 0, ++iter, true);
+	}
+}
+```
+
+### Heap sort statistics
+Sequence already sorted:
+```
+input : 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+----- build heap -----
+iteration =  1 ( 0, 1, 2, 3, 9, 5, 6, 7, 8, 4 ) comparisons =  1, swap =  1
+iteration =  2 ( 0, 1, 2, 8, 9, 5, 6, 7, 3, 4 ) comparisons =  2, swap =  1
+iteration =  3 ( 0, 1, 6, 8, 9, 5, 2, 7, 3, 4 ) comparisons =  2, swap =  1
+iteration =  4 ( 0, 9, 6, 8, 4, 5, 2, 7, 3, 1 ) comparisons =  3, swap =  2
+iteration =  5 ( 9, 8, 6, 7, 4, 5, 2, 0, 3, 1 ) comparisons =  6, swap =  3
+----- heap ready -----
+iteration =  6 ( 8, 7, 6, 3, 4, 5, 2, 0, 1, 9 ) comparisons =  6, swap =  4
+iteration =  7 ( 7, 4, 6, 3, 1, 5, 2, 0, 8, 9 ) comparisons =  4, swap =  3
+iteration =  8 ( 6, 4, 5, 3, 1, 0, 2, 7, 8, 9 ) comparisons =  4, swap =  3
+iteration =  9 ( 5, 4, 2, 3, 1, 0, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 10 ( 4, 3, 2, 0, 1, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  3
+iteration = 11 ( 3, 1, 2, 0, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 12 ( 2, 1, 0, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 13 ( 1, 0, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  1, swap =  2
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence in completely reverse order:
+```
+input : 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+----- build heap -----
+iteration =  1 ( 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  0, swap =  0
+iteration =  2 ( 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, swap =  0
+iteration =  3 ( 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, swap =  0
+iteration =  4 ( 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, swap =  0
+iteration =  5 ( 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ) comparisons =  1, swap =  0
+----- heap ready -----
+iteration =  6 ( 8, 6, 7, 2, 5, 4, 3, 0, 1, 9 ) comparisons =  6, swap =  4
+iteration =  7 ( 7, 6, 4, 2, 5, 1, 3, 0, 8, 9 ) comparisons =  4, swap =  3
+iteration =  8 ( 6, 5, 4, 2, 0, 1, 3, 7, 8, 9 ) comparisons =  4, swap =  3
+iteration =  9 ( 5, 3, 4, 2, 0, 1, 6, 7, 8, 9 ) comparisons =  3, swap =  2
+iteration = 10 ( 4, 3, 1, 2, 0, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 11 ( 3, 2, 1, 0, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  3
+iteration = 12 ( 2, 0, 1, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 13 ( 1, 0, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  0, swap =  1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Sequence with random distribution:
+```
+input : 0, 9, 7, 2, 4, 6, 5, 8, 1, 3
+----- build heap -----
+iteration =  1 ( 0, 9, 7, 2, 4, 6, 5, 8, 1, 3 ) comparisons =  0, swap =  0
+iteration =  2 ( 0, 9, 7, 8, 4, 6, 5, 2, 1, 3 ) comparisons =  2, swap =  1
+iteration =  3 ( 0, 9, 7, 8, 4, 6, 5, 2, 1, 3 ) comparisons =  1, swap =  0
+iteration =  4 ( 0, 9, 7, 8, 4, 6, 5, 2, 1, 3 ) comparisons =  1, swap =  0
+iteration =  5 ( 9, 8, 7, 2, 4, 6, 5, 0, 1, 3 ) comparisons =  6, swap =  3
+----- heap ready -----
+iteration =  6 ( 8, 4, 7, 2, 3, 6, 5, 0, 1, 9 ) comparisons =  4, swap =  3
+iteration =  7 ( 7, 4, 6, 2, 3, 1, 5, 0, 8, 9 ) comparisons =  4, swap =  3
+iteration =  8 ( 6, 4, 5, 2, 3, 1, 0, 7, 8, 9 ) comparisons =  4, swap =  3
+iteration =  9 ( 5, 4, 1, 2, 3, 0, 6, 7, 8, 9 ) comparisons =  3, swap =  3
+iteration = 10 ( 4, 3, 1, 2, 0, 5, 6, 7, 8, 9 ) comparisons =  4, swap =  3
+iteration = 11 ( 3, 2, 1, 0, 4, 5, 6, 7, 8, 9 ) comparisons =  3, swap =  3
+iteration = 12 ( 2, 0, 1, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  2, swap =  2
+iteration = 13 ( 1, 0, 2, 3, 4, 5, 6, 7, 8, 9 ) comparisons =  0, swap =  1
+output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+```
+Heap sort is not a stable sort. The cost of heap sink operation is *log<sub>2</sub>(n)*. The code to build heap is *(n / 2) * log<sub>2</sub>(n)*. The cost to sort the heap is:
+> *log<sub>2</sub>(n -1) + log<sub>2</sub>(n - 2) + ... + log<sub>2</sub>(1)*<br>
+> *log<sub>2</sub>((n - 1) * (n - 2) * .. * 2 * 1)*<br>
+> *log<sub>2</sub>((n - 1)!) =~ n * log<sub>2</sub>(n)<br>
+So the heap sort cost is *(n / 2) * log<sub>2</sub>(n) + n * log<sub>2</sub>(n)* or simply *n * og<sub>2</sub>(n)*.
+> 
+

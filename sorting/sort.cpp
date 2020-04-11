@@ -834,6 +834,99 @@ quick_sort_v2(vector<T> &elements)
 	quick_sort_v2(elements, 0, elements.size() - 1, iter);
 }
 
+/*
+ * Percolates an element down to its correct location in the heap.
+ * We are dealing with maximum heap.
+ *
+ * @param [inout] elements - the vector to fix.
+ * @param [in]    n        - the size of the vector. Do not rely on elements.size().
+ * @param [in]    i        - the element index that needs to be moved, if needed.
+ * @param [in]    iter     - the current iteration.
+ * @param [in]    incrswap - the flag to increment swap count by 1.
+ */ 
+template<typename T>
+static void
+heap_sink(vector<T> &elements, int n, int i, size_t iter, bool incrswap = false)
+{
+	size_t ncmp = 0;
+	size_t nswap = incrswap ? 1 : 0;
+
+	if (n <= 1)
+		return;
+
+	while (i < n) {
+		int l = 2 * i + 1;
+		int r = 2 * i + 2;
+		int c;
+
+		if (l >= n) {
+			c = r;
+		} else if (r >= n) {
+			c = l;
+		} else if (elements[l] > elements[r]) {
+			c = l;
+			ncmp++;
+		} else {
+			c = r;
+			ncmp++;
+		}
+
+		if ((c < n) && (elements[c] > elements[i])) {
+			swap(elements[c], elements[i]);
+			i = c;
+			ncmp++;
+			nswap++;
+		} else {
+			break;
+		}
+	}
+
+	print_stats(iter, ncmp, nswap, elements);
+}
+
+/*
+ * Perform heap sort.
+ *
+ * @param [inout] elements  - the vector to sort.
+ *
+ * @return elements are sorted on return.
+ */
+template<typename T>
+static void
+heap_sort(vector<T> &elements)
+{
+	if (elements.empty())
+		return;
+
+	size_t iter = 0;
+
+#if defined(DEBUG)
+	cout << "----- build heap -----" << endl;
+#endif
+
+	/*
+	 * Change the vector into a maximum heap.
+	 */
+	int n = static_cast<int>(elements.size());
+	for (int i = n / 2 - 1; i >= 0; --i)
+		heap_sink(elements, n, i, ++iter, false);
+
+#if defined(DEBUG)
+	cout << "----- heap ready -----" << endl;
+#endif
+
+	for (int i = n - 1; i > 0; --i) {
+		/* Swap the fist (largest) element with the last element */
+		swap(elements[0], elements[i]);
+
+		/*
+		 * Fix the heap again assuming the heap size is 1 less.
+		 * Notice i is passed as the heap size and not n.
+		 */
+		heap_sink(elements, i, 0, ++iter, true);
+	}
+}
+
 static int
 usage(const char *progname)
 {
@@ -848,7 +941,8 @@ usage(const char *progname)
 		<< "    -merge_v2                   Perform merge sort non-recursively." << endl
 		<< "    -kth <item>                 Find k-th smallest item." << endl
 		<< "    -quick_v1                   Perform basic quick sort." << endl
-		<< "    -quick_v2                   Perform 3-way quick sort." << endl;
+		<< "    -quick_v2                   Perform 3-way quick sort." << endl
+		<< "    -heap                       Perform heap sort." << endl;
 	return 1;
 }
 
@@ -865,7 +959,8 @@ enum sort_algo
 	MERGE_V2,
 	KTH,
 	QUICK_V1,
-	QUICK_V2
+	QUICK_V2,
+	HEAP
 };
 
 int
@@ -926,6 +1021,8 @@ main(int argc, const char **argv)
 			algo = QUICK_V1;
 		} else if (strcmp(argv[i], "-quick_v2") == 0) {
 			algo = QUICK_V2;
+		} else if (strcmp(argv[i], "-heap") == 0) {
+			algo = HEAP;
 		} else {
 			return usage(argv[0]);
 		}
@@ -1062,6 +1159,13 @@ main(int argc, const char **argv)
 				quick_sort_v2(svalues);
 			else
 				quick_sort_v2(ivalues);
+			break;
+
+		case HEAP:
+			if (is_string)
+				heap_sort(svalues);
+			else
+				heap_sort(ivalues);
 			break;
 
 		default:
