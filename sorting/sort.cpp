@@ -8,6 +8,7 @@
 #include <array>
 #include <string>
 #include <cstring>
+#include <chrono>
 
 using namespace std;
 
@@ -973,6 +974,7 @@ main(int argc, const char **argv)
 	size_t          k = -1;
 	size_t          len = 0;
 	bool            is_string = false;
+	bool            quiet = false;
 	vector<int>     ivalues;
 	vector<string>  svalues;
 
@@ -987,6 +989,8 @@ main(int argc, const char **argv)
 			}
 		} else if (strcmp(argv[i], "-string") == 0) {
 			is_string = true;
+		} else if (strcmp(argv[i], "-quiet") == 0) {
+			quiet = true;
 		} else if (strcmp(argv[i], "-lsd_radix_v1") == 0) {
 			algo = LSD_RADIX_V1;
 		} else if (strcmp(argv[i], "-lsd_radix_v2") == 0) {
@@ -1059,16 +1063,17 @@ main(int argc, const char **argv)
 	}
 	fin.close();
 
-	cout << "input : ";
-	if (is_string) {
-		len = svalues.size();
-		cout << svalues;
-	} else {
-		len = ivalues.size();
-		cout << ivalues;
+	if (!quiet) {
+		cout << "input : ";
+		if (is_string) {
+			len = svalues.size();
+			cout << svalues;
+		} else {
+			len = ivalues.size();
+			cout << ivalues;
+		}
+		cout << endl;
 	}
-
-	cout << endl;
 
 
 	if (algo == KTH) {
@@ -1089,6 +1094,8 @@ main(int argc, const char **argv)
 
 		return 0;
 	}
+
+	chrono::time_point<chrono::high_resolution_clock> start = chrono::high_resolution_clock::now();
 
 	switch (algo) {
 		case LSD_RADIX_V1:
@@ -1172,12 +1179,18 @@ main(int argc, const char **argv)
 			break;
 	}
 
-	cout << "output: ";
-	if (is_string)
-		cout << svalues;
-	else
-		cout << ivalues;
-	cout << endl;
+	chrono::time_point<chrono::high_resolution_clock> stop = chrono::high_resolution_clock::now();
+
+	if (!quiet) {
+		cout << "output: ";
+		if (is_string)
+			cout << svalues;
+		else
+			cout << ivalues;
+		cout << endl;
+	}
+
+	cout << chrono::duration_cast<chrono::microseconds>(stop - start).count() << endl;
 
 	return 0;
 }
