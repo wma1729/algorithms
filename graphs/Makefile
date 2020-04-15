@@ -2,13 +2,16 @@ DBG     = -g
 CFLAGS  = -c
 DEFINES =
 
-OBJS   = graph.o
+OBJS   = graph.o uf.o
 
-EXES   = graph
+EXES   = graph uf
 
 all: ${EXES}
 
 graph: graph.o
+	g++ ${DBG} $^ -o $@
+
+uf: uf.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
