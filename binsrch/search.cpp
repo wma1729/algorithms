@@ -105,25 +105,25 @@ reverse_sequence(vector<T> &seq, size_t lo, size_t hi)
 }
 
 /*
- * Rotate sequence 'n' position.
+ * Rotate sequence 'p' position.
  *
  * @param [inout] seq - the input sequence.
- * @param [in]    n   - how much to rotate? 1 <= n < seq.size()
+ * @param [in]    p   - how much to rotate? 1 <= p < seq.size()
  *
- * @return the sequence is rotated n position.
+ * @return the sequence is rotated p position.
  */
 template<typename T>
 void
-rotate_sequence(vector<T> &seq, size_t n)
+rotate_sequence(vector<T> &seq, size_t p)
 {
 	if (seq.empty())
 		return;
 
-	if ((n < 1) || (n >= seq.size()))
+	if ((p < 1) || (p >= seq.size()))
 		return;
 
-	reverse_sequence(seq, 0, n - 1);
-	reverse_sequence(seq, n, seq.size() - 1);
+	reverse_sequence(seq, 0, p - 1);
+	reverse_sequence(seq, p, seq.size() - 1);
 	reverse_sequence(seq, 0, seq.size() - 1);
 }
 

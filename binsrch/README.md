@@ -131,9 +131,9 @@ reverse_sequence(vector<T> &seq, size_t lo, size_t hi)
  * Rotate sequence 'p' position.
  *
  * @param [inout] seq - the input sequence.
- * @param [in]    p   - how much to rotate? 1 <= n < seq.size()
+ * @param [in]    p   - how much to rotate? 1 <= p < seq.size()
  *
- * @return the sequence is rotated n position.
+ * @return the sequence is rotated p position.
  */
 template<typename T>
 void
