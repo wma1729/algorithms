@@ -1,8 +1,20 @@
-#include <iostream>
-#include <vector>
+# Binary Search
 
-using namespace std;
+## Iterative binary search
+A very simple search operation performed on a sorted sequence, a perfect example of *divide-and-conquer* family of algorithms.
 
+*Problem:* Given a sorted input sequence of *n* elements, *S = { i<sub>0</sub>, i<sub>1</sub>, ..., i<sub>n - 1</sub> }*, find *key* in it.
+
+*Solution:* *key* is compared with the middle element. There possible outcomes:
+* *key == S[middle]*
+  * *key* is found at index *middle*.
+* *key < S[middle]*
+  * Repeat the process in *S[0, middle - 1].
+* *key > S[middle]*
+  * Repeat the process in *S[middle + 1, n - 1].
+
+In each step, we are dividing the search space in half. So the complexity is *log<sub>2</sub>(n)*.
+```C++
 /*
  * Iterative binary search.
  *
@@ -33,7 +45,11 @@ binary_search_v1(const vector<T> &seq, const T &key)
 
 	return -1;
 }
+```
 
+## Recursive binary search
+There is rarely a need to do a recursive version of this but it can be simply done as following:
+```C++
 /*
  * Recursive binary search in seq [lo, hi).
  *
@@ -59,7 +75,7 @@ binary_search_v2(const vector<T> &seq, size_t lo, size_t hi, const T &key)
 	else
 		hi = mid;
 
-	return binary_search_v1(seq, lo, hi, key);
+	return binary_search_v2(seq, lo, hi, key);
 }
 
 /*
@@ -79,7 +95,11 @@ binary_search_v2(const vector<T> &seq, const T &key)
 
 	return binary_search_v2(seq, 0, seq.size(), key);
 }
+```
 
+## Sequence rotation
+
+```C++
 /*
  * Reverse a sequence seq[lo, hi]
  *
@@ -126,42 +146,4 @@ rotate_sequence(vector<T> &seq, size_t n)
 	reverse_sequence(seq, n, seq.size() - 1);
 	reverse_sequence(seq, 0, seq.size() - 1);
 }
-
-int
-main()
-{
-	vector<int> svec;	// sorted vector
-	svec.push_back(0);
-	svec.push_back(1);
-	svec.push_back(2);
-	svec.push_back(3);
-	svec.push_back(4);
-	svec.push_back(5);
-	svec.push_back(6);
-	svec.push_back(7);
-	svec.push_back(8);
-	svec.push_back(9);
-
-	for (int i = 0; i < 10; ++i) {
-		int j = binary_search_v1(svec, i);
-		if (j != i) {
-			cerr << "binary search failed: i = " << i << ", j = " << j << endl;
-			return 1;
-		}
-	}
-
-	if (binary_search_v1(svec, 20) != -1) {
-		cerr << "magic!!! found that was not even in the list" << endl;
-		return 1;
-	}
-
-	for (size_t i = 1; i < svec.size(); ++i) {
-		vector<int> tmpvec(svec);
-		rotate_sequence(tmpvec, i);
-		for (auto j : tmpvec)
-			cout << j << " ";
-		cout << endl;
-	}
-
-	return 0;
-}
+```
