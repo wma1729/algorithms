@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 #include <vector>
 
 using namespace std;
@@ -127,6 +128,88 @@ rotate_sequence(vector<T> &seq, size_t p)
 	reverse_sequence(seq, 0, seq.size() - 1);
 }
 
+/*
+ * Find if key falls in the range of seq[lo, hi]. seq[lo, hi] is
+ * expected to be sorted.
+ *
+ * @param [in] seq - the input sequence (most be sorted).
+ * @param [in] lo  - the start index.
+ * @param [in] hi  - the end index (one past the end of the range).
+ * @param [in] key - the items to search.
+ *
+ * @return true if key is in range, false otherwise.
+ */
+template<typename T>
+inline bool
+in_range(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+{
+	/* special case: 1 item sequence */
+	if (lo == hi)
+		return (seq[lo] == key);
+
+	return ((key >= seq[lo]) && (key <= seq[hi]));
+}
+
+/*
+ * Find key in a sorted sequence that is rotated at an unknow position.
+ *
+ * @param [in] seq - the input sequence (most be sorted).
+ * @param [in] key - the items to search.
+ *
+ * @return item index if found, -1 otherwise.
+ */
+template<typename T>
+int
+binary_search_rotated_sequence(const vector<T> &seq, const T &key)
+{
+	if (seq.empty())
+		return -1;
+
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+
+	while (lo <= hi) {
+		int mid = (lo + hi) / 2;
+
+		/* handle the obvious */
+		if (seq[mid] == key)
+			return static_cast<int>(mid);
+
+		/* one of the two sub-sequences are sorted  */
+
+		if (seq[lo] <= seq[mid - 1]) {
+			/* seq[lo, mid - 1] is sorted */
+
+			if (in_range(seq, lo, mid - 1, key))
+				hi = mid - 1;
+			else
+				lo = mid + 1;
+		} else {
+			/* seq[mid + 1, hi] is sorted */
+
+			if (in_range(seq, mid + 1, hi, key))
+				lo = mid + 1;
+			else
+				hi = mid - 1;
+		} 
+	}
+
+	return -1;
+}
+
+template<typename T>
+static std::ostream &
+operator<< (std::ostream &os, const std::vector<T> &seq)
+{
+	typename std::vector<T>::const_iterator it;
+	for (it = seq.begin(); it != seq.end(); ++it) {
+		if (it != seq.begin())
+			os << ", ";
+		os << *it;
+	}
+	return os;
+}
+
 int
 main()
 {
@@ -155,12 +238,14 @@ main()
 		return 1;
 	}
 
+	cout << "input: " << svec << endl;
+
 	for (size_t i = 1; i < svec.size(); ++i) {
 		vector<int> tmpvec(svec);
 		rotate_sequence(tmpvec, i);
-		for (auto j : tmpvec)
-			cout << j << " ";
-		cout << endl;
+		cout << "rotate(" << i << "): " << tmpvec << endl;
+		int j = binary_search_rotated_sequence(tmpvec, 9);
+		cout << "item " << 9 << " is at index " << j << endl;
 	}
 
 	return 0;

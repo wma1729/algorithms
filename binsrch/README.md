@@ -3,7 +3,7 @@
 ## Iterative binary search
 A very simple search operation performed on a sorted sequence, a perfect example of *divide-and-conquer* family of algorithms.
 
-*Problem:* Given a sorted input sequence of *n* elements, *S = { i<sub>0</sub>, i<sub>1</sub>, ..., i<sub>n - 1</sub> }*, find *key* in it.<br>
+*Problem:* Given a sorted sequence of *n* elements, *S = { i<sub>0</sub>, i<sub>1</sub>, ..., i<sub>n - 1</sub> }*, find *key* in it.<br>
 *Solution:* *key* is compared with the *middle* element. There possible outcomes:
 * *key == S[middle]*
   * *key* is found at index *middle*.
@@ -148,5 +148,78 @@ rotate_sequence(vector<T> &seq, size_t p)
 	reverse_sequence(seq, 0, p - 1);
 	reverse_sequence(seq, p, seq.size() - 1);
 	reverse_sequence(seq, 0, seq.size() - 1);
+}
+```
+## Binary search variation
+*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find *key* in it.<br>
+*Solution:* The binary search can still be used here with some modification. The idea is simple. Divide the sequence into two. Now one of the halves will be completely sorted and the other half is not. Use this fact and the key value to decide which half to dive into.
+```C++
+/*
+ * Find if key falls in the range of seq[lo, hi]. seq[lo, hi] is
+ * expected to be sorted.
+ *
+ * @param [in] seq - the input sequence (most be sorted).
+ * @param [in] lo  - the start index.
+ * @param [in] hi  - the end index (one past the end of the range).
+ * @param [in] key - the items to search.
+ *
+ * @return true if key is in range, false otherwise.
+ */
+template<typename T>
+inline bool
+in_range(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+{
+	/* special case: 1 item sequence */
+	if (lo == hi)
+		return (seq[lo] == key);
+
+	return ((key >= seq[lo]) && (key <= seq[hi]));
+}
+
+/*
+ * Find key in a sorted sequence that is rotated at an unknow position.
+ *
+ * @param [in] seq - the input sequence (most be sorted).
+ * @param [in] key - the items to search.
+ *
+ * @return item index if found, -1 otherwise.
+ */
+template<typename T>
+int
+binary_search_rotated_sequence(const vector<T> &seq, const T &key)
+{
+	if (seq.empty())
+		return -1;
+
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+
+	while (lo <= hi) {
+		int mid = (lo + hi) / 2;
+
+		/* handle the obvious */
+		if (seq[mid] == key)
+			return static_cast<int>(mid);
+
+		/* one of the two sub-sequences are sorted  */
+
+		if (seq[lo] <= seq[mid - 1]) {
+			/* seq[lo, mid - 1] is sorted */
+
+			if (in_range(seq, lo, mid - 1, key))
+				hi = mid - 1;
+			else
+				lo = mid + 1;
+		} else {
+			/* seq[mid + 1, hi] is sorted */
+
+			if (in_range(seq, mid + 1, hi, key))
+				lo = mid + 1;
+			else
+				hi = mid - 1;
+		} 
+	}
+
+	return -1;
 }
 ```
