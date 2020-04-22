@@ -152,9 +152,11 @@ rotate_sequence(vector<T> &seq, size_t p)
 }
 ```
 ## Binary search variation
-*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find the minumum key in the sequence. Essentially the sequence is a cyclic sequence. And we have to find the key at the **inflection** point.<br>
-> S[] = 3, 4, 5, 6, 7, 8, 9, 0, 1, 2
-> S[7] is the inflection point.
+*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find the minumum key in the sequence. Essentially the sequence is a cyclic sequence. And we have to find the key at the **inflection** point.
+
+> S[] = 3, 4, 5, 6, 7, 8, 9, 0, 1, 2<br>
+> S[7] is the inflection point.<br>
+
 *Solution:* Using binary search, we can rule out the half that cannot possibly contain the inflection point i.e. if *S<sub>mid</sub>* is less than *S<sub>hi</sub>*, the inflection point is not in *S[mid + 1, hi]*. Notice that we cannot exclude *S[mid]*. Repeat the same process with the remaining half.
 ```C++
 /*
@@ -196,6 +198,7 @@ inflection_point_in_cyclic_sequence(const vector<T> &seq)
 ```
 
 *Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find *key* in it. In other words, find *key* in a cyclic sequence.
+
 *Solution:* The binary search can still be used here with some modification. The idea is simple. Divide the sequence into two. Now one of the halves will be completely sorted and the other half is not. Use this fact and the key value to decide which half to dive into.
 ```C++
 /*
