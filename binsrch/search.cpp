@@ -19,24 +19,25 @@ binary_search_v1(const vector<T> &seq, const T &key)
 	if (seq.empty())
 		return -1;
 
-	size_t lo = 0;
-	size_t hi = seq.size();
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
 
-	while (lo < hi) {
-		size_t mid = (lo + hi) / 2;
+	while (lo <= hi) {
+		mid = (lo + hi) / 2;
 		if (seq[mid] < key)
 			lo = mid + 1;
 		else if (seq[mid] == key)
-			return static_cast<int>(mid);
+			return mid;
 		else
-			hi = mid;
+			hi = mid - 1;
 	}
 
 	return -1;
 }
 
 /*
- * Recursive binary search in seq [lo, hi).
+ * Recursive binary search in seq [lo, hi].
  *
  * @param [in] seq - the input sequence (most be sorted).
  * @param [in] lo  - the start index.
@@ -47,20 +48,20 @@ binary_search_v1(const vector<T> &seq, const T &key)
  */
 template<typename T>
 static int
-binary_search_v2(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+binary_search_v2(const vector<T> &seq, int lo, int hi, const T &key)
 {
-	if (lo >= hi)
+	if (lo > hi)
 		return -1;
 
-	size_t mid = (lo + hi) / 2;
+	int mid = (lo + hi) / 2;
 	if (seq[mid] < key)
 		lo = mid + 1;
 	else if (seq[mid] == key)
-		return static_cast<int>(mid);
+		return mid;
 	else
-		hi = mid;
+		hi = mid - 1;
 
-	return binary_search_v1(seq, lo, hi, key);
+	return binary_search_v2(seq, lo, hi, key);
 }
 
 /*
@@ -78,7 +79,7 @@ binary_search_v2(const vector<T> &seq, const T &key)
 	if (seq.empty())
 		return -1;
 
-	return binary_search_v2(seq, 0, seq.size(), key);
+	return binary_search_v2(seq, 0, static_cast<int>(seq.size() - 1), key);
 }
 
 /*
@@ -129,6 +130,43 @@ rotate_sequence(vector<T> &seq, size_t p)
 }
 
 /*
+ * Find the inflection point in a cyclic sequence.
+ * 
+ * @param [in] seq - the input cyclic sequence with unique items.
+ *
+ * @return index of the inflection point.
+ */
+template<typename T>
+int
+inflection_point_in_cyclic_sequence(const vector<T> &seq)
+{
+	if (seq.empty())
+		return -1;
+
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
+
+	while (lo < hi) {
+		mid = (lo + hi) / 2;
+
+		if (seq[mid] < seq[hi]) {
+			/*
+			 * seq[mid, hi] is sorted; inflection point not here.
+			 * Do not exclude mid yet. Why? Try the algorithm
+			 * with sequence 3, 0, 1, 2 in mind or on paper.
+			 */
+			hi = mid;
+		} else {
+			/* seq[lo, mid] is sorted; inflection point not here */
+			lo = mid + 1;
+		}
+	}
+
+	return lo;
+}
+
+/*
  * Find if key falls in the range of seq[lo, hi]. seq[lo, hi] is
  * expected to be sorted.
  *
@@ -141,13 +179,9 @@ rotate_sequence(vector<T> &seq, size_t p)
  */
 template<typename T>
 inline bool
-in_range(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+in_range(const vector<T> &seq, int lo, int hi, const T &key)
 {
-	/* special case: 1 item sequence */
-	if (lo == hi)
-		return (seq[lo] == key);
-
-	return ((key >= seq[lo]) && (key <= seq[hi]));
+	return ((lo < hi) && (key >= seq[lo]) && (key <= seq[hi]));
 }
 
 /*
@@ -167,26 +201,29 @@ binary_search_rotated_sequence(const vector<T> &seq, const T &key)
 
 	int lo = 0;
 	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
 
 	while (lo <= hi) {
-		int mid = (lo + hi) / 2;
+		mid = (lo + hi) / 2;
 
-		/* handle the obvious */
+		/* handle the obvious case */
 		if (seq[mid] == key)
 			return static_cast<int>(mid);
 
-		/* one of the two sub-sequences are sorted  */
-
-		if (seq[lo] <= seq[mid - 1]) {
-			/* seq[lo, mid - 1] is sorted */
-
+		if (lo == mid) {
+			/* and we know that seq[mid] != key */
+			lo = mid + 1;
+		} else if (mid == hi) {
+			/* and we know that seq[mid] != key */
+			hi = mid - 1;
+		} else if (seq[lo] < seq[mid]) {
+			/* seq[lo, mid] is sorted */
 			if (in_range(seq, lo, mid - 1, key))
 				hi = mid - 1;
 			else
 				lo = mid + 1;
 		} else {
-			/* seq[mid + 1, hi] is sorted */
-
+			/* seq[mid, hi] is sorted */
 			if (in_range(seq, mid + 1, hi, key))
 				lo = mid + 1;
 			else
@@ -233,6 +270,14 @@ main()
 		}
 	}
 
+	for (int i = 0; i < 10; ++i) {
+		int j = binary_search_v1(svec, i);
+		if (j != i) {
+			cerr << "binary search failed: i = " << i << ", j = " << j << endl;
+			return 1;
+		}
+	}
+
 	if (binary_search_v1(svec, 20) != -1) {
 		cerr << "magic!!! found that was not even in the list" << endl;
 		return 1;
@@ -244,8 +289,9 @@ main()
 		vector<int> tmpvec(svec);
 		rotate_sequence(tmpvec, i);
 		cout << "rotate(" << i << "): " << tmpvec << endl;
+		cout << "inflection point = " << inflection_point_in_cyclic_sequence(tmpvec) << endl;
 		int j = binary_search_rotated_sequence(tmpvec, 9);
-		cout << "item " << 9 << " is at index " << j << endl;
+		cout << "input[" << j << "] = " << 9 << endl;
 	}
 
 	return 0;

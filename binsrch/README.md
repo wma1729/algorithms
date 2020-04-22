@@ -29,17 +29,18 @@ binary_search_v1(const vector<T> &seq, const T &key)
 	if (seq.empty())
 		return -1;
 
-	size_t lo = 0;
-	size_t hi = seq.size();
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
 
-	while (lo < hi) {
-		size_t mid = (lo + hi) / 2;
+	while (lo <= hi) {
+		mid = (lo + hi) / 2;
 		if (seq[mid] < key)
 			lo = mid + 1;
 		else if (seq[mid] == key)
-			return static_cast<int>(mid);
+			return mid;
 		else
-			hi = mid;
+			hi = mid - 1;
 	}
 
 	return -1;
@@ -50,7 +51,7 @@ binary_search_v1(const vector<T> &seq, const T &key)
 There is rarely a need to do a recursive version of this but it can be simply done as following:
 ```C++
 /*
- * Recursive binary search in seq [lo, hi).
+ * Recursive binary search in seq [lo, hi].
  *
  * @param [in] seq - the input sequence (most be sorted).
  * @param [in] lo  - the start index.
@@ -61,18 +62,18 @@ There is rarely a need to do a recursive version of this but it can be simply do
  */
 template<typename T>
 static int
-binary_search_v2(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+binary_search_v2(const vector<T> &seq, int lo, int hi, const T &key)
 {
-	if (lo >= hi)
+	if (lo > hi)
 		return -1;
 
-	size_t mid = (lo + hi) / 2;
+	int mid = (lo + hi) / 2;
 	if (seq[mid] < key)
 		lo = mid + 1;
 	else if (seq[mid] == key)
-		return static_cast<int>(mid);
+		return mid;
 	else
-		hi = mid;
+		hi = mid - 1;
 
 	return binary_search_v2(seq, lo, hi, key);
 }
@@ -92,7 +93,7 @@ binary_search_v2(const vector<T> &seq, const T &key)
 	if (seq.empty())
 		return -1;
 
-	return binary_search_v2(seq, 0, seq.size(), key);
+	return binary_search_v2(seq, 0, static_cast<int>(seq.size() - 1), key);
 }
 ```
 
@@ -151,7 +152,50 @@ rotate_sequence(vector<T> &seq, size_t p)
 }
 ```
 ## Binary search variation
-*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find *key* in it.<br>
+*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find the minumum key in the sequence. Essentially the sequence is a cyclic sequence. And we have to find the key at the **inflection** point.<br>
+> S[] = 3, 4, 5, 6, 7, 8, 9, 0, 1, 2
+> S[7] is the inflection point.
+*Solution:* Using binary search, we can rule out the half that cannot possibly contain the inflection point i.e. if *S<sub>mid</sub>* is less than *S<sub>hi</sub>*, the inflection point is not in *S[mid + 1, hi]*. Notice that we cannot exclude *S[mid]*. Repeat the same process with the remaining half.
+```C++
+/*
+ * Find the inflection point in a cyclic sequence.
+ * 
+ * @param [in] seq - the input cyclic sequence with unique items.
+ *
+ * @return index of the inflection point.
+ */
+template<typename T>
+int
+inflection_point_in_cyclic_sequence(const vector<T> &seq)
+{
+	if (seq.empty())
+		return -1;
+
+	int lo = 0;
+	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
+
+	while (lo < hi) {
+		mid = (lo + hi) / 2;
+
+		if (seq[mid] < seq[hi]) {
+			/*
+			 * seq[mid, hi] is sorted; inflection point not here.
+			 * Do not exclude mid yet. Why? Try the algorithm
+			 * with sequence 3, 0, 1, 2 in mind or on paper.
+			 */
+			hi = mid;
+		} else {
+			/* seq[lo, mid] is sorted; inflection point not here */
+			lo = mid + 1;
+		}
+	}
+
+	return lo;
+}
+```
+
+*Problem:* Given a sorted sequence of size *n* that is rotated at an unknown postion, find *key* in it. In other words, find *key* in a cyclic sequence.
 *Solution:* The binary search can still be used here with some modification. The idea is simple. Divide the sequence into two. Now one of the halves will be completely sorted and the other half is not. Use this fact and the key value to decide which half to dive into.
 ```C++
 /*
@@ -167,13 +211,9 @@ rotate_sequence(vector<T> &seq, size_t p)
  */
 template<typename T>
 inline bool
-in_range(const vector<T> &seq, size_t lo, size_t hi, const T &key)
+in_range(const vector<T> &seq, int lo, int hi, const T &key)
 {
-	/* special case: 1 item sequence */
-	if (lo == hi)
-		return (seq[lo] == key);
-
-	return ((key >= seq[lo]) && (key <= seq[hi]));
+	return ((lo < hi) && (key >= seq[lo]) && (key <= seq[hi]));
 }
 
 /*
@@ -193,26 +233,29 @@ binary_search_rotated_sequence(const vector<T> &seq, const T &key)
 
 	int lo = 0;
 	int hi = static_cast<int>(seq.size() - 1);
+	int mid;
 
 	while (lo <= hi) {
-		int mid = (lo + hi) / 2;
+		mid = (lo + hi) / 2;
 
-		/* handle the obvious */
+		/* handle the obvious case */
 		if (seq[mid] == key)
 			return static_cast<int>(mid);
 
-		/* one of the two sub-sequences are sorted  */
-
-		if (seq[lo] <= seq[mid - 1]) {
-			/* seq[lo, mid - 1] is sorted */
-
+		if (lo == mid) {
+			/* and we know that seq[mid] != key */
+			lo = mid + 1;
+		} else if (mid == hi) {
+			/* and we know that seq[mid] != key */
+			hi = mid - 1;
+		} else if (seq[lo] < seq[mid]) {
+			/* seq[lo, mid] is sorted */
 			if (in_range(seq, lo, mid - 1, key))
 				hi = mid - 1;
 			else
 				lo = mid + 1;
 		} else {
-			/* seq[mid + 1, hi] is sorted */
-
+			/* seq[mid, hi] is sorted */
 			if (in_range(seq, mid + 1, hi, key))
 				lo = mid + 1;
 			else
