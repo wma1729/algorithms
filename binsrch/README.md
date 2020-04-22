@@ -100,7 +100,7 @@ binary_search_v2(const vector<T> &seq, const T &key)
 ## Sequence rotation
 *Problem:* Given a sequence of *n* elements, rotate the sequence by *p* elements.
 
-*Solution:* This problem has an interesting answer. The sequence is assumed to be composed of two sub-sequences: *S[0, p - 1], S[p, n - 1]*. The solution consists of three steps:
+*Solution:* This problem has an interesting answer. The sequence is assumed to be composed of two sub-sequences: *S[0, p - 1], S[p, n - 1]*. The solution comprises of three steps:
 * Reverse the sequence *S[0, p - 1]*.
 * Reverse the sequence *S[p, n - 1]*.
 * Reverse the sequence *S[0, n - 1]*.
