@@ -22,8 +22,12 @@ For *n == 3*, the solution starts getting big cumbersome.
 - Move disk from I to T.
 - Move disk from S to T.
 
-We firt move *n - 1* disks from S to I. Move the final disk to T. Finally move all disks from I to T. Here is a rough algorithm:
+The essence of the process is:
+1. Move *n - 1* disks from S to I.
+2. Move the final *n<super>th</super>* disk to T.
+3. Finally move the remaining *n - 1* disks from I to T.
 
+Here is a rough algorithm:
 ```
 // Move n disks from s to t using i as the intermediate.
 toh(n, peg s, peg i, peg t)
