@@ -5,7 +5,7 @@
 1. Only 1 disk can move at a time.
 2. Larger disks must not be placed on the smaller one.
 
-*Solution:* Let's call the three pegs S*(ource)*, I*(ntermediate)*, and T*(arget). Initially all the disks are on peg S. The goal is to move all the disks to peg T.
+*Solution:* Let's call the three pegs *S(ource)*, *I(ntermediate)*, and *T(arget)*. Initially all the disks are on peg S. The goal is to move all the disks to peg T.
 
 For *n == 1*, the solution is simple.
 - Move disk from S to T.
@@ -15,7 +15,7 @@ For *n == 2*, the solution is still simple.
 - Move disk from S to T.
 - Move disk from I to T.
 
-For *n == 3*, the solution starts getting big cumbersome.
+For *n == 3*, the solution starts getting cumbersome.
 - Move disk from S to T.
 - Move disk from S to I.
 - Move disk from T to I.
