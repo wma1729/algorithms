@@ -9,10 +9,12 @@
 
 For *n == 1*, the solution is simple.
 - Move disk from S to T.
+
 For *n == 2*, the solution is still simple.
 - Move disk from S to I.
 - Move disk from S to T.
 - Move disk from I to T.
+
 For *n == 3*, the solution starts getting big cumbersome.
 - Move disk from S to T.
 - Move disk from S to I.
