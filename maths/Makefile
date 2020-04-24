@@ -10,12 +10,15 @@ OBJS   = fsqrt.o \
          power.o \
          driver.o
 
-EXES   = maths
+EXES   = maths polynomial
 
 all: ${EXES}
 
 maths: ${OBJS}
 	g++ ${DBG} $^ -o $@
+
+polynomial: polynomial.cpp
+	g++ ${DBG} ${DEFINES} $^ -o $@
 
 %.o: %.cpp
 	g++ ${CFLAGS} ${DBG} ${DEFINES} $^ -o $@
