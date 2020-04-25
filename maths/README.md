@@ -376,6 +376,7 @@ x! | 1 | 2 | 6 | 24 | 120 | 720 | 5040 | 40320 | 36288 | 362880
 
 Lets's assume that the polynomial function is:
 > a<sub>3</sub>x<super>3</super> + a<sub>2</sub>x<super>2</super> + a<sub>1</sub>x + a<sub>0</sub><br>
+
 The function to solve the polynomial function is passed two arguments:
 - The variable x
 - A vector of coefficients: a<sub>3</sub>, a<sub>2</sub>, a<sub>1</sub>, a<sub>0</sub>
