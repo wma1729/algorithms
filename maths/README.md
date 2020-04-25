@@ -372,3 +372,85 @@ x<sup>3</sup> | 1 | 8 | 27 | 64 | 125 | 216 | 343 | 512 | 729 | 1000
 x! | 1 | 2 | 6 | 24 | 120 | 720 | 5040 | 40320 | 36288 | 362880
  log<sub>2</sub>(x) | 0 | 1 | 1.585 | 2 | 2.32 | 2.585 | 2.8 | 3 | 3.169 | 3.322
 
+## Algorithm to solve polynomial function
+
+Lets's assume that the polynomial function is:
+> a<sub>3</sub>x<super>3</super> + a<sub>2</sub>x<super>2</super> + a<sub>1</sub>x + a<sub>0</sub><br>
+The function to solve the polynomial function is passed two arguments:
+- The variable x
+- A vector of coefficients: a<sub>3</sub>, a<sub>2</sub>, a<sub>1</sub>, a<sub>0</sub>
+
+```C++
+long
+polynomial_v1(int x, const vector<int> &a)
+{
+	if (a.empty())
+		return 0;
+
+	if (a.size() == 1)
+		return a[0];
+
+	long result = a[0];
+
+	for (size_t i = 1; i < a.size(); ++i) {
+		long var = x;
+		for (size_t j = i; j > 1; --j)
+			var *= x;
+
+		result += (a[i] * var);
+	}
+
+	return result;
+}
+```
+This function involves *n * (n + 1) / 2* multiplications and *n* additions where *n* is the degree of polynomial function.
+
+```C++
+long
+polynomial_v2(int x, const vector<int> &a)
+{
+	if (a.empty())
+		return 0;
+
+	if (a.size() == 1)
+		return a[0];
+
+	long result = a[0];
+	long var = x;
+
+	for (size_t i = 1; i < a.size(); ++i) {
+		result += (a[i] * var);
+		var = var * x;
+	}
+
+	return result;
+}
+```
+This version stores the values of the variable x in *var* and recalculates it for the next iteration with just 1 multiplication. With this optimization, we have reduced the number of multiplications to *2n*. The number of additions remain the same, *n*.
+
+Can we do better?<br>
+> a<sub>3</sub>x<super>3</super> + a<sub>2</sub>x<super>2</super> + a<sub>1</sub>x + a<sub>0</sub><br>
+> ((a<sub>3</sub>x + a<sub>2</sub>)x + a<sub>1</sub>)x + a<sub>0</sub><br>
+
+```C++
+long
+polynomial_v3(int x, const vector<int> &a)
+{
+	if (a.empty())
+		return 0;
+
+	if (a.size() == 1)
+		return a[0];
+
+	size_t i = a.size() - 1;
+
+	long result = a[i] * x + a[i - 1];
+	i--;
+
+	for (; i > 0; --i)
+		result = (result * x) + a[i - 1];
+
+	return result;
+}
+```
+This function involves only *n* multiplications and *n* additions.

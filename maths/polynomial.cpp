@@ -90,7 +90,7 @@ polynomial_v3(int x, const vector<int> &a)
 	if (a.size() == 1)
 		return a[0];
 
-	int i = static_cast<int>(a.size() - 1);
+	size_t i = a.size() - 1;
 
 	long result = a[i] * x + a[i - 1];
 	i--;
