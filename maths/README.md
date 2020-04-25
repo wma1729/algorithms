@@ -375,7 +375,7 @@ x! | 1 | 2 | 6 | 24 | 120 | 720 | 5040 | 40320 | 36288 | 362880
 ## Algorithm to solve polynomial function
 
 Lets's assume that the polynomial function is:
-> a<sub>3</sub>x<super>3</super> + a<sub>2</sub>x<super>2</super> + a<sub>1</sub>x + a<sub>0</sub><br>
+> a<sub>3</sub>x<sup>3</sup> + a<sub>2</sub>x<sup>2</sup> + a<sub>1</sub>x + a<sub>0</sub><br>
 
 The function to solve the polynomial function is passed two arguments:
 - The variable x
@@ -430,7 +430,7 @@ polynomial_v2(int x, const vector<int> &a)
 This version stores the values of the variable x in *var* and recalculates it for the next iteration with just 1 multiplication. With this optimization, we have reduced the number of multiplications to *2n*. The number of additions remain the same, *n*.
 
 Can we do better?<br>
-> a<sub>3</sub>x<super>3</super> + a<sub>2</sub>x<super>2</super> + a<sub>1</sub>x + a<sub>0</sub><br>
+> a<sub>3</sub>x<sup>3</sup> + a<sub>2</sub>x<sup>2</sup> + a<sub>1</sub>x + a<sub>0</sub><br>
 > ((a<sub>3</sub>x + a<sub>2</sub>)x + a<sub>1</sub>)x + a<sub>0</sub><br>
 
 ```C++
