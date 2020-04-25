@@ -379,7 +379,7 @@ Lets's assume that the polynomial function is:
 
 The function to solve the polynomial function is passed two arguments:
 - The variable x
-- A vector of coefficients: a<sub>3</sub>, a<sub>2</sub>, a<sub>1</sub>, a<sub>0</sub>
+- A vector of coefficients: a<sub>0</sub>, a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>
 
 ```C++
 long
