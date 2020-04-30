@@ -72,4 +72,62 @@ But we know only the horizontal line segments along the x-axis, it is sufficient
 The solution output can thus include only the starting point of each horizontal line segment as *{(x<sub>1</sub>, y<sub>1</sub>), (x<sub>2</sub>, y<sub>2</sub>), ... (x<sub>m</sub>, y<sub>m</sub>)}*.<br>
 *Solution:* The solution is not straight-forward. A few data-structures are needed before exploring the solution.
 ```C++
+/*
+ * Defines a single point of the x-y axis.
+ */
+struct point
+{
+	int x;
+	int y;
+
+	explicit point(int a, int b) : x(a), y(b) {}
+	bool operator==(const point &p) { return ((p.x == x) && (p.y == y)); }
+};
+
+ostream &
+operator<< (ostream &os, const point &pt)
+{
+	os << "(" << pt.x << ", " << pt.y << ")";
+	return os;
+}
+
+/*
+ * Less than operator for point. Since we move from left-to-right,
+ * we are only concerned about the x-coordinate.
+ */
+bool
+operator< (const point &p1, const point &p2)
+{
+	return (p1.x < p2.x);
+}
+
+/*
+ * Defines a building.
+ */
+class building
+{
+private:
+	int start;	// starting x-coordinate
+	int end;	// ending x-coordinate
+	int height;	// height of the building: y-coordinate
+
+public:
+	explicit building(int x1, int x2, int h) : start(x1), end(x2), height(h) {}
+
+	/*
+	 * Is the point contained in the building? A point is considered
+	 * with in the building if:
+	 * start <= p.x < end AND
+	 * p.y <= height.
+	 *
+	 * @return height of the building if the point is contained in the
+	 * building, -1 if the building does not contain the point.
+	 */
+	int contains(const point &p)
+	{
+		if ((p.x >= start) && (p.x < end) && (p.y <= height))
+			return height;
+		return -1;
+	}
+};
 ```
