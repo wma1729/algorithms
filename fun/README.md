@@ -68,6 +68,6 @@ toh(int h, const string &s, const string &i, const string &t)
 The problem is to find the skyline (or silhouette) of the buidlings. The skyline for the above set if buildings is
 ![skyline](buildings2.jpeg)
 But we know only the horizontal line segments along the x-axis, it is sufficient to draw the skyline.
-![output](buildings2.jpeg)
+![output](buildings3.jpeg)
 The solution output can this include only the starting point of each horizontal line segment as *{(x<sub>1</sub>, y<sub>1</sub>), (x<sub>2</sub>, y<sub>2</sub>), ... (x<sub>m</sub>, y<sub>m</sub>)}*.<br>
 *Solution:*
