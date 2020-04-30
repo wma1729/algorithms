@@ -63,11 +63,13 @@ toh(int h, const string &s, const string &i, const string &t)
 ```
 
 ## The skyline problem
-*Problem:* A set of buildings are given. Each building is defined by the following coordinates:  starting/ending points on the x-axis and the height of the building on the y-axis. The input is provided as *{(s<sub>1</sub>, e<sub>1</sub>, h<sub>1</sub>), (s<sub>2</sub>, e<sub>2</sub>, h<sub>2</sub>), ... (s<sub>n</sub>, e<sub>n</sub>, h<sub>n</sub>)}*.
+*Problem:* A set of buildings are given. Each building is defined by the following coordinates: starting/ending points on the x-axis and the height of the building on the y-axis. The input is provided as *{(s<sub>1</sub>, e<sub>1</sub>, h<sub>1</sub>), (s<sub>2</sub>, e<sub>2</sub>, h<sub>2</sub>), ... (s<sub>n</sub>, e<sub>n</sub>, h<sub>n</sub>)}*.
 ![buildings](buildings.jpeg)
 The problem is to find the skyline (or silhouette) of the buidlings. The skyline for the above set if buildings is
 ![skyline](buildings2.jpeg)
 But we know only the horizontal line segments along the x-axis, it is sufficient to draw the skyline.
 ![output](buildings3.jpeg)
-The solution output can this include only the starting point of each horizontal line segment as *{(x<sub>1</sub>, y<sub>1</sub>), (x<sub>2</sub>, y<sub>2</sub>), ... (x<sub>m</sub>, y<sub>m</sub>)}*.<br>
-*Solution:*
+The solution output can thus include only the starting point of each horizontal line segment as *{(x<sub>1</sub>, y<sub>1</sub>), (x<sub>2</sub>, y<sub>2</sub>), ... (x<sub>m</sub>, y<sub>m</sub>)}*.<br>
+*Solution:* The solution is not straight-forward. A few data-structures are needed before exploring the solution.
+```C++
+```
