@@ -73,7 +73,7 @@ The solution output can thus include only the starting point of each horizontal 
 *Solution:* The solution is not straight-forward. A few data-structures are needed before exploring the solution.
 ```C++
 /*
- * Defines a single point of the x-y axis.
+ * Defines a single point on the x-y axis.
  */
 struct point
 {
@@ -123,11 +123,25 @@ public:
 	 * @return height of the building if the point is contained in the
 	 * building, -1 if the building does not contain the point.
 	 */
-	int contains(const point &p)
+	int contains(const point &p) const
 	{
 		if ((p.x >= start) && (p.x < end) && (p.y <= height))
 			return height;
 		return -1;
 	}
 };
+```
+The following code snippet reads the building coordinates. It saves buildings in a vector. It also saves the **key** (or **critical**) points for each building. The key points of a building are top-left and bottom-right coordinates.
+```C++
+int x1, x2, h;
+vector<point> keypoints;
+vector<building> buildings;
+
+fstream fin(<file-containing-building-coordinates>, ios_base::in);
+while (fin >> x1 >> x2 >> h) {
+        buildings.emplace_back(x1, x2, h);
+        keypoints.emplace_back(x1, h);
+        keypoints.emplace_back(x2, 0);
+}
+fin.close();
 ```
