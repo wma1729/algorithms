@@ -104,14 +104,12 @@ operator< (const point &p1, const point &p2)
 /*
  * Defines a building.
  */
-class building
+struct building
 {
-private:
 	int start;	// starting x-coordinate
 	int end;	// ending x-coordinate
 	int height;	// height of the building: y-coordinate
 
-public:
 	explicit building(int x1, int x2, int h) : start(x1), end(x2), height(h) {}
 
 	/*
@@ -130,18 +128,203 @@ public:
 		return -1;
 	}
 };
+
+/*
+ * Less than operator for building. Since we move from left-to-right,
+ * we are only concerned about the start.
+ */
+bool
+operator< (const building &b1, const building &b2)
+{
+	return (b1.start < b2.start);
+}
+
 ```
 The following code snippet reads the building coordinates. It saves buildings in a vector. It also saves the **key** (or **critical**) points for each building. The key points of a building are top-left and bottom-right coordinates.
 ```C++
 int x1, x2, h;
-vector<point> keypoints;
 vector<building> buildings;
 
 fstream fin(<file-containing-building-coordinates>, ios_base::in);
-while (fin >> x1 >> x2 >> h) {
+while (fin >> x1 >> x2 >> h)
         buildings.emplace_back(x1, x2, h);
-        keypoints.emplace_back(x1, h);
-        keypoints.emplace_back(x2, 0);
-}
 fin.close();
+```
+
+### Key Points
+The **key** (or **critical**) points of a building are top-left and bottom-right coordinates of a building. If a single building is taken, the key points define the skyline of the building.
+
+### Approach 1 (Look at all the buildings to determine the height of a key point)
+1. All the key points are added to the skyline.
+2. The y-coordinate (or height) of each key point is adjusted such that it is the highest point in all buildings containing the key point.
+3. The key points are sorted.
+4. Redundant key points deleted.
+
+For every building there are *2 * n* keypoints. To adjust height of each key point, we can possibly check *n* buildings. As such, this algorithm has a complexity of *2n * n* or *n<sup>2</sup>*.
+```C++
+/*
+ * Remove redundant key points along the same y-axis (retaining the lowest x-axis point).
+ * Input:  { (x1, y1), (x2, y1), (x3, y2), (x4, y3), (x5, y3), (x6, y4) }
+ * Output: { (x1, y1), (x3, y2), (x4, y3), (x6, y4) }
+ */
+static void
+remove_redundant(vector<point> &keypoints)
+{
+	vector<point>::iterator i, j;
+
+	i = j = keypoints.begin();
+	if (i != keypoints.end())
+		i++;
+
+	while (i != keypoints.end()) {
+		if (j->y != i->y) {
+			j++;
+			*j = *i;
+		}
+		i++;
+	}
+
+	if (j != keypoints.end())
+		keypoints.erase(j + 1, keypoints.end());
+}
+
+/*
+ * Solves the skyline problem.
+ *
+ * @param [in] buildings - the set of input buildings.
+ *
+ * @return the skyline.
+ */
+vector<point>
+skyline_v1(const vector<building> &buildings)
+{
+	vector<point> keypoints;
+
+	/*
+	 * Add all key points: top-left and bottom-right corners.
+	 */
+	for (auto b : buildings) {
+		keypoints.emplace_back(b.start, b.height);
+		keypoints.emplace_back(b.end, 0);
+	}
+
+	/*
+	 * Update height (y-coordinate) of each keypoint.
+	 * It must be the highest building height containing the keypoint.
+	 */
+	vector<point>::iterator i;
+	for (i = keypoints.begin(); i != keypoints.end(); ++i) {
+		int h = i->y;
+
+		vector<building>::const_iterator k;
+		for (k = buildings.begin(); k != buildings.end(); ++k)
+			h = max(h, k->contains(*i));
+
+		i->y = h;
+	}
+
+	/* Sort keypoints */
+	sort(keypoints.begin(), keypoints.end());
+
+	/* Remove duplicates */
+	remove_redundant(keypoints);
+
+	return keypoints;
+}
+```
+
+### Approach 2 (Grow skyline by adding one building at a time)
+1. Start with empty skyline.
+2. Add a building at a time.
+3. Adding a building is effectively merging the building's skyline to the overall skyline.
+
+For every building there are *2 * n* keypoints. To add *i<sup>th</sup>* building to the existing skyline, we need to check the skyline of *(i - 1)* buildings. As such, this algorithm too has a complexity of *n<sup>2</sup>*.
+```C++
+/*
+ * Merges two skylines.
+ *
+ * @param [in] kp1 - the first skyline.
+ * @param [in] kp2 - the second skyline.
+ *
+ * @return the merged skyline.
+ */
+vector<point>
+merge_skylines(const vector<point> &kp1, const vector<point> &kp2)
+{
+	vector<point> keypoints;
+	int h1 = 0; // last height in kp1 skyline
+	int h2 = 0; // last height in kp2 skyline
+
+	vector<point>::const_iterator i = kp1.begin();
+	vector<point>::const_iterator j = kp2.begin();
+
+	/*
+	 * Choose the keypoint with smaller x-coordinate.
+	 * Adjust the y-coordinate of the skyline. The y-coordinate is
+	 * the maximum of y-coordinate and the last height of the
+	 * other skyline.
+	 */
+	while ((i != kp1.end()) && (j != kp2.end())) {
+		if (i->x < j->x) {
+			keypoints.emplace_back(i->x, max(i->y, h2));
+			h1 = i->y;
+			i++;
+		} else if (i->x == j->x) {
+			keypoints.emplace_back(i->x, max(i->y, j->y));
+			h1 = i->y;
+			h2 = j->y;
+			i++;
+			j++;
+		} else /* if (i->x > j->y) */ {
+			keypoints.emplace_back(j->x, max(h1, j->y));
+			h2 = j->y;
+			j++;
+		}
+	}
+
+	/*
+	 * Take care of the remaining key points.
+	 */
+
+	while (i != kp1.end()) {
+		keypoints.push_back(*i);
+		i++;
+	}
+
+	while (j != kp2.end()) {
+		keypoints.push_back(*j);
+		j++;
+	}
+
+	/* Remove duplicates */
+	remove_redundant(keypoints);
+
+	return keypoints;
+}
+
+/*
+ * Solves the skyline problem.
+ *
+ * @param [in] buildings - the set of input buildings.
+ *
+ * @return the skyline.
+ */
+vector<point>
+skyline_v2(const vector<building> &buildings)
+{
+	vector<point> keypoints;
+	vector<point> kp;
+
+	/*
+	 * Add one building at a time.
+	 */
+	for (auto b : buildings) {
+		kp.clear();
+		kp.emplace_back(b.start, b.height);
+		kp.emplace_back(b.end, 0);
+		keypoints = std::move(merge_skylines(keypoints, kp));
+	}
+
+	return keypoints;
+}
 ```
