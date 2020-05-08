@@ -140,7 +140,7 @@ operator< (const building &b1, const building &b2)
 }
 
 ```
-The following code snippet reads the building coordinates. It saves buildings in a vector. It also saves the **key** (or **critical**) points for each building. The key points of a building are top-left and bottom-right coordinates.
+The following code snippet reads the building coordinates. It saves buildings in a vector.
 ```C++
 int x1, x2, h;
 vector<building> buildings;
