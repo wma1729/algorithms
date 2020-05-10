@@ -154,6 +154,15 @@ fin.close();
 ### Key Points
 The **key** (or **critical**) points of a building are top-left and bottom-right coordinates of a building. If a single building is taken, the key points define the skyline of the building.
 
+### General approach
+The general approach to solve the problem is:
+* adjust the height of key points.
+* remove redundant key points.
+
+Some examples here:
+![skyline](skyline.jpeg)
+![skyline2](skyline2.jpeg)
+
 ### Approach 1 (Look at all the buildings to determine the height of a key point)
 1. All the key points are added to the skyline.
 2. The y-coordinate (or height) of each key point is adjusted such that it is the highest point in all buildings containing the key point.
