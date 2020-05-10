@@ -250,17 +250,22 @@ skyline_v1(const vector<building> &buildings)
 To add *i<sup>th</sup>* building to the existing skyline, we need to check the skyline of *(i - 1)* buildings. This is slightly better in proactive but the complexity is still *n<sup>2</sup>*.
 ```C++
 /*
- * Merges two skylines.
+ * Add building to the skyline.
  *
- * @param [in] kp1 - the first skyline.
- * @param [in] kp2 - the second skyline.
+ * @param [in] kp1 - the existing skyline.
+ * @param [in] b   - the building to add.
  *
- * @return the merged skyline.
+ * @return the final skyline.
  */
 vector<point>
-merge_skylines(const vector<point> &kp1, const vector<point> &kp2)
+add_building(const vector<point> &kp1, const building &b)
 {
 	vector<point> keypoints;
+	vector<point> kp2;
+
+	kp2.emplace_back(b.start, b.height);
+	kp2.emplace_back(b.end, 0);
+
 	int h1 = 0; // last height in kp1 skyline
 	int h2 = 0; // last height in kp2 skyline
 
@@ -322,18 +327,121 @@ vector<point>
 skyline_v2(const vector<building> &buildings)
 {
 	vector<point> keypoints;
-	vector<point> kp;
 
 	/*
 	 * Add one building at a time.
 	 */
-	for (auto b : buildings) {
-		kp.clear();
-		kp.emplace_back(b.start, b.height);
-		kp.emplace_back(b.end, 0);
-		keypoints = std::move(merge_skylines(keypoints, kp));
-	}
+	for (auto b : buildings)
+		keypoints = std::move(add_building(keypoints, b));
 
 	return keypoints;
+}
+```
+
+### Approach 2 (Merge skylines)
+Here the skyline is expanded by merging skylines of buildings. The complexity is *n * log<sub>2</sub>(n)*.
+```C++
+/*
+ * Merge two skylines. Not very different from add_building.
+ *
+ * @param [in] kp1 - the first skyline.
+ * @param [in] kp2 - the second skyline.
+ *
+ * @return the merged skyline.
+ */
+vector<point>
+merge_skylines(const vector<point> &kp1, const vector<point> &kp2)
+{
+	vector<point> keypoints;
+	int h1 = 0; // last height in kp1 skyline
+	int h2 = 0; // last height in kp2 skyline
+
+	vector<point>::const_iterator i = kp1.begin();
+	vector<point>::const_iterator j = kp2.begin();
+
+	/*
+	 * Choose the keypoint with smaller x-coordinate.
+	 * Adjust the y-coordinate of the skyline. The y-coordinate is
+	 * the maximum of y-coordinate and the last height of the
+	 * other skyline.
+	 */
+	while ((i != kp1.end()) && (j != kp2.end())) {
+		if (i->x < j->x) {
+			keypoints.emplace_back(i->x, max(i->y, h2));
+			h1 = i->y;
+			i++;
+		} else if (i->x == j->x) {
+			keypoints.emplace_back(i->x, max(i->y, j->y));
+			h1 = i->y;
+			h2 = j->y;
+			i++;
+			j++;
+		} else /* if (i->x > j->y) */ {
+			keypoints.emplace_back(j->x, max(h1, j->y));
+			h2 = j->y;
+			j++;
+		}
+	}
+
+	/*
+	 * Take care of the remaining key points.
+	 */
+
+	while (i != kp1.end()) {
+		keypoints.push_back(*i);
+		i++;
+	}
+
+	while (j != kp2.end()) {
+		keypoints.push_back(*j);
+		j++;
+	}
+
+	/* Remove duplicates */
+	remove_redundant(keypoints);
+
+	return keypoints;
+}
+
+/*
+ * Merge skylines recursively.
+ *
+ * @param [in] buildings - the set of input buildings.
+ * @param [in] lo        - the start of buildings.
+ * @param [in] hi        - the end of buildings (inclusive).
+ *
+ * @return the skyline.
+ */ 
+vector<point>
+skyline_recursive(const vector<building> &buildings, size_t lo, size_t hi)
+{
+	if (lo == hi) {
+		vector<point> kp;
+		kp.emplace_back(buildings[lo].start, buildings[lo].height);
+		kp.emplace_back(buildings[lo].end, 0);
+		return kp;
+	} else {
+		size_t mid = (lo + hi) / 2;
+		vector<point> kp1 = std::move(skyline_recursive(buildings, lo, mid));
+		vector<point> kp2 = std::move(skyline_recursive(buildings, mid + 1, hi));
+		return merge_skylines(kp1, kp2);
+	}
+}
+
+/*
+ * Solves the skyline problem.
+ *
+ * @param [in] buildings - the set of input buildings.
+ *
+ * @return the skyline.
+ */
+vector<point>
+skyline_v3(const vector<building> &buildings)
+{
+	if (buildings.empty()) {
+		return vector<point> ();
+	}
+
+	return skyline_recursive(buildings, 0, buildings.size() - 1);
 }
 ```
