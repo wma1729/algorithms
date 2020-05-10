@@ -169,7 +169,7 @@ Some examples here:
 3. The key points are sorted.
 4. Redundant key points deleted.
 
-For every building there are *2 * n* keypoints. To adjust height of each key point, we can possibly check *n* buildings. As such, this algorithm has a complexity of *2n * n* or *n<sup>2</sup>*.
+To adjust the key point heights, we can possibly check *n* buildings for every building. As such, this algorithm has a complexity of *n * n* or *n<sup>2</sup>*.
 ```C++
 /*
  * Remove redundant key points along the same y-axis (retaining the lowest x-axis point).
@@ -247,7 +247,7 @@ skyline_v1(const vector<building> &buildings)
 2. Add a building at a time.
 3. Adding a building is effectively merging the building's skyline to the overall skyline.
 
-For every building there are *2 * n* keypoints. To add *i<sup>th</sup>* building to the existing skyline, we need to check the skyline of *(i - 1)* buildings. As such, this algorithm too has a complexity of *n<sup>2</sup>*.
+To add *i<sup>th</sup>* building to the existing skyline, we need to check the skyline of *(i - 1)* buildings. This is slightly better in proactive but the complexity is still *n<sup>2</sup>*.
 ```C++
 /*
  * Merges two skylines.
