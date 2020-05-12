@@ -2,9 +2,9 @@ DBG     = -g
 CFLAGS  = -c
 DEFINES = -DDEBUG
 
-OBJS   = towersofhanoi.o skyline.o
+OBJS   = towersofhanoi.o skyline.o celebrity.o
 
-EXES   = towersofhanoi skyline
+EXES   = towersofhanoi skyline celebrity
 
 all: ${EXES}
 
@@ -12,6 +12,9 @@ towersofhanoi: towersofhanoi.o
 	g++ ${DBG} $^ -o $@
 
 skyline: skyline.o
+	g++ ${DBG} $^ -o $@
+
+celebrity: celebrity.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
