@@ -338,8 +338,10 @@ skyline_v2(const vector<building> &buildings)
 }
 ```
 
-### Approach 2 (Merge skylines)
-Here the skyline is expanded by merging skylines of buildings. The complexity is *n * log<sub>2</sub>(n)*.
+### Approach 3 (Merge skylines)
+This approach uses *divide and conquer*. The problem with *n* building is divided into two *n / 2* sub problems. The process is repeated until we are left with 1 building. The skylines are then merged as recursion winds up.
+
+The complexity is *n * log<sub>2</sub>(n)*.
 ```C++
 /*
  * Merge two skylines. Not very different from add_building.
