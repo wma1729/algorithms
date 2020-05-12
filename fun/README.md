@@ -497,8 +497,10 @@ struct person
 };
 ```
 People could be read from a file with the format:
-> <name> <comma-sepated-known-people><br>
-> <name> nil<br>
+```
+<name> <comma-sepated-known-people>
+<name> nil
+```
 In the following example, C is the celebrity.
 ```
 A B,C
