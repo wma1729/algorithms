@@ -447,3 +447,13 @@ skyline_v3(const vector<building> &buildings)
 	return skyline_recursive(buildings, 0, buildings.size() - 1);
 }
 ```
+
+## The Celebrity Problem
+*Problem:* There are *n* people in a room. At most, there is a *1* celebrity. There are following 3 rules:
+* Everyone knows the celebrity.
+* The celebrity does not know anyone.
+* The other, non-celebrities, might or might not know anyone else.
+
+The problem is to find the celebrity, if any, in the room.
+
+*Solution:* 
