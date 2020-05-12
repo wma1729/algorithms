@@ -339,7 +339,7 @@ skyline_v2(const vector<building> &buildings)
 ```
 
 ### Approach 3 (Merge skylines)
-This approach uses *divide and conquer*. The problem with *n* building is divided into two *n / 2* sub problems. The process is repeated until we are left with 1 building. The skylines are then merged as recursion winds up.
+This approach uses *divide and conquer*. The problem with *n* building is divided into two *n / 2* sub problems. The process is repeated until we are left with 1 building. The skylines are then merged as recursion unwinds.
 
 The complexity is *n * log<sub>2</sub>(n)*.
 ```C++
