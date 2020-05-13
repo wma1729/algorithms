@@ -565,3 +565,8 @@ find_celebrity(const vector<person> &people)
 	return people[celeb].name;
 }
 ```
+
+## Finding a majority
+*Problem:* Given a sequence of integers, *S = { i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>, ... i<sub>n - 1</sub>, i<sub>n</sub> }*, find the majority in the sequence. It is possible that no majority is found. But what exactly is a majority? The number of times a number appears in a sequence of *n* integers is called its **multiplicity** and majority is a number that has a multiplicity greater than *n / 2*. In short, a majority is a number in a sequence of *n* integers is the one that appears more than *n /2* times.
+
+*Solution:* The solution is inspired by **the celebrity problem**.
