@@ -569,4 +569,44 @@ find_celebrity(const vector<person> &people)
 ## Finding a majority
 *Problem:* Given a sequence of integers, *S = { i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>, ... i<sub>n - 1</sub>, i<sub>n</sub> }*, find the majority in the sequence. It is possible that no majority is found. But what exactly is a majority? The number of times a number appears in a sequence of *n* integers is called its **multiplicity** and majority is a number that has a multiplicity greater than *n / 2*. In short, a majority is a number in a sequence of *n* integers is the one that appears more than *n /2* times.
 
-*Solution:* The solution is inspired by **the celebrity problem**.
+*Solution:* The solution is inspired by **the celebrity problem**. We make two passes through the sequence. In the firt pass, we find an integer that occurs more times than any other integer. In the second pass, we count the number of times the integer occurs. The algorithm's complexity is *2 * n*.
+```C++
+/*
+ * Find majority in the sequence.
+ */
+int
+majority(const vector<int> &seq)
+{
+	int candidate = seq[0]; // possible candidate
+	int frequency = 1;      // its frequency
+
+	for (size_t i = 1; i < seq.size(); ++i) {
+		if (seq[i] == candidate) {
+			frequency++;
+		} else {
+			frequency--;
+			if (frequency == 0) {
+				candidate = seq[i];
+				frequency = 1;
+			}
+		}
+	}
+
+	size_t multiplicity = 0;
+
+	if (frequency) {
+		/*
+		 * There is a possibility that we have a majority.
+		 * 'frequency' is not the real frequency. A +ve
+		 * frequency simply means that there is a candidate
+		 * that occurs more times than any other integer.
+		 */
+		for (size_t i = 0; i < seq.size(); ++i) {
+			if (seq[i] == candidate)
+				multiplicity++;
+		}
+	}
+
+	return (multiplicity <= seq.size() / 2) ? -1 : candidate;
+}
+```
