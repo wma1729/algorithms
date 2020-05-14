@@ -612,8 +612,8 @@ majority(const vector<int> &seq)
 ```
 
 ## Maximum Consecutive Subsequence
-*Problem:* Given a sequence of real numbers (-ve allowed), *S = { r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, ... r<sub>n - 1</sub>, r<sub>n</sub> }*, find the maximum sum of a subsequence i.e. find *SS = { r<sub>i</sub>, r<sub>i + 1</sub>, ... r<sub>i + k - 1</sub>, r<sub>i + k</sub> } whose sum is maximal.
-*Solution:* Keep track of the sum of subsequence and the maximum value seen so far separately.
+*Problem:* Given a sequence of real numbers (-ve allowed), *S = { r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, ... r<sub>n - 1</sub>, r<sub>n</sub> }*, find the maximum sum of a consecutive subsequence i.e. find *SS = { r<sub>i</sub>, r<sub>i + 1</sub>, ... r<sub>i + k - 1</sub>, r<sub>i + k</sub> }* whose sum is maximal.<br>
+*Solution:* Keep track of the sum of current consecutive subsequence and the maximum consecutive subsequence values seen so far separately at each iteration. Since we only make one pass through the sequence, the complexity is *n*.
 ```C++
 double
 max_cons_subseq(const vector<double> &seq)
