@@ -612,7 +612,7 @@ majority(const vector<int> &seq)
 ```
 
 ## Maximum Consecutive Subsequence
-*Problem:* Given a sequence of real numbers (-ve allowed), *S = { r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, ... r<sub>n - 1</sub>, r<sub>n</sub> }*, find the maximum sum of a consecutive subsequence i.e. find *SS = { r<sub>i</sub>, r<sub>i + 1</sub>, ... r<sub>i + k - 1</sub>, r<sub>i + k</sub> }* whose sum is maximal.<br>
+*Problem:* Given a sequence of real numbers (-ve allowed), *S = { r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, ... r<sub>n - 1</sub>, r<sub>n</sub> }*, find the maximum sum of a consecutive subsequence i.e. find *SS = { r<sub>i</sub>, r<sub>i + 1</sub>, ... r<sub>i + k - 1</sub>, r<sub>i + k</sub> }* whose sum is maximal. The maximum sum of an empty sequence is 0.<br>
 *Solution:* Keep track of the sum of current consecutive subsequence and the maximum consecutive subsequence values seen so far separately at each iteration. Since we only make one pass through the sequence, the complexity is *n*.
 ```C++
 double
@@ -627,6 +627,44 @@ max_cons_subseq(const vector<double> &seq)
 		V = max(v, V);
 	}
 
+	return V;
+}
+```
+A small variation to the problem is to not only find the maximal value but also the subsequence. The problem can be solved similarly by keeping track of start and end indices for current consecutive subsequence and the maximum consecutive subsequence.
+```C++
+double
+max_cons_subseq(const vector<double> &seq, size_t &start, size_t &end)
+{
+	double v = 0.0; // +ve value of a subsequence
+	size_t s, e;    // start and end of a subsequence
+	double V = 0.0; // maximum value of subsequence seen so far
+	size_t S, E;    // start and end of a maximum subsequence seen so far
+
+	// Initialize start and end of the current and maximal subsequences.
+	s = S = e = E = seq.size();
+
+	for (size_t i = 0; i < seq.size(); ++i) {
+		v += seq[i];
+		if (v > 0.0) {
+			if (s == seq.size())
+				s = e = i;
+			else 
+				e = i;
+		} else {
+			s = e = seq.size();
+		}
+
+		v = max(v, 0.0);
+		if (v > V) {
+			S = s;
+			E = e;
+		}
+
+		V = max(v, V);
+	}
+
+	start = S;
+	end = E;
 	return V;
 }
 ```
