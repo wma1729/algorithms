@@ -658,9 +658,8 @@ max_cons_subseq(const vector<double> &seq, size_t &start, size_t &end)
 		if (v > V) {
 			S = s;
 			E = e;
+			V = v;
 		}
-
-		V = max(v, V);
 	}
 
 	start = S;
