@@ -457,7 +457,7 @@ skyline_v3(const vector<building> &buildings)
 The problem is to find the celebrity, if any, in the room.
 
 *Solution:* 
-Let's define a person object. It contains the person name and a list of people it knows.
+Let's define a person object. It contains the person name and a list of people it knows. Another more compact way is to maintain a 2-dimensional, *n x n*, array of booleans, say *people*. *people[A]\[B]* is true if *A* knows *B* and false otherwise. 
 ```C++
 /*
  * Defines a person and a sequence of people known.
