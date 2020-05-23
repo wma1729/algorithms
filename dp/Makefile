@@ -2,11 +2,14 @@ DBG     = -g
 CFLAGS  = -c
 DEFINES = -DDEBUG
 
-OBJS   = knapsack.o
+OBJS   = lis.o knapsack.o
 
-EXES   = knapsack
+EXES   = lis knapsack
 
 all: ${EXES}
+
+lis: lis.o
+	g++ ${DBG} $^ -o $@
 
 knapsack: knapsack.o
 	g++ ${DBG} $^ -o $@
