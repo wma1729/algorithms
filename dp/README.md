@@ -134,7 +134,7 @@ Max:    1   2   2   3   1   3   3   3   3
 Index: -1   0   0   1  -1   1   1   1   1
 ```
 
-What? The max values are not incremented. Why? Because they were already more than the max values of 3.
+What? The max values are not incremented. Why? Because they were already more than the max value of 3.
 > Max[j] = max(Max[j], Max[i] + 1)
 
 Here is the work-out for the remaining sequence:
