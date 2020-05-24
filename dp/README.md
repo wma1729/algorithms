@@ -105,7 +105,6 @@ For each item in the sequence, a corresponding LIS info is maintained. The LIS i
 
 Max is set to 1 and previous index is set to -1 for all items at the start.
 ```
-i:       0
 Input:   2   4   3   5   1   7   6   9   8
 Max:     1   1   1   1   1   1   1   1   1
 Index:  -1  -1  -1  -1  -1  -1  -1  -1  -1
@@ -113,14 +112,15 @@ Index:  -1  -1  -1  -1  -1  -1  -1  -1  -1
 
 Take the first element, 2, and find all the elements that are greater than it.
 ```
-i:      1
+i:      0
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   2   1   2   2   2   2
 Index: -1   0   0   0  -1   0   0   0   0
+```
 
 Now do the same for the next element, 4.
 ```
-i:      2
+i:      1
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   3   3   3   3
 Index: -1   0   0   1  -1   1   1   1   1
@@ -128,7 +128,7 @@ Index: -1   0   0   1  -1   1   1   1   1
 
 Next do the same for the next element, 3.
 ```
-i:      3
+i:      2
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   3   3   3   3
 Index: -1   0   0   1  -1   1   1   1   1
@@ -139,6 +139,11 @@ What? The max values are not incremented. Why? Because they were already more th
 
 Here is the work-out for the remaining sequence:
 ```
+i:      3
+Input:  2   4   3   5   1   7   6   9   8
+Max:    1   2   2   3   1   4   4   4   4
+Index: -1   0   0   1  -1   3   3   3   3
+
 i:      4
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   4   4
@@ -146,8 +151,8 @@ Index: -1   0   0   1  -1   3   3   3   3
 
 i:      5
 Input:  2   4   3   5   1   7   6   9   8
-Max:    1   2   2   3   1   4   4   4   4
-Index: -1   0   0   1  -1   3   3   3   3
+Max:    1   2   2   3   1   4   4   5   5
+Index: -1   0   0   1  -1   3   3   5   5
 
 i:      6
 Input:  2   4   3   5   1   7   6   9   8
@@ -155,11 +160,6 @@ Max:    1   2   2   3   1   4   4   5   5
 Index: -1   0   0   1  -1   3   3   5   5
 
 i:      7
-Input:  2   4   3   5   1   7   6   9   8
-Max:    1   2   2   3   1   4   4   5   5
-Index: -1   0   0   1  -1   3   3   5   5
-
-i:      8
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   5   5
 Index: -1   0   0   1  -1   3   3   5   5
