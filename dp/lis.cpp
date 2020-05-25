@@ -3,6 +3,7 @@
 #include <ostream>
 #include <vector>
 #include <list>
+#include <stack>
 #include <algorithm>
 
 using namespace std;
@@ -167,6 +168,66 @@ lis_v2(const vector<int> &seq)
 	return lis;
 }
 
+/*
+ * Longest increasing subsequence (using Patience sort)
+ */
+vector<int>
+lis_v3(const vector<int> &seq)
+{
+	vector<int> lis;
+
+	if (seq.empty())
+		return lis;
+
+	/*
+	 * Piles of numbers in descending order.
+	 * We only keep the index of the number in the piles
+	 * and not the number itself.
+	 */
+	vector<stack<int>> piles;
+
+	/*
+	 * Index of predecessor number from the
+	 * preceeding pile.
+	 */
+	vector<int> pred(seq.size(), -1);
+
+	for (size_t i = 0; i < seq.size(); ++i) {
+		size_t j;
+
+		for (j = 0; j < piles.size(); ++j) {
+			if (seq[piles[j].top()] > seq[i])
+				break;
+		}
+
+		if (j == piles.size()) {
+			// start a new pile
+			stack<int> stk;
+			stk.push(static_cast<int>(i));
+			piles.push_back(stk);
+		} else {
+			// use an existing pile
+			piles[j].push(static_cast<int>(i));
+		}
+
+		// set the predecessor index at the time of each insert
+		if (j > 0) 
+			pred[i] = static_cast<int>(piles[j - 1].top());
+	}
+
+	// form the sequence going back from the last -> first pile
+	int idx = piles.back().top();
+	while (idx != -1) {
+		lis.push_back(seq[idx]);
+		idx = pred[idx];
+	}
+
+	// reverse the sequence
+	reverse(lis.begin(), lis.end());
+
+	return lis;
+}
+
 int
 main(int argc, const char **argv)
 {
@@ -175,7 +236,7 @@ main(int argc, const char **argv)
 	for (int i = 1; i < argc; ++i)
 		seq.push_back(atoi(argv[i]));
 
-	cout << lis_v2(seq) << endl;
+	cout << lis_v3(seq) << endl;
 
 	return 0;
 }
