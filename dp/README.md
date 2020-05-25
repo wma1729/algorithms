@@ -1,4 +1,4 @@
-#--- Dynamic Programming
+# Dynamic Programming
 
 ## Longest Increasing Subsequence
 *Problem:* Given a sequence of *n* integers, *S = { i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>, ..., i<sub>n - 1</sub>, i<sub>n</sub> }*, an increasing subsequence, *LIS = { i<sub>m1</sub>, i<sub>m2</sub>, ..., i<sub>mk</sub> }*, is such that<br>
@@ -113,6 +113,7 @@ Index:  -1  -1  -1  -1  -1  -1  -1  -1  -1
 Take the first element, 2, and find all the elements that are greater than it.
 ```
 i:      0
+j:      [1, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   2   1   2   2   2   2
 Index: -1   0   0   0  -1   0   0   0   0
@@ -121,6 +122,7 @@ Index: -1   0   0   0  -1   0   0   0   0
 Now do the same for the next element, 4.
 ```
 i:      1
+j:      [2, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   3   3   3   3
 Index: -1   0   0   1  -1   1   1   1   1
@@ -129,6 +131,7 @@ Index: -1   0   0   1  -1   1   1   1   1
 Next do the same for the next element, 3.
 ```
 i:      2
+j:      [3, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   3   3   3   3
 Index: -1   0   0   1  -1   1   1   1   1
@@ -140,26 +143,31 @@ What? The max values are not incremented. Why? Because they were already more th
 Here is the work-out for the remaining sequence:
 ```
 i:      3
+j:      [4, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   4   4
 Index: -1   0   0   1  -1   3   3   3   3
 
 i:      4
+j:      [5, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   4   4
 Index: -1   0   0   1  -1   3   3   3   3
 
 i:      5
+j:      [6, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   5   5
 Index: -1   0   0   1  -1   3   3   5   5
 
 i:      6
+j:      [7, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   5   5
 Index: -1   0   0   1  -1   3   3   5   5
 
 i:      7
+j:      [8, 8]
 Input:  2   4   3   5   1   7   6   9   8
 Max:    1   2   2   3   1   4   4   5   5
 Index: -1   0   0   1  -1   3   3   5   5
@@ -217,3 +225,4 @@ lis_v2(const vector<int> &seq)
 	return lis;
 }
 ```
+This algorithm needs little additional space. But the sequence is scanned *(n - 1) + (n - 2) + ... + 2 + 1* times, resulting in complexity of *n<sup>2</sup>*.
