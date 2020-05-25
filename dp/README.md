@@ -351,3 +351,4 @@ lis_v3(const vector<int> &seq)
 	return lis;
 }
 ```
+The complexity of this algorithm is no better than the first approach. But it can be modified to use binary search to find the correct pile for inserting next item. With binary search in place, the complexity is *n * log<sub>2</sub>(n)*.
