@@ -352,3 +352,13 @@ lis_v3(const vector<int> &seq)
 }
 ```
 The complexity of this algorithm is no better than the first approach. But it can be modified to use binary search to find the correct pile for inserting next item. With binary search in place, the complexity is *n * log<sub>2</sub>(n)*.
+
+## 0/1 Knapsack Problem
+*Problem:* There are *n* items with different weights, *W = { w<sub>1</sub>, w<sub>2</sub>, ..., w<sub>n</sub> }*, and different values, *V = { v<sub>1</sub>, v<sub>2</sub>, ..., v<sub>n</sub> }*. The problem is to pack the items in a given knapsack of capacity, *C*, in a way that the knapsack has the maximum value.
+
+*Solution:* As can be seen, the solution involves extensive search. We need to try all possible combinations making sure that the total capacity does not exceed the capacity of the knapsack. The combination that gives us the maximum value is our solution.
+
+### Approach 1 (crude backtracking)
+Let the first weight and value be 0. This helps in calculations later.
+```C++
+```
