@@ -77,27 +77,6 @@ public:
 	knapsack() : memo(nullptr), dp(nullptr) {}
 	~knapsack() {}
 
-	int solve_v1(int nitems, int capacity, int weight[], int value[])
-	{
-		int v;
-
-		if ((nitems == 0) || (capacity == 0)) {
-			// If no more item left OR knapsack has no more capacity.
-			v = 0;
-		} else if (weight[nitems] > capacity) {
-			// If the current item is heavier than what knapsack can carry.
-			v = solve_v1(nitems - 1, capacity, weight, value);
-		} else {
-			// Use maximum of value excluding this item and including this item
-			v = max(
-				solve_v1(nitems - 1, capacity, weight, value),
-				value[nitems] + solve_v1(nitems - 1, capacity - weight[nitems], weight, value)
-				);
-		}
-
-		return v;
-	}
-
 	int solve_v2(int nitems, int capacity, int weight[], int value[])
 	{
 		memo = create_array(nitems, capacity);
@@ -138,14 +117,54 @@ public:
 	}
 };
 
+/*
+ * The 0/1 knapsack problem.
+ *
+ * @param n - the number of items.
+ * @param C - the capacity of the knapsack.
+ * @param w - weights of the items.
+ * @param v - values of the items.
+ *
+ * @return the maximum value of the knapsack.
+ */
+int
+knapsack_v1(int n, int C, int w[], int v[])
+{
+	int V; // Cumulative value of the knapsack so far.
+
+	if ((n == 0) || (C == 0)) {
+		/*
+		 * If no more item left OR knapsack has no more capacity,
+		 * nothing more to do.
+		 */
+		V = 0;
+	} else if (w[n] > C) {
+		/*
+		 * If the current item is heavier than what knapsack
+		 * can carry, leave this item and try the next one.
+		 */
+		V = knapsack_v1(n - 1, C, w, v);
+	} else {
+		/*
+		 * If this item can be included, calculate the knapsack
+		 * value by excluding this item and by including this
+		 * item. Choose the maximum of the two.
+		 */
+		int v_excl = knapsack_v1(n - 1, C, w, v);
+		int v_incl = v[n] + knapsack_v1(n - 1, C - w[n], w, v);
+		V = max(v_excl, v_incl);
+	}
+
+	return V;
+}
+
 int
 main(int argc, const char **argv)
 {
-	int weight[] = { 0, 1, 2, 4, 2, 5 };
-	int value[]  = { 0, 5, 3, 5, 3, 2 };
+	int weight[] = { 0, 1, 4, 2, 5, 2 };
+	int value[]  = { 0, 5, 5, 3, 2, 3 };
 
-	knapsack ks;
-	int result = ks.solve_v3(5, 10, weight, value);
+	int result = knapsack_v1(5, 10, weight, value);
 	cout << "result = " << result << endl;
 	return 0;
 }

@@ -360,5 +360,50 @@ The complexity of this algorithm is no better than the first approach. But it ca
 
 ### Approach 1 (crude backtracking)
 Let the first weight and value be 0. This helps in calculations later.
+```
+int w[] = { 0, 1, 4, 2, 5, 2 };
+int v[] = { 0, 5, 5, 3, 2, 3 };
+```
+We start with the last item and calculate the knapsack value by both excluding and including the item.
 ```C++
+/*
+ * The 0/1 knapsack problem.
+ *
+ * @param n - the number of items.
+ * @param C - the capacity of the knapsack.
+ * @param w - weights of the items.
+ * @param v - values of the items.
+ *
+ * @return the maximum value of the knapsack.
+ */
+int
+knapsack_v1(int n, int C, int w[], int v[])
+{
+	int V; // Cumulative value of the knapsack so far.
+
+	if ((n == 0) || (C == 0)) {
+		/*
+		 * If no more item left OR knapsack has no more capacity,
+		 * nothing more to do.
+		 */
+		V = 0;
+	} else if (w[n] > C) {
+		/*
+		 * If the current item is heavier than what knapsack
+		 * can carry, leave this item and try the next one.
+		 */
+		V = knapsack_v1(n - 1, C, w, v);
+	} else {
+		/*
+		 * If this item can be included, calculate the knapsack
+		 * value by excluding this item and by including this
+		 * item. Choose the maximum of the two.
+		 */
+		int v_excl = knapsack_v1(n - 1, C, w, v);
+		int v_incl = v[n] + knapsack_v1(n - 1, C - w[n], w, v);
+		V = max(v_excl, v_incl);
+	}
+
+	return V;
+}
 ```
