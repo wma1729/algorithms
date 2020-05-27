@@ -3,132 +3,31 @@
 
 using namespace std;
 
-class knapsack
-{
-private:
-	int **memo;
-	int **dp;
+constexpr int N = 5;    // Number of Items
+constexpr int C = 10;   // Knapsack capacity
 
-	int **create_array(int rows, int columns)
-	{
-		int r = rows + 1;
-		int c = columns + 1;
+/*
+ * Ideally w, v are passed to the function as parameters.
+ * It is not done intentionally to make the algorithm
+ * easier to read and understand.
+ */
 
-		int **arr = new int *[r];
-		arr[0] = new int[r * c];
-		for (size_t i = 1; i < r; ++i)
-			arr[i] = arr[i - 1] + c;
-
-		for (size_t i = 0; i < r; ++i) {
-			for (size_t j = 0; j < c; ++j) {
-				arr[i][j] = -1;
-			}
-		}
-
-		return arr;
-	}
-
-	void delete_array(int **arr)
-	{
-		delete [] arr[0];
-		delete [] arr;
-	}
-
-	void display_array(int **arr, int nitems, int capacity, int weight[], int value[])
-	{
-		cout << "        ";
-		for (size_t c = 0; c <= capacity; ++c)
-			cout << setw(4) << c << " ";
-		cout << endl;
-
-		for (size_t r = 0; r <= nitems; ++r) {
-			cout << r << "[" << weight[r] << "," << value[r] << "]  ";
-			for (size_t c = 0; c <= capacity; ++c)
-				cout << setw(4) << arr[r][c] << " ";
-			cout << endl;
-		}
-	}
-
-	int solve_v2_memo(int nitems, int capacity, int weight[], int value[])
-	{
-		int v;
-
-		if (memo[nitems][capacity] != -1)
-			return memo[nitems][capacity];
-
-		if ((nitems == 0) || (capacity == 0)) {
-			// If no more item left OR knapsack has no more capacity.
-			v = 0;
-		} else if (weight[nitems] > capacity) {
-			// If the current item is heavier than what knapsack can carry.
-			v = solve_v2_memo(nitems - 1, capacity, weight, value);
-		} else {
-			// Use maximum of value excluding this item and including this item
-			v = max(
-				solve_v2_memo(nitems - 1, capacity, weight, value),
-				value[nitems] + solve_v2_memo(nitems - 1, capacity - weight[nitems], weight, value)
-				);
-		}
-
-		return (memo[nitems][capacity] = v);
-	}
-
-public:
-	knapsack() : memo(nullptr), dp(nullptr) {}
-	~knapsack() {}
-
-	int solve_v2(int nitems, int capacity, int weight[], int value[])
-	{
-		memo = create_array(nitems, capacity);
-		int maxvalue = solve_v2_memo(nitems, capacity, weight, value);
-		display_array(memo, nitems, capacity, weight, value);
-		delete_array(memo);
-		return maxvalue;
-	}
-
-	int solve_v3(int nitems, int capacity, int weight[], int value[])
-	{
-		dp = create_array(nitems, capacity);
-
-		for (int n = 0; n <= nitems; ++n) {
-			for (int c = 0; c <= capacity; ++c) {
-				if ((n == 0) || (c == 0)) {
-					// If no more item left OR knapsack has no more capacity.
-					dp[n][c] = 0;
-				} else if (weight[n] > c) {
-					// If the current item is heavier than what knapsack can carry.
-					dp[n][c] = dp[n - 1][c];
-				} else {
-					// Use maximum of value excluding this item and including this item
-					dp[n][c] = max(
-							dp[n - 1][c],
-							value[n] + dp[n - 1][c - weight[n]]
-							);
-				}
-			}
-		}
-
-		int maxvalue =  dp[nitems][capacity];
-
-		display_array(dp, nitems, capacity, weight, value);
-		delete_array(dp);
-
-		return maxvalue;
-	}
-};
+int w[] = { 0, 1, 4, 2, 5, 2 };
+int v[] = { 0, 5, 5, 3, 2, 3 };
 
 /*
  * The 0/1 knapsack problem.
  *
  * @param n - the number of items.
  * @param C - the capacity of the knapsack.
- * @param w - weights of the items.
- * @param v - values of the items.
+ *
+ * Note: the 1st argument, n, has n possibilities: [1, n]
+ *       The 2nd argument, C, has C possibilities: [1, C]
  *
  * @return the maximum value of the knapsack.
  */
 int
-knapsack_v1(int n, int C, int w[], int v[])
+knapsack_v1(int n, int C)
 {
 	int V; // Cumulative value of the knapsack so far.
 
@@ -143,28 +42,144 @@ knapsack_v1(int n, int C, int w[], int v[])
 		 * If the current item is heavier than what knapsack
 		 * can carry, leave this item and try the next one.
 		 */
-		V = knapsack_v1(n - 1, C, w, v);
+		V = knapsack_v1(n - 1, C);
 	} else {
 		/*
 		 * If this item can be included, calculate the knapsack
 		 * value by excluding this item and by including this
 		 * item. Choose the maximum of the two.
 		 */
-		int v_excl = knapsack_v1(n - 1, C, w, v);
-		int v_incl = v[n] + knapsack_v1(n - 1, C - w[n], w, v);
+		int v_excl = knapsack_v1(n - 1, C);
+		int v_incl = v[n] + knapsack_v1(n - 1, C - w[n]);
 		V = max(v_excl, v_incl);
 	}
 
 	return V;
 }
 
+/* Memoization table */
+int memo[N + 1][C + 1];
+
+/*
+ * Initialize memoization table.
+ */
+static void
+init_memo()
+{
+	for (int i = 0; i <= N; ++i) {
+		for (int j = 0; j <= C; ++j) {
+			memo[i][j] = -1;
+		}
+	}
+}
+
+/*
+ * The 0/1 knapsack problem (using memoization)
+ *
+ * @param n - the number of items.
+ * @param C - the capacity of the knapsack.
+ *
+ * Note: the 1st argument, n, has n possibilities: [1, n]
+ *       The 2nd argument, C, has C possibilities: [1, C]
+ * There are nC subproblems. The results of the subproblems
+ * are stored in memo table and are reused as needed.
+ *
+ * @return the maximum value of the knapsack.
+ */
+int
+knapsack_v2(int n, int C)
+{
+	int V; // Cumulative value of the knapsack so far.
+
+	if (memo[n][C] == -1) {
+		/*
+		 * This problem has not been solved earlier.
+		 */
+
+		if ((n == 0) || (C == 0)) {
+			/*
+			 * If no more item left OR knapsack has no more capacity,
+			 * nothing more to do.
+			 */
+			V = 0;
+		} else if (w[n] > C) {
+			/*
+			 * If the current item is heavier than what knapsack
+			 * can carry, leave this item and try the next one.
+			 */
+			V = knapsack_v2(n - 1, C);
+		} else {
+			/*
+			 * If this item can be included, calculate the knapsack
+			 * value by excluding this item and by including this
+			 * item. Choose the maximum of the two.
+			 */
+			int v_excl = knapsack_v2(n - 1, C);
+			int v_incl = v[n] + knapsack_v2(n - 1, C - w[n]);
+			V = max(v_excl, v_incl);
+		}
+
+		// Save the problem's result in the memo table
+		memo[n][C] = V;
+	}
+
+	return memo[n][C];
+}
+
+/*
+ * The 0/1 knapsack problem (using dynamic programming)
+ * Essentially the same as knapsack_v2(). However, the
+ * memoization table is built iteratively.
+ *
+ * @param n - the number of items.
+ * @param C - the capacity of the knapsack.
+ *
+ * Note: the 1st argument, n, has n possibilities: [1, n]
+ *       The 2nd argument, C, has C possibilities: [1, C]
+ * There are nC subproblems. The results of the subproblems
+ * are stored in memo table and are reused as needed.
+ *
+ * @return the maximum value of the knapsack.
+ */
+int
+knapsack_v3(int n, int C)
+{
+	for (int i = 0; i <= n; ++i) {
+		for (int j = 0; j <= C; ++j) {
+			if ((i == 0) || (j == 0)) {
+				/*
+				 * Instead of the recursion termination condition
+				 * in v1 and v2, this should be seen as memo table
+				 * initialization.
+				 */
+				memo[i][j] = 0;
+			} else if (w[i] > C) {
+				/*
+				 * If the current item is heavier than what knapsack
+				 * can carry, leave this item and try the next one.
+				 */
+				memo[i][j] = memo[i - 1][j];
+			} else {
+				/*
+				 * If this item can be included, calculate the knapsack
+				 * value by excluding this item and by including this
+				 * item. Choose the maximum of the two.
+				 */
+				int v_excl = memo[i - 1][j];
+				int v_incl = v[i] + memo[i - 1][j - w[i]];
+				memo[i][j] = max(v_excl, v_incl);
+			}
+		}
+	}
+
+	return memo[n][C];
+}
+
 int
 main(int argc, const char **argv)
 {
-	int weight[] = { 0, 1, 4, 2, 5, 2 };
-	int value[]  = { 0, 5, 5, 3, 2, 3 };
-
-	int result = knapsack_v1(5, 10, weight, value);
+	init_memo();
+	int result = knapsack_v3(5, 10);
 	cout << "result = " << result << endl;
 	return 0;
 }
