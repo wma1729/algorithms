@@ -414,9 +414,10 @@ knapsack_v1(int n, int C)
 	return V;
 }
 ```
-The algorith works by dividing the problem into smaller subproblems. At each stage, the problem is divided into:
+The algorith works by dividing the problem into smaller subproblems. At each stage, the problem is divided into two:
 - Excluding an item, *knapsack_v1(n - 1, C)*
 - Including an item, *v[n] + knapsack_v1(n - 1, C - w[n])*
+
 Since there are *n* possibilities for the first parameter and *C* possibilities for the second parameter, the problem can possibly be divided into *nC* subproblems. And many of these subproblems are evaluated multiple times.
 
 ### Approach 2 (using memoization table)
