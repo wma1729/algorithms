@@ -2,9 +2,9 @@ DBG     = -g
 CFLAGS  = -c
 DEFINES = -DDEBUG
 
-OBJS   = towersofhanoi.o skyline.o celebrity.o majority.o maxconssubseq.o
+OBJS   = towersofhanoi.o skyline.o celebrity.o majority.o maxconssubseq.o minmax.o
 
-EXES   = towersofhanoi skyline celebrity majority maxconssubseq
+EXES   = towersofhanoi skyline celebrity majority maxconssubseq minmax
 
 all: ${EXES}
 
@@ -21,6 +21,9 @@ majority: majority.o
 	g++ ${DBG} $^ -o $@
 
 maxconssubseq: maxconssubseq.o
+	g++ ${DBG} $^ -o $@
+
+minmax: minmax.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
