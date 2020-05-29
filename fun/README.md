@@ -915,8 +915,8 @@ two_largest_v2(const vector<int> &seq, int &large1, int &large2)
 This is basically *divide and conquer* with recursion to find:
 - the largest element
 - the candidates, in the form of a small sequence, for the second largest element.
-The second largest element is then found by scanning the candidates for the second largest element sequence.
-This is extremely efficient and involves only *n + log<sub>2</sub>(n)* comparisons.
+
+The second largest element is then found by scanning the candidates for the second largest element sequence. This is extremely efficient and involves only *n + log<sub>2</sub>(n)* comparisons.
 ```C++
 static void
 two_largest_v3(const vector<int> &seq, size_t lo, size_t hi, int &large1, vector<int> &large2_choices)
