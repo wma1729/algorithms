@@ -971,7 +971,7 @@ two_largest_v3(const vector<int> &seq, int &large1, int &large2)
 {
 	vector<int> large2_choices;
 
-	two_largest_v3(seq, 0, seq.size(), large1, large2_choices, ncmp);
+	two_largest_v3(seq, 0, seq.size(), large1, large2_choices);
 
 	for (size_t i = 0; i < large2_choices.size(); ++i) {
 		if (large2_choices[i] > large2)
