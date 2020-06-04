@@ -1,17 +1,20 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 
 using namespace std;
 
-constexpr int N = 5;
-constexpr int C = 10;
+constexpr int N = 7;
+constexpr int C = 25;
 
-static int w[] = { 0, 2, 4, 5, 3, 1 };
+static int w[] = { 0, 2, 3, 5, 6, 7, 9, 11 };
 static bool memo[N + 1][C + 1];
 
 bool
 binpack_v1(int n, int c)
 {
+	cout << "n = " << n << ", c = " << c << endl;
+
 	if (c == 0)
 		return true;
 
@@ -36,6 +39,31 @@ init_memo()
 			memo[i][j] = false;
 }
 
+char
+table_entry(int i, int j)
+{
+	return (memo[i][j]) ? '1' : '0';
+}
+
+/*
+ * Dump existization table.
+ */
+static void
+dump_memo()
+{
+	cout << setw(4) << ' ';
+	for (int j = 0; j <= C; ++j)
+		cout << setw(4) << j;
+	cout << endl;
+
+	for (int i = 0; i <= N; ++i) {
+		cout << setw(4) << w[i];
+		for (int j = 0; j <= C; ++j)
+			cout << setw(4) << table_entry(i, j);
+		cout << endl;
+	}
+}
+
 bool
 binpack_v2(int n, int c)
 {
@@ -52,13 +80,15 @@ binpack_v2(int n, int c)
 		}
 	}
 
+	dump_memo();
+
 	return memo[n][c];
 }
 
 int
 main()
 {
-	if (binpack_v2(N, C)) {
+	if (binpack_v1(N, C)) {
 		cout << "fits" << endl;
 	} else {
 		cout << "does not fit" << endl;
