@@ -590,7 +590,7 @@ knapsack_v3(int n, int C)
 ## Longest Palindrome
 *Problem:* Find the longest palindrome in a given string.
 
-*Solution:* Palindrome is a sequence that reads the same forward or backwards. For example, *madam*, *level*, *kayak", etc.
+*Solution:* Palindrome is a sequence that reads the same forward or backwards. For example, *madam*, *level*, *kayak*, etc.
 
 The following code is used to determine if the string is a palindrome:
 ```C++
