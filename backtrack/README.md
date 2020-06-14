@@ -101,7 +101,7 @@ Sudoku is a N * N board with N rows and N columns that needs to be filled with n
 This is quite similar to the N-queen problem. Instead of the placement of queue, we are talking about placement of numbers.
 
 *Problem:* Solve N * N sudoku board.<br>
-*Solution:* Let the sudoku board be represented by a 2-dimensional integer array, board. We will scan the board row-by-row placing a queen in a row/column such that is safe there. If we find no such position, we will backtrack. In the following code snippet: *is_valid(r, c, val)* determines if it is okay to put *val* in the *r<sup>th</sup>* row and *c<sup>th</sup>* column. The empty numbers are set to *0* to indicate that we need to fill them.
+*Solution:* Let the sudoku board be represented by a 2-dimensional integer array, board. We will scan the board row-by-row placing a number in a row/column such that it is valid there. If we find no such position, we will backtrack. In the following code snippet: *is_valid(r, c, val)* determines if it is okay to put *val* in the *r<sup>th</sup>* row and *c<sup>th</sup>* column. The empty numbers are set to *0* to indicate that we need to fill them.
 ```C++
 /*
  * Solve the sudoku problem.
