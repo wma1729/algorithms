@@ -7,7 +7,7 @@ Operator | What? | Comments
 &        | And | 0 & 0 = 0<br>0 & 1 = 0<br>1 & 0 = 0<br>1 & 1 = 1
 \|       | Or | 0 \| 0 = 0<br>0 \| 1 = 1<br>1 \| 0 = 1<br>1 \| 1 = 1
 ~        | One's complement | Flips every bit. 1 becomes 0 and vice-versa.
-^        | Exclusive Or. Sets a 1 in each bit position where its operands have different bits, and 0 where they are the same. | 0 ^ 0 = 0<br>0 ^ 1 = 1<br>1 ^ 0 = 1<br>1 ^ 1 = 1
+^        | Exclusive Or. Sets a 1 in each bit position where its operands have different bits, and 0 where they are the same. | 0 ^ 0 = 0<br>0 ^ 1 = 1<br>1 ^ 0 = 1<br>1 ^ 1 = 0
 
 ### How to determine if n<sup>th</sup> bit is set in an integer number, N?
 > N & (1 << n)
