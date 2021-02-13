@@ -21,5 +21,8 @@ Operator | What? | Comments
 ### How to form an integer number, *N*, with first *n* bits sets?
 > N = ~(~0 << n)
 
+### How to swap two numbers, *N1* and *N2*, without a temporary variable?
+> N1 = N1 ^ N2; N2 = N1 ^ N2; N1 = N1 ^2;
+
 ### How many bits are required to store a number with *n* bits set?
 > ceiling(log<sub>2</sub>n)
