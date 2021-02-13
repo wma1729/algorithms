@@ -1,5 +1,7 @@
 #include <iostream>
+#include <sstream>
 #include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -142,12 +144,12 @@ private:
 	void recursive_remove_min(bst_node *& root)
 	{
 		if (root) {
-			if (root->left == nullptr) {
+			if (root->left) {
+				recursive_remove_min(root->left);
+			} else {
 				bst_node *tmp = root->right;
 				delete root;
 				root = tmp;
-			} else {
-				recursive_remove_min(root->left);
 			}
 		}
 	}
@@ -165,25 +167,23 @@ private:
 				parent = child;
 				child = child->right;
 			} else {
-				if (child->left == nullptr) {
-					if (parent) {
-						if (d < parent->data)
-							parent->left = child->right;
-						else
-							parent->right = child->right;
+				if (!child->left || !child->right) {
+					bst_node *new_child = nullptr;
+
+					if (child->left == nullptr)
+						new_child = child->right;
+					else
+						new_child = child->left;
+
+					if (!parent) {
+						root = new_child;
 					} else {
-						root = child->right;
-					}
-					delete child;
-				} else if (child->right == nullptr) {
-					if (parent) {
-						if (d < parent->data)
-							parent->left = child->left;
+						if (child == parent->left)
+							parent->left = new_child;
 						else
-							parent->right = child->left;
-					} else {
-						root = child->left;
+							parent->right = new_child;
 					}
+
 					delete child;
 				} else {
 					bst_node *tmp = min(child->right);
@@ -218,6 +218,37 @@ private:
 					root->data = tmp->data;
 					recursive_remove_min(root->right);
 				}
+			}
+		}
+	}
+
+	void topview_left(bst_node *root)
+	{
+		if (root) {
+			topview_left(root->left);
+			cout << root->data << endl;
+		}
+	}
+
+	void topview_right(bst_node *root)
+	{
+		if (root) {
+			cout << root->data << endl;
+			topview_right(root->right);
+		}
+	}
+
+	void split(const string &data, vector<bst_node *> &nodes)
+	{
+		stringstream ss{data};
+		while (ss.good()) {
+			string s;
+			getline(ss, s, ',');
+			if (!s.empty()) {
+				if (s == "*")
+					nodes.push_back(nullptr);
+				else
+					nodes.push_back(new bst_node(stoi(s)));
 			}
 		}
 	}
@@ -279,6 +310,110 @@ public:
 				break;
 		}
 	}
+	
+	void topview()
+	{
+		topview_left(the_root->left);
+		cout << the_root->data << endl;
+		topview_right(the_root->right);
+	}
+
+	string serialize_bfs()
+	{
+		ostringstream oss;
+		queue<bst_node *> q;
+		q.push(the_root);
+
+		while (!q.empty()) {
+			bst_node *n = q.front();
+			q.pop();
+
+			if (n == nullptr) {
+				oss << "*,";
+			} else {
+				oss << n->data << ","; 
+				q.push(n->left);
+				q.push(n->right);
+			}
+		}
+
+		return oss.str();
+	}
+
+	void deserialize_bfs(const string &data)
+	{
+		vector<bst_node *> nodes;
+		queue<bst_node *> q;
+		split(data, nodes);
+
+		if (nodes.empty() || (nodes[0] == nullptr)) {
+			the_root = nullptr;
+			return;
+		}
+
+		the_root = nodes[0];
+		q.push(the_root);
+
+		int i = 1;
+		while (i < nodes.size()) {
+			bst_node *parent = q.front();
+			q.pop();
+
+			if (nodes[i])
+				q.push(parent->left = nodes[i]);
+			i++;
+
+			if ((i < nodes.size()) && nodes[i])
+				q.push(parent->right = nodes[i]);
+			i++;
+		}
+	}
+
+	string serialize_preorder(bst_node *root)
+	{
+		ostringstream oss;
+
+		if (root == nullptr) {
+			oss << "*,";
+		} else {
+			oss << root->data << ',';
+			oss << serialize_preorder(root->left);
+			oss << serialize_preorder(root->right);
+		}
+
+		return oss.str();
+	}
+
+	string serialize_preorder()
+	{
+		return serialize_preorder(the_root);
+	}
+
+	// 8,6,5,*,*,7,*,*,10,9,*,*,11,*,*,
+	bst_node *deserialize_preorder(const vector<bst_node *> &nodes, size_t &i)
+	{
+		bst_node *root = nodes[i++];
+		if (root) {
+			root->left = deserialize_preorder(nodes, i);
+			root->right = deserialize_preorder(nodes, i);
+		}
+		return root;
+	}
+
+	void deserialize_preorder(const string &data)
+	{
+		vector<bst_node *> nodes;
+		queue<bst_node *> q;
+		split(data, nodes);
+
+		if (nodes.empty() || (nodes[0] == nullptr)) {
+			the_root = nullptr;
+			return;
+		}
+
+		size_t i = 0;
+		the_root = deserialize_preorder(nodes, i);
+	}
 };
 
 int
@@ -306,11 +441,59 @@ main()
 	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
 
 	cout << "removing 11" << endl;
-	tree.remove(11, false);
+	tree.remove(11, true);
 	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
 
 	cout << "removing 21" << endl;
 	tree.remove(21, true);
 	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	cout << "removing 15" << endl;
+	tree.remove(15, true);
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	cout << "removing 10" << endl;
+	tree.remove(10, true);
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	cout << "removing 9" << endl;
+	tree.remove(9, true);
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	cout << "removing 13" << endl;
+	tree.remove(13, true);
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	tree.add(8);
+	tree.add(6);
+	tree.add(5);
+	tree.add(7);
+	tree.add(10);
+	tree.add(9);
+	tree.add(11);
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+	cout << "top view" << endl;
+	tree.topview();
+
+	cout << "breadth-first traversal before serialization" << endl;
+	tree.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	string s = tree.serialize_bfs();
+
+	bst_tree<int> tree2;
+	tree2.deserialize_bfs(s);
+
+	cout << "breadth-first traversal after de-serialization" << endl;
+	tree2.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
+	s = tree.serialize_preorder();
+	cout << s << endl;
+
+	bst_tree<int> tree3;
+	tree3.deserialize_preorder(s);
+
+	cout << "breadth-first traversal after de-serialization using preorder" << endl;
+	tree3.traverse(bst_tree<int>::traversal_order::breadthfirst);
+
 	return 0;
 }
