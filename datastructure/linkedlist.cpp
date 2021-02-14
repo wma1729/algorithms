@@ -15,15 +15,36 @@ private:
 
 	node	*the_root;
 
-	void rr(node *root)
+	node *rr(node *root)
 	{
 		if (root && root->next) {
-			rr(root->next);
+			node *new_head = rr(root->next);
 			root->next->next = root;
 			root->next = nullptr;
+			return new_head;
 		} else {
-			the_root = root;
+			return root;
 		}
+	}
+
+	node *rr(node *root, int n)
+	{
+		node *prev = nullptr;
+		node *curr = root;
+		int k = n;
+
+		while (curr && k) {
+			node *next = curr->next;
+			curr->next = prev;
+			prev = curr;
+			curr = next;
+			k--;
+		}
+
+		if (curr)
+			root->next = rr(curr, n);
+
+		return prev;
 	}
 
 public:
@@ -77,7 +98,12 @@ public:
 
 	void recursive_reverse()
 	{
-		rr(the_root);
+		the_root = rr(the_root);
+	}
+
+	void reverse(int n)
+	{
+		the_root = rr(the_root, n);
 	}
 
 };
@@ -90,10 +116,13 @@ main()
 	ll.add(2);
 	ll.add(3);
 	ll.add(4);
+	ll.add(5);
+	ll.add(6);
 	ll.dump();
 	ll.reverse();
 	ll.dump();
 	ll.recursive_reverse();
+	ll.reverse(2);
 	ll.dump();
 	return 0;
 }
