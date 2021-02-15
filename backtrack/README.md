@@ -365,3 +365,53 @@ word_break(const string &to_break, const dictionary &dict)
 	return false;
 }
 ```
+
+# Decode a number string into all possible alphabet string
+*Problem:* A number string is given where each character is in the range [1 - 9]. Number 1 refers to 'a', 2 to 'b', and so on. The string 12 could be translated to 'ab' or 'l'. Given such a string, the ask is to find all possible combinations.<br>
+*Solution:* Use backtracking to find all possible solution. At each step, we can either pick 1 number or 2 numbers at a time.
+```
+/*
+ * Convert a given number to the alphabet.
+ * str could have either 1 or 2 characters in it.
+ */
+inline char n2c(const std::string str)
+{
+	int n = stoi(str);
+	assert((n > 0) && (n <= 26));
+	return 'a' + (n - 1);
+}
+
+/*
+ * Decode all possible answers using recursion and backtracking.
+ * s   - the number string
+ * idx - the next character(s) to consume.
+ * tmp - one combination prepared so far.
+ */
+void decode(const string &s, int idx, string &tmp)
+{
+	if (idx >= s.size()) {
+		cout << tmp << endl;
+	} else {
+		// Use one character at a time
+		tmp.push_back(n2c(s.substr(idx, 1)));
+		decode(s, idx + 1, tmp);
+		tmp.pop_back();
+
+		if (idx < s.size() - 1) {
+			// Use two characters at a time
+			tmp.push_back(n2c(s.substr(idx, 2)));
+			decode(s, idx + 2, tmp);
+			tmp.pop_back();
+		}
+	}
+}
+
+/*
+ * Decode all possible answers for the number string.
+ */
+void decode(const string &s)
+{
+	string tmp;
+	decode(s, 0, tmp);
+}
+```

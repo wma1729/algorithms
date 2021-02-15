@@ -6,13 +6,15 @@ OBJS   = nqueen.o \
          sudoku.o \
          subset.o \
          permutations.o \
-         wordbreak.o
+         wordbreak.o \
+         decode.o
 
 EXES   = nqueen \
          sudoku \
          subset \
          permutations \
-         wordbreak
+         wordbreak \
+         decode
 
 all: ${EXES}
 
@@ -29,6 +31,9 @@ permutations: permutations.o
 	g++ ${DBG} $^ -o $@
 
 wordbreak: wordbreak.o
+	g++ ${DBG} $^ -o $@
+
+decode: decode.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
