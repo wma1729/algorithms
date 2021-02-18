@@ -26,3 +26,9 @@ Operator | What? | Comments
 
 ### How many bits are required to store a number with *n* bits set?
 > ceiling(log<sub>2</sub>n)
+
+### How to find *abs(N)*?
+> Negative of a number, *n*, is one's complement of *n* + 1 i.e *-n = ~n + 1*. To get positive number from the negative number, we can do the reverse: subtract 1 from number and get its one's complement i.e. *n = ~(-n - 1)*. Alternatively, it can be done as following without caring if *n* is +ve or -ve:<br>
+> mask = n >> 31; // Assuming n is 32-bit integer; mask will be all 0s for +ve n and all 1s for -ve number.<br>
+> n = mask + n;   // For +ve n, mask is 0 so n remains unchanged. For -ve number, mask is -1 so we have subtracted 1 from the number.<br>
+> n = n ^ mask;   // For +ve n, mask is 0 so n remains unchanged. For -ve number, mask is -1 so we get one's complement of n.<br>
