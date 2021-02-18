@@ -1,3 +1,8 @@
+#include <iostream>
+#include <cassert>
+
+using namespace std;
+
 /**
  * Function to return ‘n’ bits from ‘x’ beginning at position ‘p’.
  * We assume that bit position 0 is at the right end and that n and p
@@ -16,7 +21,7 @@
 unsigned int
 getbits(unsigned int x, int p, int n)
 {
-	return (x >> (p - n + 1)) & ~(~0 << n)
+	return (x >> (p - n + 1)) & ~(~0 << n);
 }
 
 /**
@@ -120,4 +125,41 @@ rightrot(unsigned int x, int n)
 
 	/* concatenate the two */
 	return i | x;
+}
+
+/**
+ * Function to divide two integer numbers.
+ * @param [in]  numerator     the numerator.
+ * @param [in]  denominator   the denominator.
+ *
+ * @return the quotient = numerator / denominator
+ */
+int
+divide(int numerator, int denominator)
+{
+	assert(denominator != 0);
+
+	if (numerator == 0)
+		return 0;
+
+	int n = abs(numerator);
+	int d = abs(denominator);
+	int divisor = d;
+
+	if (n < d)
+		return 0;
+
+	int q = 1;
+
+	while (d < n) {
+		d <<= 1;
+		q <<= 1;
+	}
+
+	d >>= 1;
+	q >>= 1;
+
+	q += divide(n - d, divisor);
+
+	return (((numerator < 0) && (denominator > 0)) || ((numerator > 0) && (denominator < 0))) ? -q : q;
 }
