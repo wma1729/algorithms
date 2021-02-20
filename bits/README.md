@@ -32,3 +32,6 @@ Operator | What? | Comments
 > mask = n >> 31; // Assuming n is 32-bit integer; mask will be all 0s for +ve n and all 1s for -ve number.<br>
 > n = mask + n;   // For +ve n, mask is 0 so n remains unchanged. For -ve number, mask is -1 so we have subtracted 1 from the number.<br>
 > n = n ^ mask;   // For +ve n, mask is 0 so n remains unchanged. For -ve number, mask is -1 so we get one's complement of n.<br>
+
+### How to find if two integers, *n1* and *n2*, have opposite signs?
+> (n1 ^ n2) < 0
