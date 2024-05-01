@@ -35,3 +35,6 @@ Operator | What? | Comments
 
 ### How to find if two integers, *n1* and *n2*, have opposite signs?
 > (n1 ^ n2) < 0
+
+### **n1 % n2** where n2 is a power of 2
+> n1 % n2 = n1 & (n2 - 1)
