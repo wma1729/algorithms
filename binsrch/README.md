@@ -30,17 +30,17 @@ binary_search_v1(const vector<T> &seq, const T &key)
 		return -1;
 
 	int lo = 0;
-	int hi = static_cast<int>(seq.size() - 1);
+	int hi = static_cast<int>(seq.size());
 	int mid;
 
-	while (lo <= hi) {
+	while (lo < hi) {
 		mid = (lo + hi) / 2;
 		if (seq[mid] < key)
 			lo = mid + 1;
 		else if (seq[mid] == key)
 			return mid;
 		else
-			hi = mid - 1;
+			hi = mid;
 	}
 
 	return -1;
@@ -73,7 +73,7 @@ binary_search_v2(const vector<T> &seq, int lo, int hi, const T &key)
 	else if (seq[mid] == key)
 		return mid;
 	else
-		hi = mid - 1;
+		hi = mid;
 
 	return binary_search_v2(seq, lo, hi, key);
 }
@@ -93,7 +93,7 @@ binary_search_v2(const vector<T> &seq, const T &key)
 	if (seq.empty())
 		return -1;
 
-	return binary_search_v2(seq, 0, static_cast<int>(seq.size() - 1), key);
+	return binary_search_v2(seq, 0, static_cast<int>(seq.size()), key);
 }
 ```
 
@@ -118,15 +118,8 @@ template<typename T>
 void
 reverse_sequence(vector<T> &seq, size_t lo, size_t hi)
 {
-	T tmp;
-
-	while (lo < hi) {
-		tmp = seq[lo];
-		seq[lo] = seq[hi];
-		seq[hi] = tmp;
-		lo++;
-		hi--;
-	}
+	while (lo < hi)
+		std::swap(seq[lo++], seq[hi--]);
 }
 
 /*

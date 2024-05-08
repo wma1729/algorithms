@@ -2,9 +2,9 @@ DBG     = -g -Wall
 CFLAGS  = -c
 DEFINES =
 
-OBJS   = sort.o dutchflag.o genrand.o blackwhite.o
+OBJS   = sort.o dutchflag.o genrand.o blackwhite.o shuffle.o
 
-EXES   = sort dutchflag genrand blackwhite
+EXES   = sort dutchflag genrand blackwhite shuffle
 
 all: ${EXES}
 
@@ -18,6 +18,9 @@ genrand: genrand.o
 	g++ ${DBG} $^ -o $@
 
 blackwhite: blackwhite.o
+	g++ ${DBG} $^ -o $@
+
+shuffle: shuffle.o
 	g++ ${DBG} $^ -o $@
 
 %.o: %.cpp
