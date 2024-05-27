@@ -1313,20 +1313,19 @@ So the heap sort cost is *(n / 2) * log<sub>2</sub>(n) + n * log<sub>2</sub>(n)*
 ## Shuffle
 ```
 algorithm: shuffle
-	input: A sorted sequence of N items. Example, { 0, 1, 2, 3, 4, 5 }.
-	output: A shuffled sequence with all the N items. One possible outcome of the above sequence is { 1, 4, 0, 2, 5, 3 }.
+    input: array { integer, N } : seq   # A sorted sequence of N items. Example, { 0, 1, 2, 3, 4, 5 }.
+    output: array { integer, N }        # The same sequence with items shuffled. One possible
+                                        # outcome of the above sequence is { 1, 4, 0, 2, 5, 3 }.
 begin
-	integer: i						# index into the input sequence
-	integer: count          		# number of elements in the sequence
-	count = input.length 
+    integer: i                          # index into the input sequence
 
-	for i = [0, count)      		# include 0, exclude count
-	begin
-		integer: r
-		r = random number [0, i]	# include both 0 and i
-		swap(input[i], input[r])
-	end
+    for i = [0, N)                      # include 0, exclude N
+    begin
+        integer: r
+        r = random number [0, i]        # include both 0 and i
+        swap(seq[i], seq[r])
+    end
 
-	return input;
+    return seq;
 end
 ```

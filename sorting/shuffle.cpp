@@ -11,7 +11,6 @@ get_random_in_range(size_t start, size_t end)
 	return dist(rd);
 }
 
-
 static void
 shuffle(int array[], size_t count)
 {
