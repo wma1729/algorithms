@@ -1154,3 +1154,58 @@ outer-loop-iteration-0:
         break
     seq =  [ 4, 5, 6, 7, 8, 1, 2, 3 ]
 ```
+
+## Anagrams
+
+### Given a dictionary of words, find all sets of anagrams
+Given a dictionary of words (as a list/array of strings), find all sets of anagrams. If the dictionary has the following words:
+```
+care
+dare
+no
+on
+pots
+race
+read
+stop
+tops
+```
+The response should be:
+```
+care race
+dare read
+no on
+pots stop tops
+```
+
+The solution has two main components:
+1. Word signature. The signature of the word is such that all the anagrams yield the same signature irrespective of the placement of letters in the word. One such algorithm is to sort the letters of the word i.e. signature of `pots`, `stop`, and `tops` is `opst`. 
+2. Maintains a map of signature to a list of the words with the same signature i.e. `word_map[opst] = [ pots, stop, tops ]`.
+
+```
+algorithm: anagrams
+    input: list { string } : words                  # A list of words in the dictionary
+    output: list { list { string } }                # A list of list of words that are anagrams
+begin
+    map { string, list { string } } : word_map      # Map of signature to list of words
+
+    foreach word of words                           # Pre-process dictionary
+    begin
+        string : sign
+        sign = signature(word)                      # Get word signature.
+        word_map.key = sign                         # Add the word to the word_map
+        word_map.value.append(word)
+    end
+
+    list { list { string } } : response
+    foreach kvpair of word_map                      # Go through the word_map
+    begin
+        if kvpair.size > 1                          # If a signature has more that one word,
+        then
+            response.append(kvpair.value)           # add the words to the map
+        end
+    end
+
+    return response
+end
+```
