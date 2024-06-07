@@ -1193,8 +1193,11 @@ begin
     begin
         string : sign
         sign = signature(word)                      # Get word signature.
-        word_map.key = sign                         # Add the word to the word_map
-        word_map.value.append(word)
+        if not word_map.has(sign)                   # If the signature has not been seen before
+        then
+            word_map[sign] = new()                  # Create a new list
+        end
+        word_map[sign].append(word)                 # Append the word to the list
     end
 
     list { list { string } } : response
